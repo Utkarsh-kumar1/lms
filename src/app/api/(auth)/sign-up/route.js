@@ -3,23 +3,22 @@ import SignupSchema from "@/Schema/SignupSchema";
 import dbconnect from "@/lib/dbconnect";
 import bcrypt from "bcrypt"
 import sendUserVeficationMail from "@/helpers/sendmail";
+import jwt from "jsonwebtoken";
+import { cookies } from "next/headers";
 
 
 
 export async function POST(request) {
     // get username , email and password
     const { username, email, firstName, lastName, password } = await request.json();
-    console.log(username, email, password)
 
     // validate the username , email , password
     const validationResponse = SignupSchema.safeParse({ username, email, password, firstName, lastName })
     if (!validationResponse.success) {
-        console.log(validationResponse.error.errors[0].message);
         return Response.json(ApiResponse.error(400, validationResponse.error.errors[0].message), { status: 400 })
     }
 
     // check for unique username and email
-    console.log(username)
     //check for user by username
     try {
         const [userByUsername] = await dbconnect.execute('SELECT username FROM users WHERE username = ?', [username]);
@@ -41,22 +40,17 @@ export async function POST(request) {
     // create otp
     const randomNumber = Math.floor(Math.random() * 10000).toString()
     const userOtp = randomNumber.padStart(4, '0');
-    console.log(userOtp);
 
     // create otp expiry
     const currentDate = new Date();
     const otpExpiry = new Date(currentDate.getTime());
     otpExpiry.setMinutes(currentDate.getMinutes() + 5);
 
-    console.log('Current Date:', currentDate);
-    console.log('OTP Expiry:', otpExpiry);
-
     // send otp to email
     try {
-        await sendUserVeficationMail(firstName+" "+lastName,email, userOtp)
+        await sendUserVeficationMail(firstName + " " + lastName, email, userOtp)
 
     } catch (error) {
-        console.log(error);
         return Response.json(ApiResponse.error(500, "Error while sending Mail"), { status: 500 })
 
     }
@@ -65,13 +59,22 @@ export async function POST(request) {
     try {
         const [response] = await dbconnect.execute("INSERT INTO users(username, email ,firstname , lastname , userPassword , otp , otpExpiry) VALUES(?,?,?,?,?,?,?);", [username, email, firstName, lastName, hashedPassword, userOtp, otpExpiry])
 
-        user = await dbconnect.execute("SELECT username , email , firstName , lastName from users where id = ? ;", [response.insertId])
+        user = await dbconnect.execute("SELECT id, username , email , firstName , lastName from users where id = ? ;", [response.insertId])
 
 
     } catch (error) {
         return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
     }
 
+    const token = jwt.sign({ userId: user[0][0].id,  username: user[0][0].username, userOtp }, process.env.JWT_SECRET, { expiresIn: '5m' });
 
-    return Response.json(ApiResponse.success(200, user[0][0], "user created successfully "), { status: 200 });
+    cookies().set({
+        name: 'token',
+        value: token,
+        httpOnly: true,
+        path: '/',
+    })
+
+
+    return Response.json(ApiResponse.success(200, user[0][0], "user created successfully "), { status: 200});
 }

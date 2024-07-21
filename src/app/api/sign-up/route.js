@@ -7,7 +7,6 @@ import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
 
 
-
 export async function POST(request) {
     // get username , email and password
     const { username, email, firstName, lastName, password } = await request.json();
@@ -21,18 +20,29 @@ export async function POST(request) {
     // check for unique username and email
     //check for user by username
     try {
-        const [userByUsername] = await dbconnect.execute('SELECT username FROM users WHERE username = ?', [username]);
-        if (userByUsername.length > 0) {
-            return Response.json(ApiResponse.error(400, "User already exists with this username"), { status: 400 })
+        console.log(username, email);
+        const [userCheckResult] = await dbconnect.execute(`
+            SELECT 
+                (SELECT COUNT(*) FROM users WHERE username = ?) as usernameCount, 
+                (SELECT COUNT(*) FROM users WHERE email = ?) as emailCount;
+        `, [username, email]);
+        
+        const { usernameCount, emailCount } = userCheckResult[0];
+        
+        if (usernameCount > 0) {
+            return Response.json(ApiResponse.error(400, "User already exists with this username"), { status: 400 });
         }
-        //check for user by email
-        const [userByEmail] = await dbconnect.execute('SELECT username FROM users WHERE username = ?', [email]);
-        if (userByEmail.length > 0) {
-            return Response.json(ApiResponse.error(400, "User already exists with this Email"), { status: 400 })
+        
+        if (emailCount > 0) {
+            return Response.json(ApiResponse.error(400, "User already exists with this Email"), { status: 400 });
         }
+        
     } catch (error) {
+        console.log(error.sqlMessage);
         return Response.json(ApiResponse.error(400, "Error while connection to Database"), { status: 400 })
     }
+    
+    // Proceed with user creation since neither username nor email exists
 
     // hash the password
     const hashedPassword = bcrypt.hashSync(password, 10);

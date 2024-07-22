@@ -9,7 +9,7 @@ const SignupSchema = z.object({
     username: usernameValidation,
     email: z.string({ required_error: "Email is required" })
         .email({ message: "Invalid email address" }),
-    password: z.string({ required_error: "Email is required" })
+    password: z.string({ required_error: "Password is required" })
         .min(8, "password must contain 8 character")
         .max(20, "password must contain less than 20 character")
         .regex(/[A-Za-z]/, "Password must contain atleast one letter ")

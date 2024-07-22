@@ -32,6 +32,7 @@ export async function POST(request) {
         if (usernameCount > 0) {
             return Response.json(ApiResponse.error(400, "User already exists with this username"), { status: 400 });
         }
+        //check for user by email
         
         if (emailCount > 0) {
             return Response.json(ApiResponse.error(400, "User already exists with this Email"), { status: 400 });

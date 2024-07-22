@@ -1,17 +1,17 @@
 import ApiResponse from "@/helpers/ApiResponse";
-import ResendOtpSchema from "@/Schema/ResendOtpSchema";
 import dbconnect from "@/lib/dbconnect";
 import bcrypt from "bcrypt";
 import sendUserVeficationMail from "@/helpers/sendmail";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import SignInSchema from "@/Schema/signInSchema";
 
 export async function POST(request) {
     // get username or email and password
     const { usernameOrEmail, password } = await request.json();
 
     // validate the usernameOrEmail and password
-    const validationResponse = ResendOtpSchema.safeParse({ usernameOrEmail, password });
+    const validationResponse = SignInSchema.safeParse({ usernameOrEmail, password });
     if (!validationResponse.success) {
         return Response.json(ApiResponse.error(400, validationResponse.error.errors[0].message), { status: 400 });
     }
@@ -34,6 +34,13 @@ export async function POST(request) {
         }
         
         user = userCheckResult[0];
+
+        // Check if the OTP is expired
+        const currentDate = new Date();
+        const otpExpiry = new Date(user.otpExpiry)
+        if (currentDate.getTime() < otpExpiry.getTime()) {
+            return Response.json(ApiResponse.error(400, "Current OTP is still valid"), { status: 400 });
+        }
         
         // check if password is correct
         const isPasswordValid = bcrypt.compareSync(password, user.userPassword);
@@ -46,11 +53,7 @@ export async function POST(request) {
         return Response.json(ApiResponse.error(400, "Error while connecting to Database"), { status: 400 });
     }
     
-    // Check if the OTP is expired
-    const currentDate = new Date();
-    if (currentDate < new Date(user.otpExpiry)) {
-        return Response.json(ApiResponse.error(400, "Current OTP is still valid"), { status: 400 });
-    }
+    
 
     // Proceed with generating and sending new OTP
 
@@ -59,6 +62,7 @@ export async function POST(request) {
     const newOtp = randomNumber.padStart(4, '0');
 
     // create otp expiry
+    const currentDate = new Date()
     const otpExpiry = new Date(currentDate.getTime());
     otpExpiry.setMinutes(currentDate.getMinutes() + 5);
 
@@ -90,5 +94,5 @@ export async function POST(request) {
         path: '/',
     });
 
-    return Response.json(ApiResponse.success(200, { username: user.username, email: user.email }, "OTP resent successfully"), { status: 200 });
+    return Response.json(ApiResponse.success(200, { username: user.username, email: user.email }, "OTP Resent successfully"), { status: 200 });
 }

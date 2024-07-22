@@ -5,7 +5,6 @@ let pool;
 
 function createPool() {
     if (!pool) {
-        console.log(process.env.DB_HOST)
         pool = mysql.createPool({
             host: process.env.DB_HOST,
             user: process.env.DB_USER,
@@ -27,11 +26,6 @@ function createPool() {
         return pool;
     }
 };
-
-// createPool()
-// console.log(pool);
-// const data = pool.execute("Select * from users where username = ?", ["Utkarsh"]);
-// console.log(data);
 
 
 export default createPool();

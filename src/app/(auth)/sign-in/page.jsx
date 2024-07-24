@@ -23,8 +23,10 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card"; // Make sure this path is correct
+import { useRouter } from "next/navigation";
 
 export default function ProfileForm() {
+  const router = useRouter()
   const form = useForm({
     resolver: zodResolver(SignInSchema),
     defaultValues: {
@@ -36,22 +38,24 @@ export default function ProfileForm() {
   const { toast } = useToast();
 
   async function onSubmit(data) {
-    console.log(data);
     const response = await signIn("credentials", {
       redirect: false,
       usernameOrEmail: data.usernameOrEmail,
       password: data.password,
     });
-    console.log(response);
     toast({
       variant: !response.ok ? "destructive" : "",
       title: response.ok ? "Success" : "Error",
       description: response.error,
     });
+    if(response.ok == true)
+    {
+      router.push("/dashboard");
+    }
   }
 
   return (
-    <Card>
+    <Card className=" h-auto w-[25rem]">
       <CardHeader>
         <CardTitle>Sign In</CardTitle>
       </CardHeader>
@@ -84,7 +88,7 @@ export default function ProfileForm() {
                 </FormItem>
               )}
             />
-            <Button type="submit">Submit</Button>
+            <Button type="submit">Sign In</Button>
           </form>
         </Form>
       </CardContent>

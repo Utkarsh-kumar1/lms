@@ -20,7 +20,6 @@ export async function POST(request) {
     // check for unique username and email
     //check for user by username
     try {
-        console.log(username, email);
         const [userCheckResult] = await dbconnect.execute(`
             SELECT 
                 (SELECT COUNT(*) FROM users WHERE username = ?) as usernameCount, 
@@ -39,7 +38,6 @@ export async function POST(request) {
         }
         
     } catch (error) {
-        console.log(error.sqlMessage);
         return Response.json(ApiResponse.error(400, "Error while connection to Database"), { status: 400 })
     }
     
@@ -87,5 +85,5 @@ export async function POST(request) {
     })
 
 
-    return Response.json(ApiResponse.success(200, user[0][0], "user created successfully "), { status: 200});
+    return Response.json(ApiResponse.success(200, user[0][0], "Sign-up Successfull "), { status: 200});
 }

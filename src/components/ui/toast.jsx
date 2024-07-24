@@ -26,14 +26,15 @@ const toastVariants = cva(
       variant: {
         default: "border bg-background text-foreground",
         destructive:
-          "destructive group border-destructive bg-destructive text-destructive-foreground",
+          "destructive group border-destructive bg-destructive text-destructive-foreground font-serif",
+        success: "border-2 border-gray-400 bg-green-500 text-black font-serif",
       },
     },
     defaultVariants: {
       variant: "default",
     },
   }
-)
+);
 
 const Toast = React.forwardRef(({ className, variant, ...props }, ref) => {
   return (

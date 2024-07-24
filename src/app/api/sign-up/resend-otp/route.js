@@ -49,7 +49,6 @@ export async function POST(request) {
         }
         
     } catch (error) {
-        console.log(error.sqlMessage);
         return Response.json(ApiResponse.error(400, "Error while connecting to Database"), { status: 400 });
     }
     

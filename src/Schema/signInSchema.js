@@ -23,7 +23,7 @@
 
 import { z } from 'zod';
 
-const usernameOrEmailValidation = z.string({ required_error: "Email or Username is required" })
+const usernameOrEmailValidation = z.string({ required_error: "Username or Email  is required" })
     .min(1, "Username or email is required")
     .refine(value => {
         const isUsername = /^[a-zA-Z0-9]{4,15}$/.test(value);

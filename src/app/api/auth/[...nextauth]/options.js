@@ -15,72 +15,58 @@ export const authOptions = {
                 password: {}
             },
             async authorize(credentials, req) {
-                console.log("credentials" ,credentials);
                 try {
-                    
-                    const validationResponse = SignInSchema.safeParse({ usernameOrEmail: credentials.usernameOrEmail, password: credentials.password})
-                    console.log(validationResponse);
 
-                    if(!validationResponse.success)
-                    {
+                    const validationResponse = SignInSchema.safeParse({ usernameOrEmail: credentials.usernameOrEmail, password: credentials.password })
+
+                    if (!validationResponse.success) {
                         throw new Error(validationResponse.error.errors[0].message)
                     }
 
-                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentials.usernameOrEmail))
-                    {
+                    if (/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentials.usernameOrEmail)) {
                         try {
 
-                            console.log("credentials");
-                            console.log(credentials.usernameOrEmail);
-                            //fetching user from the database
-                            const [user] = await dbconnect.execute("SELECT id , username , firstName , lastName, userPassword , isVerified from users where email = ?; " , [credentials.usernameOrEmail])
-                            console.log("credentials");
-                            console.log(user);
-                            if(user.length < 1)
-                            {
+                      
+                            const [user] = await dbconnect.execute("SELECT id , username , firstName , lastName, userPassword , isVerified from users where email = ?; ", [credentials.usernameOrEmail])
+                            
+                            if (user.length < 1) {
                                 throw new Error("No user exists with this email , First Create Account ")
                             }
 
                             //Check wheather user is verified or not
-                            if(user[0].isVerified == false)
-                            {
+                            if (user[0].isVerified == false) {
                                 throw new Error("Please verify your Account first")
                             }
 
                             //Check weather the password is Correct
-                            const isPasswordCorrect = await bcrypt.compare(credentials.password , user[0].userPassword);
-                            console.log(isPasswordCorrect)
+                            const isPasswordCorrect = await bcrypt.compare(credentials.password, user[0].userPassword);
 
-                            if(isPasswordCorrect)
-                            {
+                            if (isPasswordCorrect) {
                                 const verifiedUser = {
-                                    id : user[0].id,
-                                    username : user[0].username,
-                                    firstName : user[0].firstName,
-                                    lastName : user[0].lastName,
-                                    email : user[0].email,
-                                    isVerified : user[0].isVerified
+                                    id: user[0].id,
+                                    username: user[0].username,
+                                    firstName: user[0].firstName,
+                                    lastName: user[0].lastName,
+                                    email: user[0].email,
+                                    isVerified: user[0].isVerified
 
                                 }
                                 return verifiedUser;
                             }
-                            else{
+                            else {
                                 throw new Error("Incorrect password")
                             }
 
                         } catch (error) {
-                            console.log(error);
-                            throw new Error( error.message)
+                            throw new Error(error.message)
                         }
                     }
-                    else
-                    {
+                    else {
                         try {
 
                             //fetching user from the database
-                         
+
                             const [user] = await dbconnect.execute("SELECT id , username , firstName , lastName, userPassword , isVerified from users where username = ?; ", [credentials.usernameOrEmail])
-                            console.log(user);
                             if (user.length < 1) {
                                 throw new Error("No user exists with this username , First Create Account ")
                             }
@@ -92,7 +78,6 @@ export const authOptions = {
 
                             //Check weather the password is Correct
                             const isPasswordCorrect = await bcrypt.compare(credentials.password, user[0].userPassword);
-                            console.log(isPasswordCorrect)
 
                             if (isPasswordCorrect) {
                                 const verifiedUser = {
@@ -117,11 +102,13 @@ export const authOptions = {
                 } catch (error) {
                     throw new Error(error.message)
                 }
-                
+
             }
         })
     ],
     callbacks: {
+
+        
 
 
         async jwt({ token, user }) {
@@ -157,7 +144,7 @@ export const authOptions = {
         signIn: '/sign-in',
     },
     session: {
-        jwt : true
+        jwt: true
     },
     session: {
         jwt: true, // Use JSON Web Tokens for session

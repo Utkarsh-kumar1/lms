@@ -29,15 +29,19 @@ export async function PATCH(request) {
     if (!otpValidation.success) {
         return Response.json(ApiResponse.error(400, otpValidation.error.errors[0].message), { status: 400 })
     }
-    //check for otp in token and otp in request should be same
-    if (decodedToken.userOtp !== OTP) {
-        return Response.json(ApiResponse.error(400, "OTP is invalid"), { status: 400 })
-    }
 
     //check for otp expiry
     let data;
     try {
-        [data] = await dbconnect.execute("select otp , otpExpiry from users where id = ?", [decodedToken.userId || null])
+        [data] = await dbconnect.execute("select otp , otpExpiry , isVerified from users where id = ?", [decodedToken.userId || null])
+        if (data[0].isVerified == true)
+        {
+            return Response.json(ApiResponse.error(400, "User is already Verified"), { status: 400 })
+        }
+        //check for otp in token and otp in request should be same
+        if (decodedToken.userOtp !== OTP) {
+            return Response.json(ApiResponse.error(400, "OTP is invalid Regenerate OTP"), { status: 400 })
+        }
     } catch (error) {
         return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
     }

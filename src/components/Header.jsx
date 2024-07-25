@@ -5,7 +5,6 @@ import Link from "next/link";
 
 function Header() {
   const { data: session, status } = useSession();
-  console.log(session , status);
 
   const NavOptions = [
     {
@@ -22,14 +21,53 @@ function Header() {
     },
   ];
 
-  const renderNavOptions = () => {
-    if (status === "loading") {
-      return <div className="animate-pulse">Loading...</div>;
-    }
+  // const renderNavOptions = () => {
+  //   if (status === "loading") {
+  //     return <div className="animate-pulse">Loading...</div>;
+  //   }
 
-    if (status === "authenticated") {
-      return (
-        <>
+  //   if (status === "authenticated") {
+  //     return (
+  //       <>
+  //         {NavOptions.map((option) => (
+  //           <a key={option.name} href={option.url} className="mx-2">
+  //             {option.name}
+  //           </a>
+  //         ))}
+  //         <button
+  //           onClick={() => signOut({ callbackUrl: "/" })}
+  //           className="mx-2"
+  //         >
+  //           Sign Out
+  //         </button>
+  //       </>
+  //     );
+  //   }
+
+  //   return (
+  //     <>
+  //       <Link href="/" className="mx-2">
+  //         Home
+  //       </Link>
+  //       <Link href="/sign-in" className="mx-2">
+  //         Sign In
+  //       </Link>
+  //       <Link href="/sign-up" className="mx-2">
+  //         Sign Up
+  //       </Link>
+  //     </>
+  //   );
+  // };
+
+  return (
+    <header className="w-full h-[8%] bg-orange-400 text-white flex items-center justify-between px-4">
+      <div className="flex items-center">
+        <span className="font-bold text-lg">Logo</span>
+      </div>
+      <div className="flex items-center">
+        {status == "loading" && <div className="animate-pulse">Loading...</div>}
+        {status == "authenticated" &&
+         <div>
           {NavOptions.map((option) => (
             <a key={option.name} href={option.url} className="mx-2">
               {option.name}
@@ -41,12 +79,8 @@ function Header() {
           >
             Sign Out
           </button>
-        </>
-      );
-    }
-
-    return (
-      <>
+        </div>}
+        {status == "unauthenticated" &&  <div>
         <Link href="/" className="mx-2">
           Home
         </Link>
@@ -56,16 +90,8 @@ function Header() {
         <Link href="/sign-up" className="mx-2">
           Sign Up
         </Link>
-      </>
-    );
-  };
-
-  return (
-    <header className="w-full h-[8%] bg-orange-400 text-white flex items-center justify-between px-4">
-      <div className="flex items-center">
-        <span className="font-bold text-lg">Logo</span>
+      </div>}
       </div>
-      <nav className="flex items-center">{renderNavOptions()}</nav>
     </header>
   );
 }

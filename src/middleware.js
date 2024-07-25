@@ -7,7 +7,6 @@ export async function middleware(req) {
     const token = await getToken({ req, secret });
     const url = req.nextUrl.clone();
 
-    console.log(token);
 
     if (token && (
         url.pathname.startsWith('/sign-in') ||

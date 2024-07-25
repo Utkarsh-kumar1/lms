@@ -1,5 +1,7 @@
 "use client";
 
+import { ChevronLeft } from "lucide-react"
+
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
 import { z } from "zod";
@@ -156,16 +158,14 @@ export default function OTPForm({ setIsOtpSended, userData }) {
 
   return (
     <>
-      <button
-        className="text-black font-bold text-2xl mb-5"
-        disabled={isVerifying || isResending}
+
+      <Button variant="outline" size="icon" disabled={isVerifying || isResending}
         type="button"
         onClick={() => {
           setIsOtpSended(false);
-        }}
-      >
-        {"<-"}
-      </button>
+        }}>
+      <ChevronLeft className="h-4 w-4" />
+    </Button>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -208,7 +208,7 @@ export default function OTPForm({ setIsOtpSended, userData }) {
                   </InputOTP>
                 </FormControl>
                 <FormDescription>
-                  Please enter the one-time password sent to your Email.
+                  Please enter the one-time password sent to your <span className="text-base font-bold text-black "> {userData.email}</span>.
                 </FormDescription>
                 <FormMessage />
               </FormItem>

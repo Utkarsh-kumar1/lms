@@ -19,7 +19,7 @@ export async function middleware(req) {
 
     if (!token && (
         url.pathname.startsWith('/dashboard') ||
-        url.pathname.startsWith('/Activity') ||
+        // url.pathname.startsWith('/Activity') ||
         url.pathname.startsWith('/Revision')
     )) {
         return NextResponse.redirect(new URL('/', req.url));

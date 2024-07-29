@@ -20,7 +20,8 @@ export async function POST(request) {
     // check for unique username and email
     //check for user by username
     try {
-        const [userCheckResult] = await dbconnect.execute(`
+        const pool = dbconnect();
+        const [userCheckResult] = await pool.execute(`
             SELECT 
                 (SELECT COUNT(*) FROM users WHERE username = ?) as usernameCount, 
                 (SELECT COUNT(*) FROM users WHERE email = ?) as emailCount;
@@ -66,9 +67,10 @@ export async function POST(request) {
     // save it to db {Username , Email , Password , Otp , OtpExpiry} 
     let user;
     try {
-        const [response] = await dbconnect.execute("INSERT INTO users(username, email ,firstname , lastname , userPassword , otp , otpExpiry) VALUES(?,?,?,?,?,?,?);", [username, email, firstName, lastName, hashedPassword, userOtp, otpExpiry])
+        const pool = dbconnect()
+        const [response] = await pool.execute("INSERT INTO users(username, email ,firstname , lastname , userPassword , otp , otpExpiry) VALUES(?,?,?,?,?,?,?);", [username, email, firstName, lastName, hashedPassword, userOtp, otpExpiry])
 
-        user = await dbconnect.execute("SELECT id, username , email , firstName , lastName from users where id = ? ;", [response.insertId])
+        user = await pool.execute("SELECT id, username , email , firstName , lastName from users where id = ? ;", [response.insertId])
 
 
     } catch (error) {

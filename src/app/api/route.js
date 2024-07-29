@@ -1,6 +1,7 @@
-import pool from "../../lib/dbconnect"
+import dbconnect from "../../lib/dbconnect"
 
 export async function GET(request) {
+    const pool = dbconnect()
 
     try {
         const [data] = await pool.execute('select * from users');

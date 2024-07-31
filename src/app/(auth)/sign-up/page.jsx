@@ -25,7 +25,7 @@ export default function ProfileForm() {
   
 
   return (
-    <Card className=" mt-5 w-[30rem] ">
+    <Card className=" mt-5 sm:w-[30rem] ">
       <CardHeader>
         <CardTitle>{isOtpSended ? "Submit OTP" : "Sign Up"}</CardTitle>
       </CardHeader>

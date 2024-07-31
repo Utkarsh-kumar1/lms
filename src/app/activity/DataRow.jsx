@@ -44,15 +44,18 @@ export default function DataRow({ subtopic, subIndex }) {
           key={subIndex}
           className={`${
             subtopic.end || isCompleted ? "bg-green-100" : "bg-red-100"
-          } hover:bg-gray-200 transition duration-150`}
+          } hover:bg-gray-200 transition duration-150 sm:text-sm`}
         >
-          <TableCell className="p-2">{subtopic.subtopicName}</TableCell>
-          <TableCell className="p-2">{formatDate(subtopic.start)}</TableCell>
-          <TableCell className="p-2">
+          <TableCell className="p-2 text-[.7rem] sm:text-base">
+            {subtopic.subtopicName}
+          </TableCell>
+          <TableCell className="p-2 text-[.7rem] sm:text-base">
+            {formatDate(subtopic.start)}
+          </TableCell>
+          <TableCell className="p-2 text-[.7rem] sm:text-base">
             {EndDate ? formatDate(EndDate) : "-"}
           </TableCell>
-          <TableCell className="p-2">
-            
+          <TableCell className="p-2 text-[.7rem] sm:text-base">
             <Switch
               className={`bg-slate-50`}
               disabled={updating}
@@ -62,15 +65,12 @@ export default function DataRow({ subtopic, subIndex }) {
                 const response = await updateActivity(subtopic.id, status);
                 setUpdating(false);
                 if (response.status == 200) {
-                    setisCompleted(status)
-                    if(status)
-                    {
-                      setEndDate(new Date())
-                    }
-                    else{
-                      setEndDate(null)
-                    }
-                    
+                  setisCompleted(status);
+                  if (status) {
+                    setEndDate(new Date());
+                  } else {
+                    setEndDate(null);
+                  }
                 }
               }}
             />

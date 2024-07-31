@@ -70,19 +70,31 @@ export default async function ProtectedPage() {
                   <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150">
                     {topic.topicName}
                   </AccordionTrigger>
-                  <AccordionContent className="bg-gray-100 p-4 rounded-b-lg">
+                  <AccordionContent className="bg-gray-100 sm:p-4  rounded-b-lg p-0">
                     <Table className="w-full">
                       <TableHeader>
                         <TableRow>
-                          <TableHead className="font-bold">SubTopic</TableHead>
-                          <TableHead className="font-bold">Start</TableHead>
-                          <TableHead className="font-bold">End</TableHead>
-                          <TableHead className="font-bold">Action</TableHead>
+                          <TableHead className="font-bold text-[.7rem]">
+                            SubTopic
+                          </TableHead>
+                          <TableHead className="font-bold text-[.7rem]">
+                            Start
+                          </TableHead>
+                          <TableHead className="font-bold text-[.7rem]">
+                            End
+                          </TableHead>
+                          <TableHead className="font-bold text-[.7rem]">
+                            Action
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>
                         {topic.subtopics.map((subtopic, subIndex) => (
-                          <DataRow subtopic={subtopic} subIndex={subIndex} />
+                          <DataRow
+                            key={subIndex}
+                            subtopic={subtopic}
+                            subIndex={subIndex}
+                          />
                         ))}
                       </TableBody>
                     </Table>

@@ -11,10 +11,17 @@ export async function PATCH(req) {
 
     try {
         const pool = dbconnect();
+        const [data] = await pool.execute(
+            "SELECT id FROM activity WHERE subTopic = ? AND owner = ?",
+            [id, token.id]
+        );
+        if (data.length === 0) {
+            return Response.json(ApiResponse.error(403, "Forbidden"), { status: 403 });
+        }
         // Use a conditional expression to handle the end value
         const updateResponse = await pool.execute(
-            "UPDATE activity SET end = IF(? IS NOT NULL, CURRENT_TIMESTAMP(), null) WHERE owner = ? AND subTopic = ?",
-            [end, token.id, id]
+            "UPDATE activity SET end = IF(? IS NOT NULL, CURRENT_TIMESTAMP(), null) WHERE id = ? ;",
+            [end, data[0].id]
         );
     } catch (error) {
         return  Response.json( ApiResponse.error(500 ,"Error while updating Activity ") , {status : 500})

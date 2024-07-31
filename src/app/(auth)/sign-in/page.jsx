@@ -61,7 +61,7 @@ export default function ProfileForm() {
   }
 
   return (
-    <Card className=" h-auto w-[25rem]">
+    <Card className=" h-auto sm:w-[25rem]">
       <CardHeader>
         <CardTitle>Sign In</CardTitle>
       </CardHeader>

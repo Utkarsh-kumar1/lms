@@ -58,10 +58,10 @@ export default function SignUpForm({ setIsOtpSended, FormData, setFormData }) {
   }
 
   return (
-    <Form {...form}>
+    <Form {...form} >
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className=" space-y-4 md:space-y-6"
+        className=" space-y-4 md:space-y-6 "
       >
         <FormField
           control={form.control}

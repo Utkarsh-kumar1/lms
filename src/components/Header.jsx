@@ -74,19 +74,25 @@ function Header() {
           <div className="text-lg flex  space-x-4">
             <Button
               href="/"
-              className="bg-gray-700 hover:bg-gray-800 text-sm sm:text-lg"
+              className={`${
+                pathname == "/" ? "bg-green-500 font-bold" : ""
+              }bg-gray-700 hover:bg-gray-800 text-sm sm:text-lg`}
             >
               Home
             </Button>
             <Button
               href="/sign-in"
-              className="bg-gray-700 hover:bg-gray-800 text-sm sm:text-lg"
+              className={`${
+                pathname == "/sign-in" ? "bg-green-500 font-bold" : ""
+              }bg-gray-700 hover:bg-gray-800 text-sm sm:text-lg`}
             >
               Sign In
             </Button>
             <Button
               href="/sign-up"
-              className="bg-gray-700 hover:bg-gray-800 text-sm sm:text-lg"
+              className={`${
+                pathname == "/sign-up" ? "bg-green-500 font-bold" : ""
+              }bg-gray-700 hover:bg-gray-800 text-sm sm:text-lg`}
             >
               Sign Up
             </Button>

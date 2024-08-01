@@ -3,6 +3,7 @@ import React from "react";
 import { useSession, signOut } from "next-auth/react";
 import Link from "next/link";
 import { Skeleton } from "@/components/ui/skeleton";
+import { usePathname } from "next/navigation";
 
 // Define the navigation options
 const NAV_OPTIONS = [
@@ -13,6 +14,7 @@ const NAV_OPTIONS = [
 
 // Reusable Button Component
 const Button = ({ href, onClick, children, className }) => {
+  const pathname = usePathname()
   return href ? (
     <Link
       href={href}
@@ -32,6 +34,7 @@ const Button = ({ href, onClick, children, className }) => {
 
 function Header() {
   const { data: session, status } = useSession();
+  const pathname = usePathname();
 
   return (
     <header className="w-full h-16 bg-indigo-600 text-white flex items-center justify-between px-2 sm:px-6 shadow-md">
@@ -52,7 +55,9 @@ function Header() {
               <Button
                 key={option.name}
                 href={option.url}
-                className="bg-blue-500 hover:bg-blue-600 text-xs sm:text-lg"
+                className={`${
+                  pathname == option.url ? "bg-green-500 font-bold" : ""
+                }bg-blue-500 hover:bg-blue-600 text-xs sm:text-lg`}
               >
                 {option.name}
               </Button>
@@ -67,7 +72,10 @@ function Header() {
         )}
         {status === "unauthenticated" && (
           <div className="text-lg flex  space-x-4">
-            <Button href="/" className="bg-gray-700 hover:bg-gray-800 text-sm sm:text-lg">
+            <Button
+              href="/"
+              className="bg-gray-700 hover:bg-gray-800 text-sm sm:text-lg"
+            >
               Home
             </Button>
             <Button

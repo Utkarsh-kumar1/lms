@@ -29,15 +29,19 @@ export async function PATCH(request) {
     if (!otpValidation.success) {
         return Response.json(ApiResponse.error(400, otpValidation.error.errors[0].message), { status: 400 })
     }
-    //check for otp in token and otp in request should be same
-    if (decodedToken.userOtp !== OTP) {
-        return Response.json(ApiResponse.error(400, "OTP is invalid"), { status: 400 })
-    }
-
+    const pool = dbconnect();
     //check for otp expiry
     let data;
     try {
-        [data] = await dbconnect.execute("select otp , otpExpiry from users where id = ?", [decodedToken.userId || null])
+        [data] = await pool.execute("select otp , otpExpiry , isVerified from users where id = ?", [decodedToken.userId || null])
+        if (data[0].isVerified == true)
+        {
+            return Response.json(ApiResponse.error(400, "User is already Verified"), { status: 400 })
+        }
+        //check for otp in token and otp in request should be same
+        if (decodedToken.userOtp !== OTP) {
+            return Response.json(ApiResponse.error(400, "OTP is invalid Regenerate OTP"), { status: 400 })
+        }
     } catch (error) {
         return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
     }
@@ -58,14 +62,14 @@ export async function PATCH(request) {
     }
     //if otp expiry and otp are true the marked user verified in db
     try {
-        const update = await dbconnect.execute("UPDATE users SET isVerified = True , otp = null where id = ?", [decodedToken.userId])
+        const update = await pool.execute("UPDATE users SET isVerified = True , otp = null where id = ?", [decodedToken.userId])
     } catch (error) {
         return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
     }
 
     let updateduser;
     try {
-        [updateduser] = await dbconnect.execute("SELECT id , userName , email , firstName , lastName from users where id = ?", [decodedToken.userId])
+        [updateduser] = await pool.execute("SELECT id , userName , email , firstName , lastName from users where id = ?", [decodedToken.userId])
 
     } catch (error) {
         return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })

@@ -20,8 +20,8 @@ export async function POST(request) {
     // check for unique username and email
     //check for user by username
     try {
-        console.log(username, email);
-        const [userCheckResult] = await dbconnect.execute(`
+        const pool = dbconnect();
+        const [userCheckResult] = await pool.execute(`
             SELECT 
                 (SELECT COUNT(*) FROM users WHERE username = ?) as usernameCount, 
                 (SELECT COUNT(*) FROM users WHERE email = ?) as emailCount;
@@ -39,7 +39,6 @@ export async function POST(request) {
         }
         
     } catch (error) {
-        console.log(error.sqlMessage);
         return Response.json(ApiResponse.error(400, "Error while connection to Database"), { status: 400 })
     }
     
@@ -68,9 +67,10 @@ export async function POST(request) {
     // save it to db {Username , Email , Password , Otp , OtpExpiry} 
     let user;
     try {
-        const [response] = await dbconnect.execute("INSERT INTO users(username, email ,firstname , lastname , userPassword , otp , otpExpiry) VALUES(?,?,?,?,?,?,?);", [username, email, firstName, lastName, hashedPassword, userOtp, otpExpiry])
+        const pool = dbconnect()
+        const [response] = await pool.execute("INSERT INTO users(username, email ,firstname , lastname , userPassword , otp , otpExpiry) VALUES(?,?,?,?,?,?,?);", [username, email, firstName, lastName, hashedPassword, userOtp, otpExpiry])
 
-        user = await dbconnect.execute("SELECT id, username , email , firstName , lastName from users where id = ? ;", [response.insertId])
+        user = await pool.execute("SELECT id, username , email , firstName , lastName from users where id = ? ;", [response.insertId])
 
 
     } catch (error) {
@@ -87,5 +87,5 @@ export async function POST(request) {
     })
 
 
-    return Response.json(ApiResponse.success(200, user[0][0], "user created successfully "), { status: 200});
+    return Response.json(ApiResponse.success(200, user[0][0], "Sign-up Successfull "), { status: 200});
 }

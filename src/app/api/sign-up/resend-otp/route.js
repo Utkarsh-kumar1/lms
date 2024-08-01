@@ -23,7 +23,8 @@ export async function POST(request) {
     // check for user by username or email
     let user;
     try {
-        const [userCheckResult] = await dbconnect.execute(`
+        const pool = dbconnect();
+        const [userCheckResult] = await pool.execute(`
             SELECT id, username, email, userPassword, firstName, lastName, otp, otpExpiry 
             FROM users 
             WHERE ${queryField} = ?;
@@ -49,7 +50,6 @@ export async function POST(request) {
         }
         
     } catch (error) {
-        console.log(error.sqlMessage);
         return Response.json(ApiResponse.error(400, "Error while connecting to Database"), { status: 400 });
     }
     
@@ -75,7 +75,8 @@ export async function POST(request) {
 
     // update otp and otpExpiry in the database
     try {
-        await dbconnect.execute(`
+        const pool = dbconnect();
+        await pool.execute(`
             UPDATE users 
             SET otp = ?, otpExpiry = ? 
             WHERE id = ?;

@@ -1,32 +1,34 @@
-import { NextResponse, NextRequest } from 'next/server'
-export { default } from "next-auth/middleware"
-import { getToken } from 'next-auth/jwt'
+import { NextResponse } from 'next/server';
+import { getToken } from 'next-auth/jwt';
 
-// This function can be marked `async` if using `await` inside
+// Middleware function
 export async function middleware(req) {
-
     const secret = process.env.JWT_SECRET;
     const token = await getToken({ req, secret });
-    console.log(token);
-    const url = req.nextUrl
+    const url = req.nextUrl.clone();
+
 
     if (token && (
         url.pathname.startsWith('/sign-in') ||
         url.pathname.startsWith('/sign-up') ||
         url.pathname.startsWith('/verify') ||
-        url.pathname.startsWith('/')
+        url.pathname === '/'
     )) {
-        return NextResponse.redirect(new URL('/test', req.url))
+        return NextResponse.redirect(new URL('/dashboard', req.url));
     }
 
-    if (!token && url.pathname.startsWith('/dashboard')) 
-    {
-        return NextResponse.redirect(new URL('/sign-in' , req.url))
+    if (!token && (
+        url.pathname.startsWith('/dashboard') ||
+        // url.pathname.startsWith('/Activity') ||
+        url.pathname.startsWith('/Revision')
+    )) {
+        return NextResponse.redirect(new URL('/', req.url));
     }
 
-    return NextResponse.next()
+    return NextResponse.next();
 }
 
+// Middleware matcher
 export const config = {
     matcher: [
         '/sign-in',
@@ -34,6 +36,5 @@ export const config = {
         '/',
         '/dashboard/:path*',
         '/verify/:path*'
-
     ],
-}
+};

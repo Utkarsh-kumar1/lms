@@ -43,7 +43,7 @@ export default function DataRow({ subtopic, subIndex }) {
         <TableRow
           key={subIndex}
           className={`${
-            subtopic.end || isCompleted ? "bg-green-100" : "bg-red-100"
+            EndDate || isCompleted ? "bg-green-100" : "bg-red-100"
           } hover:bg-gray-200 transition duration-150 sm:text-sm`}
         >
           <TableCell className="p-2 text-[.7rem] sm:text-base">

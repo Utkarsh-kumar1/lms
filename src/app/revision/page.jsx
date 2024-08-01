@@ -22,7 +22,7 @@ import DataRow from "./DataRow";
 async function fetchActivity(id) {
   const pool = dbconnect();
   const [data] = await pool.execute(
-    "SELECT courseName, topics FROM activityView WHERE userId = ?",
+    "SELECT courseName, topics FROM RevisionView WHERE userId = ?",
     [id]
   );
   return data;
@@ -48,6 +48,7 @@ export default async function ProtectedPage() {
     <div className="container mx-auto p-4">
       {activity.map((course, courseIndex) => {
         const topics = JSON.parse(course.topics);
+
         return (
           <div
             key={`course-${courseIndex}`}
@@ -71,7 +72,7 @@ export default async function ProtectedPage() {
                   <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150">
                     {topic.topicName}
                   </AccordionTrigger>
-                  <AccordionContent className="bg-gray-100 sm:p-4  rounded-b-lg p-0">
+                  <AccordionContent className="bg-gray-100 sm:p-4 rounded-b-lg p-0">
                     <Table className="w-full">
                       <TableHeader>
                         <TableRow>
@@ -85,7 +86,7 @@ export default async function ProtectedPage() {
                             End
                           </TableHead>
                           <TableHead className="font-bold text-[.7rem]">
-                            Action
+                            Revision Counter
                           </TableHead>
                         </TableRow>
                       </TableHeader>

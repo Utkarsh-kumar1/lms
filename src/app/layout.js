@@ -14,6 +14,7 @@ export const metadata = {
 export default function RootLayout({ children }) {
   return (
     <html lang="en" className=" h-screen">
+      <link rel="icon" href="/logo.jpeg" sizes="any" />
       <body className={`${inter.className} h-full  w-screen` }>
         <AuthProvider>
           <Header/>

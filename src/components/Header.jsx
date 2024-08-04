@@ -86,7 +86,7 @@ function Header() {
     },
     {
       name: "Sub Topics",
-      url: "/topics",
+      url: "/sub-topics",
       isActive: status === "authenticated",
       onNavbar: false,
     },

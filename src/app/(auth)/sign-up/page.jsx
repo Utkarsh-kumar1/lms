@@ -1,6 +1,7 @@
+// pages/profile.js
 "use client";
 
-import { useToast } from "@/components/ui/use-toast";
+import React, { useState, Suspense } from "react";
 import {
   Card,
   CardHeader,
@@ -8,9 +9,9 @@ import {
   CardContent,
   CardFooter,
 } from "@/components/ui/card";
-import { useState } from "react";
-import SignUpForm from "@/components/SignUpForm";
-import OTPForm from "@/components/OtpForm";
+import SkeletonFallback from "./SkeletonFallback";
+const SignUpForm = React.lazy(() => import("@/components/SignUpForm"));
+const OTPForm = React.lazy(() => import("@/components/OtpForm"));
 
 export default function ProfileForm() {
   const [isOtpSended, setIsOtpSended] = useState(false);
@@ -21,34 +22,30 @@ export default function ProfileForm() {
     firstName: "",
     lastName: "",
   });
-
   
 
   return (
-    <Card className=" mt-5 sm:w-[30rem] ">
+    <Card className="mt-5  w-[18rem] sm:w-[30rem]">
       <CardHeader>
         <CardTitle>{isOtpSended ? "Submit OTP" : "Sign Up"}</CardTitle>
       </CardHeader>
       <CardContent>
-        <div
-          className={`transition-opacity duration-1000 ease-in `}
-        >
+        <div className="transition-opacity duration-1000 ease-in">
           {!isOtpSended && (
-            <SignUpForm
-              setIsOtpSended={setIsOtpSended}
-              FormData={FormData}
-              setFormData={setFormData}
-            />
+            <Suspense fallback={<SkeletonFallback />}>
+              <SignUpForm
+                setIsOtpSended={setIsOtpSended}
+                FormData={FormData}
+                setFormData={setFormData}
+              />
+            </Suspense>
           )}
         </div>
-        <div
-          className={`transition-opacity duration-1000 ease-linear `}
-        >
+        <div className="transition-opacity duration-1000 ease-linear">
           {isOtpSended && (
-            <OTPForm
-              setIsOtpSended={setIsOtpSended}
-              userData={FormData}
-            />
+            <Suspense fallback={<SkeletonFallback />}>
+              <OTPForm setIsOtpSended={setIsOtpSended} userData={FormData} />
+            </Suspense>
           )}
         </div>
       </CardContent>

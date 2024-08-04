@@ -4,10 +4,11 @@ import { TableRow, TableCell } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import axios from "axios";
 
-async function updateActivity(id, status) {
+async function updateActivity(subtopicId, revisionId, status) {
   const response = await axios.patch("/api/updateRevision", {
     status,
-    id,
+    subtopicId,
+    revisionId
   });
   return response;
 }
@@ -35,6 +36,7 @@ function formatDate(inputDate) {
 }
 
 export default function DataRow({ subtopic, subIndex }) {
+  
   const [updating, setUpdating] = useState(false);
   const [isCompleted, setIsCompleted] = useState(!!subtopic.end);
   const [endDate, setEndDate] = useState(subtopic.end);
@@ -65,7 +67,7 @@ export default function DataRow({ subtopic, subIndex }) {
           defaultChecked={!!endDate}
           onCheckedChange={async (status) => {
             setUpdating(true);
-            const response = await updateActivity(subtopic.id, status);
+            const response = await updateActivity(subtopic.id , subtopic.revisionId, status);
             setUpdating(false);
             if (response.status === 200) {
               setIsCompleted(status);

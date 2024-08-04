@@ -44,11 +44,24 @@ export default async function ProtectedPage() {
     );
   }
 
+  const data = activity.filter((data)=>data.topics !== null)
+  if(data.length == 0) return (
+    <>
+      <p className="text-center text-gray-500">No activity data available.</p>
+      <br />
+      <button
+        type="button"
+        className="px-4 py-2 rounded-md transition-colors duration-300 shadow-sm hover:shadow-md bg-blue-500 font-bold text-xl"
+      >
+        Generate For Revision
+      </button>
+    </>
+  );
   return (
     <div className="container mx-auto p-4">
-      {activity.map((course, courseIndex) => {
+      {data?.map((course, courseIndex) => {
         const topics = JSON.parse(course.topics);
-
+        if (course.topics == null) return <></>;
         return (
           <div
             key={`course-${courseIndex}`}
@@ -58,7 +71,7 @@ export default async function ProtectedPage() {
               {course.courseName.charAt(0).toUpperCase() +
                 course.courseName.slice(1).toLowerCase()}
             </h2>
-            {topics.map((topic, topicIndex) => (
+            {topics?.map((topic, topicIndex) => (
               <Accordion
                 type="single"
                 collapsible
@@ -91,7 +104,7 @@ export default async function ProtectedPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {topic.subtopics.map((subtopic, subIndex) => (
+                        {topic.subtopics?.map((subtopic, subIndex) => (
                           <DataRow
                             key={subIndex}
                             subtopic={subtopic}

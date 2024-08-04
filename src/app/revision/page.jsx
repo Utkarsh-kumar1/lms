@@ -101,6 +101,9 @@ export default async function ProtectedPage() {
                           <TableHead className="font-bold text-[.7rem]">
                             Revision Counter
                           </TableHead>
+                          <TableHead className="font-bold text-[.7rem]">
+                            Action 
+                          </TableHead>
                         </TableRow>
                       </TableHeader>
                       <TableBody>

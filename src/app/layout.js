@@ -1,7 +1,7 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
-import { Toaster } from "@/components/ui/toaster"
+import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 
 const inter = Inter({ subsets: ["latin"] });
@@ -13,12 +13,16 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en" className=" h-screen">
+    <html lang="en">
       <link rel="icon" href="/logo.jpeg" sizes="any" />
-      <body className={`${inter.className} h-full  w-screen` }>
+      <body className={`${inter.className} h-screen overflow-x-hidden`}>
         <AuthProvider>
-          <Header/>
-          <div className="flex items-center justify-center flex-col min-h-[92%] ">{children}</div>
+          <Header />
+          <div className="pt-16"> {/* Adjust pt-16 to match the height of your header */}
+            <div className="flex items-center flex-col min-h-screen">
+              {children}
+            </div>
+          </div>
           <Toaster />
         </AuthProvider>
       </body>

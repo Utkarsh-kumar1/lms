@@ -19,7 +19,12 @@ export async function middleware(req) {
 
     if (!token && (
         url.pathname.startsWith('/dashboard') ||
-        // url.pathname.startsWith('/Activity') ||
+        url.pathname.startsWith('/Activity') ||
+        url.pathname.startsWith('/subTopics') ||
+        url.pathname.startsWith('/topics') ||
+        url.pathname.startsWith('/courses') ||
+        url.pathname.startsWith('/subjects') ||
+        url.pathname.startsWith('/create-subject') ||
         url.pathname.startsWith('/Revision')
     )) {
         return NextResponse.redirect(new URL('/', req.url));

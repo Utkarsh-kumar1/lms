@@ -5,11 +5,13 @@ import ApiResponse from '@/helpers/ApiResponse';
 export async function PATCH(req) {
     const secret = process.env.JWT_SECRET;
     const token = await getToken({ req, secret });
+    if (!token) {
+        return NextResponse.json(ApiResponse.error(401, "Unauthorized access"), { status: 401 });
+    }
     const { status, subtopicId, revisionId } = await req.json();
     
 
     const end = status ? "CURRENT_TIMESTAMP()" : null;
-    console.log(status);
     
 
     try {
@@ -21,7 +23,6 @@ export async function PATCH(req) {
         if (data.length === 0) {
             return Response.json(ApiResponse.error(403, "Forbidden"), { status: 403 });
         }
-        console.log(data);
         
         // Use a conditional expression to handle the end value
         const updatedResponse = await pool.execute(

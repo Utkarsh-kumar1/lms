@@ -51,7 +51,6 @@ function Header() {
       name: "Activity",
       url: "/activity",
       isActive: status === "authenticated",
-
       onNavbar: true,
     },
     {
@@ -67,14 +66,14 @@ function Header() {
       onNavbar: false,
     },
     {
-      name: "Courses",
-      url: "/course",
+      name: "Subjects",
+      url: "/subjects",
       isActive: status === "authenticated",
       onNavbar: false,
     },
     {
-      name: "Sujects",
-      url: "/subjects",
+      name: "Courses",
+      url: "/courses",
       isActive: status === "authenticated",
       onNavbar: false,
     },
@@ -86,7 +85,7 @@ function Header() {
     },
     {
       name: "Sub Topics",
-      url: "/sub-topics",
+      url: "/subTopics",
       isActive: status === "authenticated",
       onNavbar: false,
     },
@@ -111,7 +110,7 @@ function Header() {
   ];
 
   return (
-    <header className="w-full h-16 bg-indigo-600 text-white flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 shadow-lg">
+    <header className="w-full h-16 bg-indigo-600 text-white flex items-center justify-between px-4 sm:px-6 md:px-8 lg:px-10 xl:px-12 shadow-lg fixed top-0 left-0 z-50">
       <div className="flex items-center">
         <span className="font-bold text-xl sm:text-2xl lg:text-3xl">
           <Image
@@ -119,22 +118,20 @@ function Header() {
             alt="Logo"
             width={50}
             height={50}
-            className="h-10 w-10 object-contain rounded-full"
+            className="h-10 w-10 object-contain rounded-full cursor-pointer"
             onClick={() => {
               if (status === "authenticated") {
                 router.push("/dashboard");
               } else {
                 router.push("/");
               }
-
-              return;
             }}
           />
         </span>
       </div>
-      <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-6 lg:space-x-8 ">
+      <div className="flex items-center space-x-2 sm:space-x-4 md:space-x-6 lg:space-x-8">
         {status === "loading" && (
-          <div className="animate-pulse flex items-center space-x-4 ">
+          <div className="animate-pulse flex items-center space-x-4">
             <Skeleton className="h-8 w-24 rounded-md bg-gray-300 hidden md:block" />
             <Skeleton className="h-8 w-24 rounded-md bg-gray-300 hidden md:block" />
             <Skeleton className="h-8 w-24 rounded-md bg-gray-300 hidden md:block" />
@@ -162,12 +159,12 @@ function Header() {
               <SheetTrigger>
                 {status === "authenticated" ? (
                   <CircleUser
-                    className="h-10 w-10 text-white"
+                    className="h-10 w-10 text-white cursor-pointer"
                     onClick={() => setIsOpen(true)}
                   />
                 ) : (
                   <Menu
-                    className="h-6 w-6 text-white"
+                    className="h-6 w-6 text-white cursor-pointer"
                     onClick={() => setIsOpen(true)}
                   />
                 )}
@@ -180,7 +177,7 @@ function Header() {
                       : `Welcome`}
                   </SheetTitle>
                 </SheetHeader>
-                <SheetDescription className="flex flex-col space-y-2 p-4 px-0 h-ful">
+                <SheetDescription className="flex flex-col space-y-2 p-4 px-0 h-full">
                   {NAV_OPTIONS.filter((option) => option.isActive).map(
                     (option) => (
                       <Button

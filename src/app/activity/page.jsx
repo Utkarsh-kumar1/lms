@@ -45,7 +45,7 @@ export default async function ProtectedPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
+    <div className="container mx-auto p-4 min-h-screen">
       {activity?.map((course, courseIndex) => {
         const topics = JSON.parse(course.topics);
         return (

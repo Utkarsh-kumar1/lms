@@ -27,9 +27,7 @@ export default async function page() {
     return <div className=" text-red-600 font-bold"> {error.message} </div>;
   }
 
-  if (topics.length === 0) {
-    return <div className=" text-gray-600">No courses Found ....</div>;
-  }
+
 
   return (
     <>

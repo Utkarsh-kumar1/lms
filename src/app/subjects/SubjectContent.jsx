@@ -17,11 +17,13 @@ export default function SubjectContent({ subjects: initialSubjects }) {
   const [isCompleted, setIsCompleted] = useState(true);
   const [isAddingSubject, setIsAddingSubject] = useState(false);
 
-  useEffect(() => {
-    setSubjects(initialSubjects);
-  }, [initialSubjects]);
+  console.log(subjects);
 
-  const filteredSubjects = subjects.filter((subject) => {
+  // useEffect(() => {
+  //   setSubjects(initialSubjects);
+  // }, [initialSubjects]);
+
+  const filteredSubjects = subjects?.filter((subject) => {
     if (isActive && isCompleted) {
       return true;
     } else if (isCompleted) {
@@ -39,9 +41,10 @@ export default function SubjectContent({ subjects: initialSubjects }) {
 
   return (
     <div className="p-4 bg-gray-50 min-h-screen flex flex-col gap-3">
-      <div className="">
-        <h1 className="text-2xl font-bold text-gray-800">Subjects</h1>
-        <div className="flex space-x-4 mt-4">
+      <div className="mb-6">
+        <h1 className="text-2xl font-bold text-gray-800">Subject</h1>
+        <div className="flex mt-4 rounded-md border-2 gap-2 md:gap-6 p-4 sm:items-center flex-col sm:flex-row items-start justify-start">
+          <p>Filter :</p>
           <Select
             defaultValue="All"
             onValueChange={(data) => {
@@ -68,15 +71,14 @@ export default function SubjectContent({ subjects: initialSubjects }) {
           </Select>
         </div>
       </div>
+     
       <div className="">
         {filteredSubjects.length > 0 ? (
-          filteredSubjects.map((subject, index) => (
+          filteredSubjects?.map((subject, index) => (
             <SubjectCard key={subject.id} index={index} subject={subject} />
           ))
         ) : (
-          <p className="text-lg text-gray-500">
-            No subjects match the current filters.
-          </p>
+          <p className="text-lg text-gray-500">No subjects Found.</p>
         )}
       </div>
       <div className="flex items-center w-full justify-center min-h-14 flex-col">

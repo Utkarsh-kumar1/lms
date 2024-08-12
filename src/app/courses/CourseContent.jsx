@@ -25,12 +25,11 @@ export default function CourseContent({ courses: initialCourses }) {
   const [filtedSubject, setfiltedSubject] = useState([]);
   const [isAddingSubject, setIsCourseAdded] = useState(false);
 
-  useEffect(() => {
-    setCourses(initialCourses);
-  }, [initialCourses]);
+  // useEffect(() => {
+  //   setCourses(initialCourses);
+  // }, [initialCourses]);
 
-  const filteredCourses = courses
-    .filter(
+  const filteredCourses = courses?.filter(
       (course) =>
         filtedSubject.length === 0 || filtedSubject.includes(course.subjectName)
     )
@@ -39,7 +38,7 @@ export default function CourseContent({ courses: initialCourses }) {
     );
 
   const subjects = Array.from(
-    new Set(courses.map((course) => course.subjectName))
+    new Set(courses?.map((course) => course.subjectName))
   );
 
   function onCourseAdded(Addedcourses) {
@@ -95,12 +94,12 @@ export default function CourseContent({ courses: initialCourses }) {
       </div>
       <div className="space-y-4">
         {filteredCourses.length > 0 ? (
-          filteredCourses.map((course, index) => (
+          filteredCourses?.map((course, index) => (
             <CourseCard key={course.id} index={index} course={course} />
           ))
         ) : (
           <p className="text-lg text-gray-500">
-            No courses match the current filters.
+            No courses Found.
           </p>
         )}
       </div>

@@ -26,9 +26,9 @@ export default function TopicContent({ topics: initialTopics }) {
   const [filtedCourses, setfiltedCourses] = useState([]);
   const [isAddingTopic, setIsAddingTopic] = useState(false);
 
-  useEffect(() => {
-    setTopics(initialTopics);
-  }, [initialTopics]);
+  // useEffect(() => {
+  //   setTopics(initialTopics);
+  // }, [initialTopics]);
 
   const subjects = Array.from(
     new Set(topics.map((topic) => topic.subjectName))
@@ -36,21 +36,21 @@ export default function TopicContent({ topics: initialTopics }) {
   const courses = Array.from(new Set(topics.map((topic) => topic.courseName)));
 
   const filteredTopics = topics
-    .filter((topic) => {
+    ?.filter((topic) => {
       if (filtedSubject.length === 0) {
         return true;
       } else {
         return filtedSubject.includes(topic.subjectName);
       }
     })
-    .filter((topic) => {
+    ?.filter((topic) => {
       if (filtedCourses.length === 0) {
         return true;
       } else {
         return filtedCourses.includes(topic.courseName);
       }
     })
-    .filter((topic) => {
+    ?.filter((topic) => {
       if (isAll) {
         return true;
       } else if (isCompleted) {
@@ -71,7 +71,7 @@ export default function TopicContent({ topics: initialTopics }) {
       <div className="mb-6">
         <h1 className="text-2xl font-bold text-gray-800">Topics</h1>
         <div className="flex mt-4 rounded-md border-2 gap-2 md:gap-6 p-4 sm:items-center flex-col sm:flex-row items-start justify-start">
-          <p className="">Filter Subjects:</p>
+          <p className="">Filter :</p>
           <MultiSelect
             onChange={(value) => {
               setfiltedSubject(value);
@@ -81,7 +81,7 @@ export default function TopicContent({ topics: initialTopics }) {
               <MultiSelectValue placeholder="All" />
             </MultiSelectTrigger>
             <MultiSelectContent>
-              {subjects.map((subject, index) => (
+              {subjects?.map((subject, index) => (
                 <MultiSelectItem key={index} value={subject}>
                   {subject}
                 </MultiSelectItem>
@@ -97,7 +97,7 @@ export default function TopicContent({ topics: initialTopics }) {
               <MultiSelectValue placeholder="All" />
             </MultiSelectTrigger>
             <MultiSelectContent>
-              {courses.map((course, index) => (
+              {courses?.map((course, index) => (
                 <MultiSelectItem key={index} value={course}>
                   {course}
                 </MultiSelectItem>
@@ -131,12 +131,12 @@ export default function TopicContent({ topics: initialTopics }) {
       </div>
       <div className="space-y-4">
         {filteredTopics.length > 0 ? (
-          filteredTopics.map((topic, index) => (
+          filteredTopics?.map((topic, index) => (
             <TopicCard key={topic.id} index={index} topic={topic} />
           ))
         ) : (
           <p className="text-lg text-gray-500">
-            No topics match the current filters.
+            No topics Found.
           </p>
         )}
       </div>

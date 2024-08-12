@@ -28,9 +28,7 @@ export default async function page() {
     return <div> {error.message} </div>;
   }
 
-  if (courses.length === 0) {
-    return <div>No courses Found</div>;
-  }
+
 
   return (
     <>

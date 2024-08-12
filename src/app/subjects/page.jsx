@@ -28,9 +28,7 @@ export default async function page() {
     return <div> {error.message} </div>;
   }
 
-  if (subjects.length === 0) {
-    return <div>No subjects Found</div>;
-  }
+
 
   return (
     <SubjectContent subjects={subjects}/>

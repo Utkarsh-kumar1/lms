@@ -27,9 +27,9 @@ export default function TopicContent({ subtopics: initialSubtopics }) {
   const [filtedTopics, setFiltedTopics] = useState([]);
   const [issubTopicAdding, setIsSubTopicAdding] = useState(false);
 
-  useEffect(() => {
-    setSubtopics(initialSubtopics);
-  }, [initialSubtopics]);
+  // useEffect(() => {
+  //   setSubtopics(initialSubtopics);
+  // }, [initialSubtopics]);
 
   const subjects = Array.from(
     new Set(subtopics.map((subtopic) => subtopic.subjectName))
@@ -42,7 +42,7 @@ export default function TopicContent({ subtopics: initialSubtopics }) {
   );
 
   const filteredSubtopics = subtopics
-    .filter(
+    ?.filter(
       (subtopic) =>
         filtedSubject.length === 0 ||
         filtedSubject.includes(subtopic.subjectName)
@@ -77,7 +77,7 @@ export default function TopicContent({ subtopics: initialSubtopics }) {
               <MultiSelectValue placeholder="All" />
             </MultiSelectTrigger>
             <MultiSelectContent>
-              {subjects.map((subject, index) => (
+              {subjects?.map((subject, index) => (
                 <MultiSelectItem key={index} value={subject}>
                   {subject}
                 </MultiSelectItem>
@@ -89,7 +89,7 @@ export default function TopicContent({ subtopics: initialSubtopics }) {
               <MultiSelectValue placeholder="All" />
             </MultiSelectTrigger>
             <MultiSelectContent>
-              {courses.map((course, index) => (
+              {courses?.map((course, index) => (
                 <MultiSelectItem key={index} value={course}>
                   {course}
                 </MultiSelectItem>
@@ -101,7 +101,7 @@ export default function TopicContent({ subtopics: initialSubtopics }) {
               <MultiSelectValue placeholder="All" />
             </MultiSelectTrigger>
             <MultiSelectContent>
-              {topics.map((topic, index) => (
+              {topics?.map((topic, index) => (
                 <MultiSelectItem key={index} value={topic}>
                   {topic}
                 </MultiSelectItem>
@@ -135,12 +135,12 @@ export default function TopicContent({ subtopics: initialSubtopics }) {
       </div>
       <div className="space-y-4">
         {filteredSubtopics.length > 0 ? (
-          filteredSubtopics.map((subtopic, index) => (
+          filteredSubtopics?.map((subtopic, index) => (
             <SubTopicCard key={subtopic.id} index={index} subtopic={subtopic} />
           ))
         ) : (
           <p className="text-lg text-gray-500">
-            No subtopics match the current filters.
+            No subtopics Found.
           </p>
         )}
       </div>

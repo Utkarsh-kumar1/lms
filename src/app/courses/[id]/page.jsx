@@ -4,7 +4,7 @@ import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import CourseCard from "@/app/courses/CourseCard";
 import TopicCard from "@/app/topics/TopicCard";
-import Course from "./course";
+import Course from "./Course";
 
 async function fetchSubject(owner, courseId) {
   const pool = dbconnect();

@@ -12,6 +12,7 @@ async function fetchSubject(id) {
       "SELECT c.* , s.subjectName  FROM `course` c JOIN `subject` s ON c.subject = s.id WHERE s.owner = ?;",
       [id]
     );
+    
 
     return courses;
   } catch (error) {

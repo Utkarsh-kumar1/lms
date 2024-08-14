@@ -14,11 +14,7 @@ function CreateConnection() {
             idleTimeout: 60000,
             queueLimit: 0
         });
-        console.log('Database pool created');
-    }
-    else{
-        console.log('Database pool already Created');
-
+        // console.log('Database pool created');
     }
     return pool;
 }

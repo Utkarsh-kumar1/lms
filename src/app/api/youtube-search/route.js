@@ -12,7 +12,6 @@ export async function GET(request) {
     const searchParams = request.nextUrl.searchParams;
     const query = searchParams.get('q');
     const pageToken = searchParams.get('pageToken') || ''; // Get the pageToken if available
-    console.log(query);
 
     const maxResults = 15;
 
@@ -22,7 +21,6 @@ export async function GET(request) {
     try {
         const response = await fetch(url);
         const data = await response.json();
-        console.log(data);
 
         return Response.json(ApiResponse.success(200, data, "Fetched successfully"), { status: 200 });
 

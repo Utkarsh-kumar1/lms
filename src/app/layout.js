@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <Header />
           <div className="pt-16"> {/* Adjust pt-16 to match the height of your header */}
-            <div className="flex items-center flex-col min-h-screen">
+            <div className="flex items-center flex-col h-full overflow-hidden ">
               {children}
             </div>
           </div>

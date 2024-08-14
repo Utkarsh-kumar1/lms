@@ -13,14 +13,12 @@ async function fetchSubject(owner, courseId) {
       "SELECT c.* , s.id AS subjectId FROM `course` c JOIN `subject` s ON c.subject = s.id WHERE s.owner = ? AND c.id = ?;",
       [owner , courseId]
     );
-    console.log(courses);
 
       const [topics] = await pool.execute(
         "SELECT t.* FROM topics t JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? AND c.id = ?",
         [owner , courseId]
       );
 
-    console.log(topics);
 
     return { courses , topics};
   } catch (error) {

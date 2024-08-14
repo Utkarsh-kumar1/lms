@@ -111,7 +111,6 @@ const AddSubtopicForm = ({
           setErrors({ ...errors, subtopicName: "All subtopics already exist" });
           return;
         }
-        console.log(response.data.data);
         
         onSubtopicAdded(response.data.data);
         setIsSubTopicAdding(false);

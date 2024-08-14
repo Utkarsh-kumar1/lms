@@ -49,66 +49,6 @@ export async function PATCH(req) {
 
 }
 
-// export async function POST(req) {
-//     const secret = process.env.JWT_SECRET;
-//     const token = await getToken({ req, secret });
-//     const { subtopicName, subjectId, courseId, topicId } = await req.json();
-
-//     try {
-//         const pool = dbconnect();
-
-//         // Verify if the subject and course exist for the user
-//         const [subjectCourse] = await pool.execute(
-//             `SELECT s.id AS subjectId, c.id AS courseId 
-//              FROM subject s 
-//              JOIN course c ON c.subject = s.id 
-//              WHERE s.owner = ? AND s.id = ? AND c.id = ?`,
-//             [token.id, subjectId, courseId]
-//         );
-
-//         if (subjectCourse.length === 0) {
-//             return Response.json(ApiResponse.error(403, "Forbidden"), { status: 403 });
-//         }
-
-//         // Check if the subtopic already exists
-//         const [existingSubtopic] = await pool.execute(
-//             `SELECT id, subtopicName FROM subtopics 
-//              WHERE topic = ? AND subtopicName = ?`,
-//             [topicId, subtopicName]
-//         );
-
-//         if (existingSubtopic.length > 0) {
-//             return Response.json(ApiResponse.success("200", null, "Subtopic already exists"), { status: 200 });
-//         }
-
-//         // Get the highest subtopicIndex for the topic
-//         const [highestIndex] = await pool.execute(
-//             `SELECT MAX(subtopicIndex) as maxIndex FROM subtopics WHERE topic = ?`,
-//             [topicId]
-//         );
-
-//         const newSubtopicIndex = highestIndex[0].maxIndex ? highestIndex[0].maxIndex + 1 : 1;
-
-//         // Insert the new subtopic with the incremented index
-//         const [insertedData] = await pool.execute(
-//             `INSERT INTO subtopics (subtopicName, subtopicIndex, topic) VALUES (?, ?, ?)`,
-//             [subtopicName, newSubtopicIndex, topicId]
-//         );
-//         console.log(insertedData);
-        
-
-//         const [subTopic] = await pool.execute(
-//             `SELECT * FROM subtopics WHERE id = ?`,
-//             [insertedData.insertId]
-//         );
-//         return Response.json(ApiResponse.success(200 , subTopic[0] , "Subtopic Created successfully"), { status: 200 });
-
-//     } catch (error) {
-//         console.error(error);
-//         return Response.json(ApiResponse.error(500, "Error while adding subtopic"), { status: 500 });
-//     }
-// }
-
 
 export async function POST(req) {
     const secret = process.env.JWT_SECRET;

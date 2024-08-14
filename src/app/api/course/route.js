@@ -23,7 +23,6 @@ export async function GET(req) {
 
         return Response.json(ApiResponse.success(200, courses, "Course Data fetched successfully"), { status: 200 })
     } catch (error) {
-        console.log(error);
 
         return Response.json(ApiResponse.error(500, "Error while Fetching the Subjects"), { status: 500 })
     }

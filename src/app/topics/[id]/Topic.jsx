@@ -8,7 +8,6 @@ import AddSubtopicForm from "@/app/subTopics/AddSubtopicForm";
 export default function Topic({ topic, subtopics }) {
   const [issubTopicAdding, setIssubTopicAdding] = useState(false);
 
-  console.log(subtopics);
   
   function onSubtopicAdded(subtopic) {
     subtopics.push(...subtopic);
@@ -22,7 +21,6 @@ export default function Topic({ topic, subtopics }) {
           <div>No subtopic Found</div>
         ) : (
           subtopics.map((subtopic, index) => {
-            console.log("subtopics in map " ,subtopic);
             
             return <SubTopicCard subtopic={subtopic} index={index} key={index} />
           })

@@ -11,7 +11,6 @@ export async function PATCH(req) {
     }
     
     const { isActive, newSubjectName , id } = await req.json();
-    console.log(isActive);
     
 
     if((isActive == null) && !newSubjectName){
@@ -32,9 +31,6 @@ export async function PATCH(req) {
 
         const field = isActive !== undefined ? "isActive" : "subjectName";
         const value = isActive !== undefined ? isActive : newSubjectName;
-        console.log(field);
-        console.log(value);
-        console.log(data[0].subjectName);
         
 
         if(field == "subjectName" && data[0].subjectName == value)
@@ -55,7 +51,6 @@ export async function PATCH(req) {
         return Response.json({ status: 200, message: "Update successful" });
 
     } catch (error) {
-        console.log(error);
     
         
         return Response.json(ApiResponse.error(500, "Error while updating Activity "), { status: 500 })

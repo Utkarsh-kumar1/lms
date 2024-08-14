@@ -55,7 +55,6 @@ const AddCourseForm = ({ setIsCourseAdding, onCourseAdded, subjectId }) => {
     const newErrors = { courseNames: "", subject: "" };
 
     if (!courseNames) newErrors.courseNames = "Course Names are required.";
-    console.log(subjectId , selectedSubject);
     
     if (!subjectId && !selectedSubject)
       newErrors.subject = "Subject is required.";
@@ -92,7 +91,6 @@ const AddCourseForm = ({ setIsCourseAdding, onCourseAdded, subjectId }) => {
         setIsCourseAdding(false);
       }
     } catch (error) {
-      console.log(error);
       setErrors({ ...errors, fetch: "Error while saving the courses." });
     }
   };

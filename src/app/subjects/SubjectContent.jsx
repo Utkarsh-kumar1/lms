@@ -17,7 +17,6 @@ export default function SubjectContent({ subjects: initialSubjects }) {
   const [isCompleted, setIsCompleted] = useState(true);
   const [isAddingSubject, setIsAddingSubject] = useState(false);
 
-  console.log(subjects);
 
   // useEffect(() => {
   //   setSubjects(initialSubjects);

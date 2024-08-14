@@ -13,12 +13,10 @@ async function fetchSubject(owner, topicId) {
       "SELECT t.* , c.id AS courseId , s.id AS subjectId FROM topics t JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? AND t.id = ?",
       [owner, topicId]
     );
-    console.log(topics);
      const [subtopics] = await pool.execute(
        "SELECT st.* FROM subtopics st JOIN topics t ON st.topic = t.id JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? AND t.id = ? ; ",
        [owner , topicId]
      );
-    console.log(subtopics);
 
     return { subtopics, topics };
   } catch (error) {
@@ -53,7 +51,6 @@ export default async function page({ params }) {
       // </>
     );
   } catch (error) {
-    console.log(error);
     
     return (
       <div>

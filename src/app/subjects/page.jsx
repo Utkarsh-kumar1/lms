@@ -11,7 +11,6 @@ async function fetchSubject(id) {
       "SELECT id , subjectName , isCompleted , isActive FROM subject WHERE OWNER = ? ;",
       [id]
     );
-    console.log(subjects);
 
     return subjects;
   } catch (error) {

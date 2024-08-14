@@ -61,7 +61,6 @@ export default function TopicContent({ topics: initialTopics }) {
     });
 
   function onTopicAdded(newTopic) {
-    console.log(newTopic);
     
     setTopics((prevTopics) => [...prevTopics, ...newTopic]);
   }

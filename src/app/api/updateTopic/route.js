@@ -20,7 +20,6 @@ export async function PATCH(req) {
             return Response.json(ApiResponse.error(403, "Forbidden"), { status: 403 });
         }
 
-        console.log(data[0].topicName);
 
 
         if (data[0].topicName === topicName) {
@@ -37,7 +36,6 @@ export async function PATCH(req) {
         return Response.json({ status: 200, message: "Update successful" }, { status: 200 });
 
     } catch (error) {
-        console.log(error);
 
 
         return Response.json(ApiResponse.error(500, "Error while updating Activity "), { status: 500 })
@@ -48,58 +46,7 @@ export async function PATCH(req) {
 
 
 
-// export async function POST(req) {
-//     const secret = process.env.JWT_SECRET;
-//     const token = await getToken({ req, secret });
-//     if (!token) {
-//         return Response.json(ApiResponse.error(400, "Unauthorized access"), { status: 401 });
-//     }
-//     const { topicName, courseId } = await req.json();
 
-//     if (!topicName) {
-//         return Response.json(ApiResponse.error(400, "Topic Name is required"), { status: 400 });
-//     }
-//     if (!courseId) {
-//         return Response.json(ApiResponse.error(400, "Course Id is required"), { status: 400 });
-//     }
-
-//     try {
-//         const pool = dbconnect()
-
-//         const [courses] = await pool.execute(
-//             "SELECT c.id FROM `course` c JOIN `subject` s ON c.subject = s.id WHERE s.owner = ? and c.id = ? ;",
-//             [token.id, courseId]
-//         );
-//         console.log(courses);
-//         if (!courses[0]) {
-//             return Response.json(ApiResponse.error(400, "No such course found"), { status: 400 });
-//         }
-
-//         const [topics] = await pool.execute(
-//             "SELECT t.topicIndex FROM topics t JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? and c.id = ? ORDER BY t.topicIndex DESC ",
-//             [token.id, courseId]
-//         );
-//         console.log(topics);
-
-
-//         const [databaseResponse] = await pool.execute("INSERT INTO topics (topicName , course , topicIndex) VALUES (? , ? , ?);", [topicName, courseId, (topics[0]?.topicIndex + 1) || 1])
-
-
-//         const [topic] = await pool.execute(
-//             "SELECT t.*, c.courseName, s.subjectName FROM topics t JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? and t.id = ? ",
-//             [token.id, databaseResponse.insertId]
-//         );
-
-
-//         return Response.json(ApiResponse.success(200, topic[0], "Topic created successfully"), { status: 200 })
-//     } catch (error) {
-//         console.log(error);
-
-//         return Response.json(ApiResponse.error(500, "Error while Creating Topic "), { status: 500 })
-//     }
-
-
-// }
 
 export async function POST(req) {
     const secret = process.env.JWT_SECRET;
@@ -110,7 +57,6 @@ export async function POST(req) {
     }
 
     const { topics, subjectId, courseId } = await req.json();
-    console.log(topics, subjectId, courseId);
     
 
     if (!Array.isArray(topics) || topics.length === 0 || !subjectId || !courseId) {
@@ -179,7 +125,6 @@ export async function POST(req) {
             JOIN subject s ON c.subject = s.id 
             WHERE t.topicName IN (?) AND t.course = ?
         `, [newTopics, courseId]);
-        console.log(insertedData);
         
 
         return NextResponse.json(ApiResponse.success(200, insertedData, "Topics added successfully"), { status: 200 });

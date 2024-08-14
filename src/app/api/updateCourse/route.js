@@ -6,6 +6,10 @@ export async function PATCH(req) {
     const secret = process.env.JWT_SECRET;
     const token = await getToken({ req, secret });
     const { newcourseName : courseName, id } = await req.json();
+    if (!token) {
+        return Response.json(ApiResponse.error(401, "Unauthorized access"), { status: 401 });
+    }
+
 
 
     try {
@@ -18,7 +22,6 @@ export async function PATCH(req) {
             return Response.json(ApiResponse.error(403, "Forbidden"), { status: 403 });
         }
 
-        console.log(data[0].courseName);
 
 
         if (data[0].courseName === courseName) {
@@ -35,7 +38,6 @@ export async function PATCH(req) {
         return Response.json({ status: 200, message: "Update successful" });
 
     } catch (error) {
-        console.log(error);
 
 
         return Response.json(ApiResponse.error(500, "Error while updating Activity "), { status: 500 })

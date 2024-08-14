@@ -1,12 +1,11 @@
-"use client"
+"use client";
 import React from "react";
 
 const YouTubeSearchResults = ({ data, onShowMore }) => {
-  console.log(data);
 
   return (
     <div>
-      <div className="flex flex-wrap gap-6 sm:p-6">
+      <div className="flex flex-col p-0   gap-6 ">
         {data?.items
           ?.filter(
             (item) =>
@@ -14,7 +13,7 @@ const YouTubeSearchResults = ({ data, onShowMore }) => {
               (item.id.kind === "youtube#video" ||
                 item.id.kind === "youtube#playlist")
           )
-          .map((item , index) => {
+          .map((item, index) => {
             const { id, snippet } = item;
             const isVideo = id.kind === "youtube#video";
             const isPlaylist = id.kind === "youtube#playlist";
@@ -22,7 +21,7 @@ const YouTubeSearchResults = ({ data, onShowMore }) => {
             return (
               <div
                 key={index}
-                className="flex flex-col flex-wrap sm:flex-row bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden w-full"
+                className="flex flex-col  xl:flex-row bg-white rounded-lg shadow-md hover:shadow-lg transition-shadow duration-200 overflow-hidden w-full  "
               >
                 <a
                   href={
@@ -32,19 +31,19 @@ const YouTubeSearchResults = ({ data, onShowMore }) => {
                   }
                   target="_blank"
                   rel="noopener noreferrer"
-                  className=" h-fit w-fit"
+                  className=" flex items-center justify-center"
                 >
                   <img
                     src={snippet.thumbnails.high.url}
                     alt={snippet.title}
-                    className="aspect-auto"
+                    className="w-full h-full"
                   />
                 </a>
-                <div className="p-4 flex-1 flex flex-col min-w-[170px]">
+                <div className="p-4 flex-1 flex flex-col lg:w-[500px] min-w-[160px]">
                   <h3 className="text-lg font-semibold mb-2">
                     {snippet.title}
                   </h3>
-                  <p className="text-sm text-gray-600 mb-3 line-clamp-2">
+                  <p className="text-sm text-gray-600 mb-3 hidden sm:block ">
                     {snippet.description}
                   </p>
                   <p className="text-sm text-gray-500">

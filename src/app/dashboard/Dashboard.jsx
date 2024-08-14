@@ -1,18 +1,37 @@
-"use client"
+"use client";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+  DialogTrigger,
+} from "@/components/ui/dialog";
+
 import React, { useState } from "react";
-import { Search } from "lucide-react";
+import { Plus, Search } from "lucide-react";
 import axios from "axios";
 import YouTubeSearchResults from "./YouTubeSearchResults";
-import { Avatar, AvatarFallback, AvatarImage } from "@/components/ui/avatar";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Input } from "@/components/ui/input";
+import StatisticsDashboard from "./StatisticsDashboard";
+import DailyActivities from "./DailyActivities";
+import { IoAddCircleSharp } from "react-icons/io5";
+import { Button } from "@/components/ui/button";
 
-export default function Dashboard() {
+export default function Dashboard({ userData }) {
   const [searchQuery, setSearchQuery] = useState(""); // State to store input value
   const [queryResult, setQueryResult] = useState({}); // State to store search results
   const [isSearching, setIsSearching] = useState(false);
-  const [errors, setErrors] = useState({ queryError: "" });
+  const [errors, setErrors] = useState({
+    queryError: "",
+    addActivityError: "",
+  });
   const [pageToken, setPageToken] = useState(""); // State to store pageToken
+  const [activityInput, setActivityInput] = useState("");
+  const [isDialogOpen, setIsDialogOpen] = useState(false);
+  const [activities, setActivities] = useState([]); // State to store activities
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -29,7 +48,6 @@ export default function Dashboard() {
       setQueryResult(response.data.data);
       setPageToken(response.data.data.nextPageToken || ""); // Update pageToken
     } catch (error) {
-      console.log(error);
       setErrors({ ...errors, queryError: "Something went Wrong" });
     } finally {
       setIsSearching(false);
@@ -37,7 +55,6 @@ export default function Dashboard() {
   };
 
   const handleShowMore = async (nextPageToken) => {
-
     try {
       const response = await axios.get(
         `/api/youtube-search?q=${searchQuery}&pageToken=${nextPageToken}`
@@ -56,61 +73,121 @@ export default function Dashboard() {
       }));
       setPageToken(response.data.data.nextPageToken || ""); // Update pageToken
     } catch (error) {
-      console.log(error);
       setErrors({ ...errors, queryError: "Something went Wrong" });
-    } 
+    }
+  };
+
+  const addActivity = async () => {
+    if (!activityInput) {
+      setErrors({ ...errors, addActivityError: "Activity Name is required" });
+      return;
+    }
+
+    try {
+      const response = await axios.patch("/api/dailyActivities", {
+        activityName: activityInput,
+      });
+      
+
+      if (response.status === 200) {
+        // Re-fetch activities or update the state directly
+        setActivities((prev)=>[...prev , response.data.data]);
+        setActivityInput(""); // Clear the input field
+        setIsDialogOpen(false); // Close the dialog
+      }
+    } catch (error) {
+      setErrors({ ...errors, addActivityError: "Failed to add activity" });
+    }
   };
 
   return (
-    <div className="grid gap-4 md:gap-8 lg:grid-cols-2 xl:grid-cols-3">
-      <Card className="xl:col-span-2" x-chunk="dashboard-01-chunk-4">
-        <CardHeader className="flex sm:flex-row items-center">
-          <div className="grid gap-2 w-full">
-            <CardTitle className="text-md sm:text-2xl lg:text-base">
+    <div className="flex flex-col w-full gap-6 p-6 bg-gray-100 min-h-screen">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* YouTube Search Card */}
+        <Card className="w-full lg:w-2/3  bg-white shadow-md rounded-lg">
+          <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+            <CardTitle className="text-lg font-bold text-gray-800">
               Your YouTube Space
             </CardTitle>
-          </div>
-          <div className="flex w-full items-center md:ml-auto md:gap-2">
             <form
-              className="ml-auto flex-1 sm:flex-initial"
+              className="flex items-center mt-4 sm:mt-0"
               onSubmit={handleSubmit}
             >
-              <div className="relative">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-muted-foreground" />
+              <div className="relative w-full sm:w-auto">
+                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
                 <Input
                   type="search"
                   placeholder="YouTube Search..."
                   value={searchQuery}
                   onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 sm:w-[300px] md:w-[200px] lg:w-fit disabled:cursor-progress"
+                  className="pl-8 w-full md:min-w-[300px] disabled:cursor-progress"
                   disabled={isSearching}
                   required
+                  autoFocus
                 />
               </div>
             </form>
-          </div>
-        </CardHeader>
-        <CardContent>
-          {isSearching && <div>Loading...</div>}
-          {errors.queryError && (
-            <div className="text-red-500">{errors.queryError}</div>
-          )}
-          {queryResult && !isSearching && (
-            <YouTubeSearchResults
-              data={queryResult}
-              onShowMore={handleShowMore}
+          </CardHeader>
+          <CardContent className="mt-4">
+            {isSearching && <div className="text-gray-600">Loading...</div>}
+            {errors.queryError && (
+              <div className="text-red-500">{errors.queryError}</div>
+            )}
+            {queryResult && !isSearching && (
+              <YouTubeSearchResults
+                data={queryResult}
+                onShowMore={handleShowMore}
+              />
+            )}
+          </CardContent>
+        </Card>
+
+        {/* Daily Activities Card */}
+        <Card className="h-fit lg:w-1/3  bg-white shadow-md rounded-lg">
+          <CardHeader>
+            <CardTitle className="text-lg font-bold text-gray-800 flex justify-between items-center">
+              <div> Daily Activities</div>
+              <Dialog
+                open={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
+                className="flex"
+              >
+                <DialogTrigger
+                  asChild
+                  className=" shadow-xl hover:bg-slate-50 hover:scale-[1.1] min-h-11 min-w-11 "
+                >
+                  <Plus className=" cursor-pointer shadow-sm p-2   rounded-lg" />
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px] flex flex-col">
+                  <DialogHeader>
+                    <DialogTitle>Add Daily Activity</DialogTitle>
+                    <DialogDescription></DialogDescription>
+                  </DialogHeader>
+
+                  <Input
+                    id="name"
+                    onChange={(e) => setActivityInput(e.target.value)}
+                    value={activityInput}
+                    placeholder="Activity Name"
+                    className="col-span-3"
+                  />
+                  <DialogFooter>
+                    <Button type="button" onClick={addActivity}>
+                      Add Activity
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="">
+            <DailyActivities
+              activities={activities}
+              setActivities={setActivities}
             />
-          )}
-        </CardContent>
-      </Card>
-      <Card x-chunk="dashboard-01-chunk-5 " className="h-fit">
-        <CardHeader>
-          <CardTitle>Daily Events</CardTitle>
-        </CardHeader>
-        <CardContent className="grid gap-8">
-          {/* Sales data content */}
-        </CardContent>
-      </Card>
+          </CardContent>
+        </Card>
+      </div>
     </div>
   );
 }

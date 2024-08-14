@@ -1,0 +1,12 @@
+import { Inter } from "next/font/google";
+
+const inter = Inter({ subsets: ["latin"] });
+
+export const metadata = {
+  title: "LMS Subjects",
+  description: "This is the sign-in page of the LMS App",
+};
+
+export default function subject({ children }) {
+  return <div className="h-full  w-full">{children}</div>;
+}

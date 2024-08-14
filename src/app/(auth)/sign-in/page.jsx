@@ -15,7 +15,7 @@ import {
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import SignInSchema from "@/Schema/signInSchema";
-import { useSession, signIn, signOut } from "next-auth/react";
+import {  signIn } from "next-auth/react";
 import {
   Card,
   CardHeader,
@@ -53,6 +53,7 @@ export default function ProfileForm() {
       variant: !response.ok ? "destructive" : "success",
       title: response.ok ? "Success" : "Error",
       description: response.ok ? "Sign In Successfully" : response.error ,
+      
     });
     if(response.ok == true)
     {

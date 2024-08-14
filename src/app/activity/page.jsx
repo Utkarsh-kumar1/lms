@@ -45,8 +45,8 @@ export default async function ProtectedPage() {
   }
 
   return (
-    <div className="container mx-auto p-4">
-      {activity.map((course, courseIndex) => {
+    <div className="container mx-auto p-4 min-h-screen">
+      {activity?.map((course, courseIndex) => {
         const topics = JSON.parse(course.topics);
         return (
           <div
@@ -57,7 +57,7 @@ export default async function ProtectedPage() {
               {course.courseName.charAt(0).toUpperCase() +
                 course.courseName.slice(1).toLowerCase()}
             </h2>
-            {topics.map((topic, topicIndex) => (
+            {topics?.map((topic, topicIndex) => (
               <Accordion
                 type="single"
                 collapsible
@@ -90,7 +90,7 @@ export default async function ProtectedPage() {
                         </TableRow>
                       </TableHeader>
                       <TableBody>
-                        {topic.subtopics.map((subtopic, subIndex) => (
+                        {topic.subtopics?.map((subtopic, subIndex) => (
                           <DataRow
                             key={subIndex}
                             subtopic={subtopic}

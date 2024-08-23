@@ -60,7 +60,7 @@ const AddCourseForm = ({ setIsCourseAdding, onCourseAdded, subjectId }) => {
       newErrors.subject = "Subject is required.";
 
     // Check for empty values in courseNames
-    const courseNamesArray = courseNames.split(",").map((name) => name.trim());
+    const courseNamesArray = courseNames.split(";").map((name) => name.trim());
     const hasEmptyValues = courseNamesArray.some((name) => name === "");
     if (hasEmptyValues)
       newErrors.courseNames = "Course Names should not be empty.";
@@ -77,7 +77,7 @@ const AddCourseForm = ({ setIsCourseAdding, onCourseAdded, subjectId }) => {
 
     try {
       const response = await axios.post("/api/updateCourse", {
-        courseNames: courseNames.split(",").map((name) => name.trim()),
+        courseNames: courseNames.split(";").map((name) => name.trim()),
         subjectId: selectedSubject,
       });
 
@@ -110,7 +110,7 @@ const AddCourseForm = ({ setIsCourseAdding, onCourseAdded, subjectId }) => {
             type="text"
             autoFocus
             value={courseNames}
-            placeholder="Course Names (comma separated)"
+            placeholder="Course Names (semi-colon separated)"
             onChange={(e) => setCourseNames(e.target.value)}
             className="text-lg font-semibold text-gray-800 border-b border-gray-400 outline-none bg-transparent w-full text-center p-2 placeholder:text-sm sm:placeholder:text-lg"
             required

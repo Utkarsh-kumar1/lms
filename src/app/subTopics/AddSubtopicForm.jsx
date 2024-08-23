@@ -96,7 +96,7 @@ const AddSubtopicForm = ({
 
     try {
       const subtopicsArray = subtopicName
-        .split(",")
+        .split(";")
         .map((subtopic) => subtopic.trim());
 
       const response = await axios.post("/api/updateSubTopic", {
@@ -135,7 +135,7 @@ const AddSubtopicForm = ({
             type="text"
             autoFocus
             value={subtopicName}
-            placeholder="Subtopic Names (comma separated)"
+            placeholder="Subtopic Names (semi-colon separated)"
             onChange={(e) => setSubtopicName(e.target.value)}
             className="text-lg font-semibold text-gray-800 border-b border-gray-400 outline-none bg-transparent w-full text-center p-2 placeholder:text-sm "
             required

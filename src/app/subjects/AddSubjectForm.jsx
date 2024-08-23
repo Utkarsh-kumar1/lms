@@ -15,7 +15,7 @@ const AddSubjectForm = ({ setIsAddingSubject, onSubjectAdded }) => {
 
     // Check for empty values in subjectInput
     const subjectArray = subjectInput
-      .split(",")
+      .split(";")
       .map((subject) => subject.trim());
     const hasEmptyValues = subjectArray.some((subject) => subject === "");
     if (hasEmptyValues) newErrors.subject = "Subjects should not be empty.";
@@ -32,7 +32,7 @@ const AddSubjectForm = ({ setIsAddingSubject, onSubjectAdded }) => {
 
     try {
       const response = await axios.post("/api/updateSubject", {
-        subjects: subjectInput.split(",").map((subject) => subject.trim()),
+        subjects: subjectInput.split(";").map((subject) => subject.trim()),
       });
 
       if (response.status === 200) {
@@ -66,7 +66,7 @@ const AddSubjectForm = ({ setIsAddingSubject, onSubjectAdded }) => {
             autoFocus
             value={subjectInput}
             onChange={(e) => setSubjectInput(e.target.value)}
-            placeholder="Enter subjects, separated by commas"
+            placeholder="Enter subjects (semi-colon seperated) "
             className="text-lg font-semibold text-gray-800 border-b border-gray-400 outline-none bg-transparent w-full placeholder:text-sm sm:placeholder:text-lg text-center"
           />
           {errors.subject && (

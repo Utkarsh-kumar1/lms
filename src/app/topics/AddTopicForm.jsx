@@ -93,7 +93,7 @@ const AddTopicForm = ({
   const handleSaveClick = async () => {
     if (!validateForm()) return;
 
-    const topicsArray = topicNames.split(",").map((name) => name.trim());
+    const topicsArray = topicNames.split(";").map((name) => name.trim());
     setErrors({ topicNames: "", subject: "", course: "" });
 
     try {
@@ -129,7 +129,7 @@ const AddTopicForm = ({
             type="text"
             autoFocus
             value={topicNames}
-            placeholder="Enter Topic Names (comma-separated)"
+            placeholder="Enter Topic Names (semi-colon separated)"
             onChange={(e) => setTopicNames(e.target.value)}
             className="text-lg font-semibold text-gray-800 border-b border-gray-400 outline-none bg-transparent w-full text-center p-2 placeholder:text-sm"
             required

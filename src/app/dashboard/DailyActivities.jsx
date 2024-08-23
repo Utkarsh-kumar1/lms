@@ -18,7 +18,6 @@ const fetchActivities = async (date) => {
 };
 
 function formatDate(inputDate) {
-  // const dateObj = new Date(inputDate);
   const months = [
     "January",
     "February",
@@ -33,18 +32,13 @@ function formatDate(inputDate) {
     "November",
     "December",
   ];
-  // const day = dateObj.getDate();
-  // const month = months[dateObj.getMonth()];
-  // const year = dateObj.getFullYear();
+
   const [day, month, year] = inputDate.split(",")[0].split("/");
-  // console.log(day, month, year);
   return `${day} ${months[parseInt(month)]} ${year}`;
 }
 
 export default function DailyActivities({ activities, setActivities }) {
   const [date, setDate] = useState(new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' })); // Default to today   
-  // console.log(new Date().toISOString().split("T")[0]);
-  // console.log(date.split(', ')[0].split('/').reverse().join('-'));
 
 
   useEffect(() => {
@@ -53,20 +47,11 @@ export default function DailyActivities({ activities, setActivities }) {
       setActivities(data);
     };
     loadData();
-
-    // console.log(date);
   }, [date, setActivities]);
 
   const handlePreviousDay = () => {
-    // const previousDate = new Date(date);
-    // previousDate.setDate(previousDate.getDate() - 1);
-    // setDate(previousDate.toISOString().split("T")[0]);
     const oneDayAgo = new Date(new Date(date.split(', ')[0].split('/').reverse().join('-')).setDate(date.split(', ')[0].split('/')[0] -1 )).toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' });
-    // previousDate.setDate(oneDayAgo);
     setDate(oneDayAgo);
-    // console.log(oneDayAgo);
-    // console.log("state date", date);
-    // console.log(date.split(', ')[0].split('/')[0]);
   };
 
   const handleToday = () => {

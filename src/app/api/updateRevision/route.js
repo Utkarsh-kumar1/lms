@@ -27,7 +27,7 @@ export async function PATCH(req) {
         // Use a conditional expression to handle the end value
         const updatedResponse = await pool.execute(
             "UPDATE revision SET end = IF(? IS NOT NULL, CURRENT_TIMESTAMP(), null) WHERE id = ? ;",
-            [status, revisionId]
+            [end, revisionId]
         );
     } catch (error) {
         return Response.json(ApiResponse.error(500, "Error while updating Activity "), { status: 500 })

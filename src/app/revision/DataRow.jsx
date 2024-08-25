@@ -35,8 +35,7 @@ function formatDate(inputDate) {
   return `${day} ${month} ${year}`;
 }
 
-export default function DataRow({ subtopic, subIndex }) {
-  
+export default function DataRow({ subtopic, subIndex, onsubtopicUpdate }) {
   const [updating, setUpdating] = useState(false);
   const [isCompleted, setIsCompleted] = useState(!!subtopic.end);
   const [endDate, setEndDate] = useState(subtopic.end);
@@ -67,9 +66,18 @@ export default function DataRow({ subtopic, subIndex }) {
           defaultChecked={!!endDate}
           onCheckedChange={async (status) => {
             setUpdating(true);
-            const response = await updateActivity(subtopic.id , subtopic.revisionId, status);
+            const response = await updateActivity(
+              subtopic.id,
+              subtopic.revisionId,
+              status
+            );
             setUpdating(false);
             if (response.status === 200) {
+
+              onsubtopicUpdate({
+                ...subtopic,
+                end: status ? new Date() : null,
+              });
               setIsCompleted(status);
               setEndDate(status ? new Date() : null);
             }

@@ -2,6 +2,7 @@ import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import dbconnect from "@/lib/dbconnect";
+import Topics from "./Topics"
 
 import {
   Table,
@@ -81,53 +82,7 @@ export default async function ProtectedPage() {
                    course.courseName.slice(1).toLowerCase()}
                </h2>
                {topics?.map((topic, topicIndex) => (
-                 <Accordion
-                   type="single"
-                   collapsible
-                   key={`accordion-${courseIndex}-${topicIndex}`}
-                   className="mb-4"
-                 >
-                   <AccordionItem
-                     value={`item-${topicIndex}`}
-                     className="border rounded-lg"
-                   >
-                     <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150">
-                       {topic.topicName}
-                     </AccordionTrigger>
-                     <AccordionContent className="bg-gray-100 sm:p-4 rounded-b-lg p-0">
-                       <Table className="w-full">
-                         <TableHeader>
-                           <TableRow>
-                             <TableHead className="font-bold text-[.7rem]">
-                               SubTopic
-                             </TableHead>
-                             <TableHead className="font-bold text-[.7rem]">
-                               Start
-                             </TableHead>
-                             <TableHead className="font-bold text-[.7rem]">
-                               End
-                             </TableHead>
-                             <TableHead className="font-bold text-[.7rem]">
-                               Revision Counter
-                             </TableHead>
-                             <TableHead className="font-bold text-[.7rem]">
-                               Action
-                             </TableHead>
-                           </TableRow>
-                         </TableHeader>
-                         <TableBody>
-                           {topic.subtopics?.map((subtopic, subIndex) => (
-                             <DataRow
-                               key={subIndex}
-                               subtopic={subtopic}
-                               subIndex={subIndex}
-                             />
-                           ))}
-                         </TableBody>
-                       </Table>
-                     </AccordionContent>
-                   </AccordionItem>
-                 </Accordion>
+               <Topics topic={topic} topicIndex={topicIndex} key={topicIndex}/>
                ))}
              </div>
            );

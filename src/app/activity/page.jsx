@@ -18,6 +18,7 @@ import {
   AccordionContent,
 } from "@/components/ui/accordion";
 import DataRow from "./DataRow";
+import Topics from "./Topics";
 
 async function fetchActivity(id) {
   const pool = dbconnect();
@@ -57,50 +58,7 @@ export default async function ProtectedPage() {
               {course.courseName}
             </h2>
             {topics?.map((topic, topicIndex) => (
-              <Accordion
-                type="single"
-                collapsible
-                key={`accordion-${courseIndex}-${topicIndex}`}
-                className="mb-4"
-              >
-                <AccordionItem
-                  value={`item-${topicIndex}`}
-                  className="border rounded-lg"
-                >
-                  <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150">
-                    {topic.topicName}
-                  </AccordionTrigger>
-                  <AccordionContent className="bg-gray-100 sm:p-4  rounded-b-lg p-0">
-                    <Table className="w-full">
-                      <TableHeader>
-                        <TableRow>
-                          <TableHead className="font-bold text-[.7rem]">
-                            SubTopic
-                          </TableHead>
-                          <TableHead className="font-bold text-[.7rem]">
-                            Start
-                          </TableHead>
-                          <TableHead className="font-bold text-[.7rem]">
-                            End
-                          </TableHead>
-                          <TableHead className="font-bold text-[.7rem]">
-                            Action
-                          </TableHead>
-                        </TableRow>
-                      </TableHeader>
-                      <TableBody>
-                        {topic.subtopics?.map((subtopic, subIndex) => (
-                          <DataRow
-                            key={subIndex}
-                            subtopic={subtopic}
-                            subIndex={subIndex}
-                          />
-                        ))}
-                      </TableBody>
-                    </Table>
-                  </AccordionContent>
-                </AccordionItem>
-              </Accordion>
+              <Topics topic={topic} topicIndex={topicIndex} key={topicIndex}/>
             ))}
           </div>
         );

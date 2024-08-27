@@ -8,7 +8,7 @@ async function fetchSubtopics(id) {
   const pool = dbconnect();
   try {
     const [subtopics] = await pool.execute(
-      "SELECT st.*,t.topicName , c.courseName, s.subjectName FROM subtopics st JOIN topics t ON st.topic = t.id JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? ; ",
+      "SELECT st.*,t.topicName , c.courseName, s.subjectName FROM subtopics st JOIN topics t ON st.topic = t.id JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? ORDER BY st.subTopicIndex ; ",
       [id]
     );
 

@@ -21,11 +21,13 @@ import DataRow from "./DataRow";
 import Topics from "./Topics";
 
 async function fetchActivity(id) {
+  //TODO: wrap in trycatch
   const pool = dbconnect();
   const [data] = await pool.execute(
     "SELECT courseName, topics FROM activityView WHERE userId = ?",
     [id]
   );
+  
   return data;
 }
 

@@ -20,7 +20,7 @@ export default function RootLayout({ children }) {
           <Header />
           <div className="pt-16"> {/* Adjust pt-16 to match the height of your header */}
             <div className="flex items-center flex-col h-full overflow-hidden ">
-              {children}
+              {children} 
             </div>
           </div>
           <Toaster />

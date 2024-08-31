@@ -34,7 +34,7 @@ function formatDate(inputDate) {
   ];
 
   const [day, month, year] = inputDate.split(",")[0].split("/");
-  return `${day} ${months[parseInt(month)]} ${year}`;
+  return `${day} ${months[parseInt(month)-1]} ${year}`;
 }
 
 export default function DailyActivities({ activities, setActivities }) {

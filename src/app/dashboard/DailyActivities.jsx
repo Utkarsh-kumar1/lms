@@ -83,6 +83,7 @@ export default function DailyActivities({ activities, setActivities }) {
             <TableRow>
               <TableHead className="w-[100px]">Task</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Streak</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>

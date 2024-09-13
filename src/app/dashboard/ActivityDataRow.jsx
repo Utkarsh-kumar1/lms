@@ -21,9 +21,10 @@ export default function ActivityDataRow({ activity }) {
   const [isCompleted, setIsCompleted] = useState(activity.isCompleted);
   const [streak, setStreak] = useState(activity.streak);
 
-  // Update isCompleted state when the activity prop changes
+  // Update isCompleted and streak state when the activity prop changes
   useEffect(() => {
     setIsCompleted(activity.isCompleted);
+    setStreak(activity.streak);
   }, [activity]);
   
 

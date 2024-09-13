@@ -39,7 +39,7 @@ function formatDate(inputDate) {
     "December",
   ];
   // Split the date and time string
-  const timePart = inputDate.split(", ")[1];
+  const timePart = inputDate.split(", ")[1] ?? new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata' });
   const [day, month, year] = inputDate.split(",")[0].split("/");
 
   // Create a new Date object using the parsed values
@@ -80,7 +80,6 @@ export default function DailyActivities({ activities, setActivities }) {
     setDate(
       new Date()
         .toLocaleString("en-GB", { timeZone: "Asia/Kolkata" })
-        .split(",")[0]
     );
   };
 

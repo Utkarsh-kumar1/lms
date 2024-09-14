@@ -57,8 +57,7 @@ export default async function ProtectedPage() {
             className="mb-8 p-4 bg-white border border-gray-200 rounded-lg shadow-md"
           >
             <h2 className="text-3xl font-extrabold mb-4 text-blue-600">
-              {course.courseName.charAt(0).toUpperCase() +
-                course.courseName.slice(1).toLowerCase()}
+              {course.courseName}
             </h2>
             {topics?.map((topic, topicIndex) => (
               <Topics topic={topic} topicIndex={topicIndex} key={topicIndex}/>

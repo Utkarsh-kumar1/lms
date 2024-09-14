@@ -6,15 +6,15 @@ import TopicCard from "@/app/topics/TopicCard";
 import SubTopicCard from "@/app/subTopics/SubTopicCard";
 import Topic from "./Topic";
 
-async function fetchSubject(owner, topicId) {
+async function fetchData(owner, topicId) {
   const pool = dbconnect();
   try {
     const [topics] = await pool.execute(
-      "SELECT t.* , c.id AS courseId , s.id AS subjectId FROM topics t JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? AND t.id = ?",
+      "SELECT t.* , c.id AS courseId , s.id AS subjectId FROM topics t JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? AND t.id = ? ORDER BY t.topicIndex ",
       [owner, topicId]
     );
      const [subtopics] = await pool.execute(
-       "SELECT st.* FROM subtopics st JOIN topics t ON st.topic = t.id JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? AND t.id = ? ; ",
+       "SELECT st.* FROM subtopics st JOIN topics t ON st.topic = t.id JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? AND t.id = ? ORDER BY st.subTopicIndex ; ",
        [owner , topicId]
      );
 
@@ -30,7 +30,7 @@ export default async function page({ params }) {
     return <div>Unauthorized Access</div>;
   }
   try {
-    const { subtopics, topics } = await fetchSubject(session.id, params.id);
+    const { subtopics, topics } = await fetchData(session.id, params.id);
     if (topics.length === 0) {
       return <div>No subjects Found</div>;
     }

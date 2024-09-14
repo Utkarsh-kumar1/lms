@@ -13,12 +13,17 @@ import {
 import ActivityDataRow from "./ActivityDataRow";
 
 const fetchActivities = async (date) => {
-  const response = await axios.get(`/api/dailyActivities?date=${date.split(', ')[0].split('/').reverse().join('-')}`);
+  const response = await axios.get(
+    `/api/dailyActivities?date=${date
+      .split(", ")[0]
+      .split("/")
+      .reverse()
+      .join("-")}`
+  );
   return response.data.data;
 };
 
 function formatDate(inputDate) {
-  // const dateObj = new Date(inputDate);
   const months = [
     "January",
     "February",
@@ -33,19 +38,26 @@ function formatDate(inputDate) {
     "November",
     "December",
   ];
-  // const day = dateObj.getDate();
-  // const month = months[dateObj.getMonth()];
-  // const year = dateObj.getFullYear();
+  // Split the date and time string
+  const timePart = inputDate.split(", ")[1] ?? new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata' });
   const [day, month, year] = inputDate.split(",")[0].split("/");
-  // console.log(day, month, year);
-  return `${day} ${months[parseInt(month)]} ${year}`;
+
+  // Create a new Date object using the parsed values
+  const formattedDate = new Date(`${year}-${month}-${day}T${timePart}`);
+
+  // Get the day of the week
+  const dayOfWeek = formattedDate.toLocaleString("en-US", {
+    weekday: "long",
+    timeZone: "Asia/Kolkata",
+  });
+
+  return `${dayOfWeek}, ${day} ${months[parseInt(month) - 1]} ${year}`;
 }
 
 export default function DailyActivities({ activities, setActivities }) {
-  const [date, setDate] = useState(new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' })); // Default to today   
-  // console.log(new Date().toISOString().split("T")[0]);
-  // console.log(date.split(', ')[0].split('/').reverse().join('-'));
-
+  const [date, setDate] = useState(
+    new Date().toLocaleString("en-GB", { timeZone: "Asia/Kolkata" })
+  ); // Default to today
 
   useEffect(() => {
     const loadData = async () => {
@@ -53,24 +65,22 @@ export default function DailyActivities({ activities, setActivities }) {
       setActivities(data);
     };
     loadData();
-
-    // console.log(date);
   }, [date, setActivities]);
 
   const handlePreviousDay = () => {
-    // const previousDate = new Date(date);
-    // previousDate.setDate(previousDate.getDate() - 1);
-    // setDate(previousDate.toISOString().split("T")[0]);
-    const oneDayAgo = new Date(new Date(date.split(', ')[0].split('/').reverse().join('-')).setDate(date.split(', ')[0].split('/')[0] -1 )).toLocaleDateString('en-GB', { timeZone: 'Asia/Kolkata' });
-    // previousDate.setDate(oneDayAgo);
+    const oneDayAgo = new Date(
+      new Date(date.split(", ")[0].split("/").reverse().join("-")).setDate(
+        date.split(", ")[0].split("/")[0] - 1
+      )
+    ).toLocaleDateString("en-GB", { timeZone: "Asia/Kolkata" });
     setDate(oneDayAgo);
-    // console.log(oneDayAgo);
-    // console.log("state date", date);
-    // console.log(date.split(', ')[0].split('/')[0]);
   };
 
   const handleToday = () => {
-    setDate(new Date().toLocaleString('en-GB', { timeZone: 'Asia/Kolkata' }).split(',')[0]);
+    setDate(
+      new Date()
+        .toLocaleString("en-GB", { timeZone: "Asia/Kolkata" })
+    );
   };
 
   return (
@@ -98,6 +108,7 @@ export default function DailyActivities({ activities, setActivities }) {
             <TableRow>
               <TableHead className="w-[100px]">Task</TableHead>
               <TableHead>Status</TableHead>
+              <TableHead>Streak</TableHead>
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
@@ -122,4 +133,3 @@ export default function DailyActivities({ activities, setActivities }) {
     </div>
   );
 }
-

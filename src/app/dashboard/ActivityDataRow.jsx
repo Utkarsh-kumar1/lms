@@ -19,12 +19,13 @@ export default function ActivityDataRow({ activity }) {
   
   const [updating, setUpdating] = useState(false);
   const [isCompleted, setIsCompleted] = useState(activity.isCompleted);
+  const [streak, setStreak] = useState(activity.streak);
 
-  // Update isCompleted state when the activity prop changes
+  // Update isCompleted and streak state when the activity prop changes
   useEffect(() => {
     setIsCompleted(activity.isCompleted);
+    setStreak(activity.streak);
   }, [activity]);
-
   
 
   return (
@@ -39,6 +40,9 @@ export default function ActivityDataRow({ activity }) {
       <TableCell className="p-2 text-[.7rem] sm:text-base">
         {isCompleted ? "Completed" : "Not Completed"}
       </TableCell>
+      <TableCell>
+        {streak}
+      </TableCell>
       <TableCell className="p-2 text-[.7rem] sm:text-base">
         <Switch
           className={`bg-slate-50`}
@@ -50,6 +54,9 @@ export default function ActivityDataRow({ activity }) {
             setUpdating(false);
             if (response.status === 200) {
               setIsCompleted(status);
+              console.log(isCompleted);
+              if (!isCompleted ) setStreak(streak+1);
+              else setStreak(streak-1);
             }
           }}
         />

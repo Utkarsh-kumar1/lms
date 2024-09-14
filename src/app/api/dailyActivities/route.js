@@ -19,7 +19,7 @@ export async function GET(req) {
         // Query for today's data
         const pool = dbconnect()
         const [todayData] = await pool.query(
-            `SELECT * FROM dailyActivitiesScheduled where startDate = Date(?) and owner = ? ORDER BY startDate DESC`,
+            `SELECT * FROM dailyActivitiesScheduledView where startDate = Date(?) and owner = ? ORDER BY startDate DESC`,
             [date, token.id]
         );
 

@@ -123,7 +123,6 @@ export default function Dashboard({ userData }) {
                   className="pl-8 w-full md:min-w-[300px] disabled:cursor-progress"
                   disabled={isSearching}
                   required
-                  autoFocus
                 />
               </div>
             </form>

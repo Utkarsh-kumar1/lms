@@ -20,7 +20,7 @@ export default function Course({ course, topics: initialTopic }) {
           <div>No Topic Found</div>
         ) : (
           topics.map((topic, index) => (
-            <TopicCard topic={topic} index={index} key={index} />
+            <TopicCard topic={topic} index={topic.topicIndex} key={index} />
           ))
         )}
       </div>

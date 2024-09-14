@@ -8,12 +8,14 @@ async function fetchSubtopics(id) {
   const pool = dbconnect();
   try {
     const [subtopics] = await pool.execute(
-      "SELECT st.*,t.topicName , c.courseName, s.subjectName FROM subtopics st JOIN topics t ON st.topic = t.id JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? ORDER BY st.subTopicIndex ; ",
+      "SELECT st.*,t.topicName , c.courseName, s.subjectName FROM subtopics st JOIN topics t ON st.topic = t.id JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? ORDER BY t.topicIndex , st.subtopicIndex ; ",
       [id]
     );
 
     return subtopics;
   } catch (error) {
+    console.log(error);
+    
     throw new Error("Error while fetching subtopic");
   }
 }

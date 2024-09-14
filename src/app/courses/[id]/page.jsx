@@ -15,7 +15,7 @@ async function fetchSubject(owner, courseId) {
     );
 
       const [topics] = await pool.execute(
-        "SELECT t.* FROM topics t JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? AND c.id = ?",
+        "SELECT t.* FROM topics t JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? AND c.id = ? ORDER BY t.topicIndex",
         [owner , courseId]
       );
 

@@ -48,7 +48,7 @@ const TopicCard = ({ topic, index }) => {
       }}
     >
       {index != null ? (
-        <p className="text-lg font-semibold text-gray-800">{index + 1}.</p>
+        <p className="text-lg font-semibold text-gray-800">{index }.</p>
       ) : null}
       <div className="flex items-center justify-between w-full">
         <div>

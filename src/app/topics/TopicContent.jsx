@@ -131,7 +131,7 @@ export default function TopicContent({ topics: initialTopics }) {
       <div className="space-y-4">
         {filteredTopics.length > 0 ? (
           filteredTopics?.map((topic, index) => (
-            <TopicCard key={topic.id} index={index} topic={topic} />
+            <TopicCard key={topic.id} index={topic.topicIndex} topic={topic} />
           ))
         ) : (
           <p className="text-lg text-gray-500">

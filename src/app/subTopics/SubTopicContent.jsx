@@ -136,7 +136,7 @@ export default function TopicContent({ subtopics: initialSubtopics }) {
       <div className="space-y-4">
         {filteredSubtopics.length > 0 ? (
           filteredSubtopics?.map((subtopic, index) => (
-            <SubTopicCard key={subtopic.id} index={index} subtopic={subtopic} />
+            <SubTopicCard key={subtopic.id} index={subtopic.subTopicIndex} subtopic={subtopic} />
           ))
         ) : (
           <p className="text-lg text-gray-500">

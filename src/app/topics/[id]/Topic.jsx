@@ -22,7 +22,7 @@ export default function Topic({ topic, subtopics }) {
         ) : (
           subtopics.map((subtopic, index) => {
             
-            return <SubTopicCard subtopic={subtopic} index={index} key={index} />
+            return <SubTopicCard subtopic={subtopic} index={subtopic.subTopicIndex} key={index} />
           })
         )}
       </div>

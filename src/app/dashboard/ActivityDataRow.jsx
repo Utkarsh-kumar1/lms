@@ -40,8 +40,9 @@ export default function ActivityDataRow({ activity }) {
       <TableCell className="p-2 text-[.7rem] sm:text-base">
         {isCompleted ? "Completed" : "Not Completed"}
       </TableCell>
-      <TableCell>
-        {streak}
+      <TableCell className="relative">
+        {streak}{ activity.isBestStreak &&
+         <span className="absolute text-[10px] top-0 align-super bg-gradient-to-bl bg-gradient-to-r from-yellow-600 to-red-600 bg-clip-text text-transparent font-black italic">Best</span>}
       </TableCell>
       <TableCell className="p-2 text-[.7rem] sm:text-base">
         <Switch

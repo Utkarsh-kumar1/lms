@@ -100,7 +100,7 @@ export default function DailyActivities({ activities, setActivities }) {
             See Today
           </button>
         </div>
-        <p>{formatDate(date)}</p>
+        <p bold>{formatDate(date)}</p>
       </div>
       <div className=" overflow-auto max-h-64">
         <Table>

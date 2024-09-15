@@ -25,18 +25,18 @@ const fetchActivities = async (date) => {
 
 function formatDate(inputDate) {
   const months = [
-    "January",
-    "February",
-    "March",
-    "April",
+    "Jan",
+    "Feb",
+    "Mar",
+    "Apr",
     "May",
-    "June",
-    "July",
-    "August",
-    "September",
-    "October",
-    "November",
-    "December",
+    "Jun",
+    "Jul",
+    "Aug",
+    "Sep",
+    "Oct",
+    "Nov",
+    "Dec",
   ];
   // Split the date and time string
   const timePart = inputDate.split(", ")[1] ?? new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata' });

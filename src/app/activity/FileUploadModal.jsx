@@ -18,9 +18,17 @@ export default function FileUploadModal({
   const [selectedFile, setSelectedFile] = useState(null);
   const [uploadStatus, setUploadStatus] = useState("");
 
-  const handleFileChange = (e) => {
-    setSelectedFile(e.target.files[0]);
-  };
+const handleFileChange = (e) => {
+  const file = e.target.files[0];
+  const allowedTypes = ["application/pdf"];
+
+  // Check if the selected file is of an allowed type
+  if (file && allowedTypes.includes(file.type)) {
+    setSelectedFile(file);
+  } else {
+    alert("Only PDF files are allowed.");
+  }
+};
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -67,7 +75,12 @@ export default function FileUploadModal({
         <form onSubmit={handleSubmit}>
           <div className=" rounded-lg">
             <label htmlFor="fileInput">Choose a file:</label>
-            <input type="file" id="fileInput" onChange={handleFileChange} />
+            <input
+              type="file"
+              id="fileInput"
+              onChange={handleFileChange}
+              accept=".pdf , application/pdf"
+            />
           </div>
           <Button type="submit">Upload</Button>
           {uploadStatus && <p>{uploadStatus}</p>}

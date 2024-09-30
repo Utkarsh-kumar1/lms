@@ -60,7 +60,7 @@ export default async function ProtectedPage() {
               {course.courseName}
             </h2>
             {topics?.map((topic, topicIndex) => (
-              <Topics topic={topic} topicIndex={topicIndex} key={topicIndex}/>
+              <Topics topic={topic} topicIndex={topicIndex} key={topicIndex} subjectId={course.courseId}/>
             ))}
           </div>
         );

@@ -66,13 +66,21 @@ function Topics({ topic: initialTopic, topicIndex }) {
               className="flex gap-2 items-center bg-blue-400 hover:bg-blue-300 p-2 rounded-md cursor-pointer transition duration-150 ml-auto mr-4"
               onClick={(e) => {
                 e.stopPropagation();
-                setIsModalOpen(true);
+                setIsModalOpen(!isModalOpen);
               }}
             >
               <NotebookPen className="text-white" />
               <p className="text-sm text-white">View notes</p>
             </div>
           </AccordionTrigger>
+          {/* Modal for viewing notes */}
+          {isModalOpen && (
+            <ViewNotes
+              topicId={topic.topicId}
+              isOpen={isModalOpen}
+              setIsOpen={setIsModalOpen}
+            />
+          )}
 
           {/* Accordion Content */}
           <AccordionContent className="bg-gray-100 sm:p-4 rounded-b-lg p-0">
@@ -109,14 +117,7 @@ function Topics({ topic: initialTopic, topicIndex }) {
         </AccordionItem>
       </Accordion>
       
-      {/* Modal for viewing notes */}
-      {isModalOpen && (
-        <ViewNotes
-          topicId={topic.topicId}
-          isOpen={isModalOpen}
-          setIsOpen={setIsModalOpen}
-        />
-      )}
+      
     </>
   );
 }

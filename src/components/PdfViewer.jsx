@@ -29,15 +29,15 @@ const PdfViewer = ({ fileUrl }) => {
 
   return (
     <div className="w-full h-screen">
-      <object data={fileUrl} type="application/pdf" width="100%" height="100%">
-        {/* <p>
-          Your browser doesn't support viewing PDFs inline. You can{" "}
+      {/* <object data={fileUrl} type="application/pdf" width="100%" height="100%"> */}
+        {/* <p> */}
+          {/* Your browser doesn't support viewing PDFs inline. You can{" "} */}
           <a href={fileUrl} target="_blank" rel="noopener noreferrer">
             download the PDF here
           </a>
-          .
-        </p> */}
-      </object>
+          {/* . */}
+        {/* </p> */}
+      {/* </object> */}
     </div>
   );
 };

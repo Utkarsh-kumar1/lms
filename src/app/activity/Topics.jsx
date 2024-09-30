@@ -59,21 +59,26 @@ function Topics({ topic: initialTopic, topicIndex, courseId }) {
       className="mb-4" // Add margin for better spacing
     >
       <AccordionItem value={`item-${topicIndex}`} className="border rounded-lg">
-        <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 flex justify-between items-center">
+        <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out shadow-md flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-300">
           {/* Topic name */}
           <span>{topic.topicName}</span>
 
           {/* FilePlus2 icon button to trigger the modal */}
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-4 ml-auto mr-4">
+            {" "}
+            {/* Add ml-auto to push icons to the right */}
             <FilePlus2
               onClick={(e) => {
                 e.stopPropagation(); // Prevent the accordion from collapsing
                 setIsModalOpen(true); // Open the modal
               }}
-              className="cursor-pointer text-white hover:text-gray-200"
+              className="cursor-pointer text-white hover:text-gray-200 transition duration-150 ease-in-out"
               size={24} // Adjust size of the icon
             />
-            <FilePenLine />
+            <FilePenLine
+              className="text-white hover:text-gray-200 transition duration-150 ease-in-out"
+              size={24}
+            />
           </div>
         </AccordionTrigger>
 

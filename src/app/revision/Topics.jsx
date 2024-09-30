@@ -21,7 +21,7 @@ import ViewNotes from "./ViewNotes";
 
 function Topics({ topic: initialTopic, topicIndex }) {
   const [topic, setTopic] = useState(initialTopic);
-  const [isModalOpen, setIsModalOpen] = useState(false)
+  const [isModalOpen, setIsModalOpen] = useState(false);
 
   function onsubtopicUpdate(data) {
     const updatedSubtopics = topic.subtopics?.map((subtopic) => {
@@ -41,6 +41,7 @@ function Topics({ topic: initialTopic, topicIndex }) {
       subtopics: updatedSubtopics,
     });
   }
+
   return (
     <>
       <Accordion
@@ -53,19 +54,27 @@ function Topics({ topic: initialTopic, topicIndex }) {
           value={`item-${topicIndex}`}
           className="border rounded-lg"
         >
-          <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150">
-            {topic.topicName}
+          {/* Styled Accordion Trigger */}
+          <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out flex justify-between items-center">
+            {/* Topic Name */}
+            <span className=" text-xs sm:text-lg font-semibold">
+              {topic.topicName}
+            </span>
+
+            {/* View Notes button with icon */}
             <div
-              className="flex gap-3 items-center justify-center hover:bg-blue-300 h-full p-2 rounded-md "
+              className="flex gap-2 items-center bg-blue-400 hover:bg-blue-300 p-2 rounded-md cursor-pointer transition duration-150 ml-auto mr-4"
               onClick={(e) => {
                 e.stopPropagation();
                 setIsModalOpen(true);
               }}
             >
-              <NotebookPen />
-              <p>View notes</p>
+              <NotebookPen className="text-white" />
+              <p className="text-sm text-white">View notes</p>
             </div>
           </AccordionTrigger>
+
+          {/* Accordion Content */}
           <AccordionContent className="bg-gray-100 sm:p-4 rounded-b-lg p-0">
             <Table className="w-full">
               <TableHeader>
@@ -99,6 +108,8 @@ function Topics({ topic: initialTopic, topicIndex }) {
           </AccordionContent>
         </AccordionItem>
       </Accordion>
+      
+      {/* Modal for viewing notes */}
       {isModalOpen && (
         <ViewNotes
           topicId={topic.topicId}

@@ -1,13 +1,15 @@
 "use client";
-import axios from "axios";
 import React, { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
+import PdfViewer from "@/components/PdfViewer";
+import axios from "axios";
 
 function ViewNotes({ isOpen, topicId, setIsOpen }) {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
+  const [selectedPdf, setSelectedPdf] = useState(null); // Track the selected PDF
 
-  useEffect(() => {
+    useEffect(() => {
     if (isOpen && topicId) {
       const fetchNotes = async () => {
         try {
@@ -52,20 +54,29 @@ function ViewNotes({ isOpen, topicId, setIsOpen }) {
                 <span className="text-lg font-medium text-gray-800">
                   {note.fileName}
                 </span>
-                <a
-                  href={`/api/files/${encodeURIComponent(note.filePath)}`}
-                  target="_blank"
-                  rel="noopener noreferrer"
+                <button
+                  onClick={() =>
+                    setSelectedPdf(
+                      `/api/files/${encodeURIComponent(note.filePath)}`
+                    )
+                  }
                   className="text-blue-600 hover:text-blue-400 font-semibold transition"
                 >
                   View
-                </a>
+                </button>
               </div>
             </li>
           ))}
         </ul>
       ) : (
         <p className="text-gray-600">No notes available.</p>
+      )}
+
+      {selectedPdf && (
+        <div className="mt-4">
+          {/* Render the PDF Viewer */}
+          <PdfViewer fileUrl={selectedPdf} />
+        </div>
       )}
     </div>
   );

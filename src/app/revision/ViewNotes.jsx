@@ -1,7 +1,6 @@
 "use client";
 import React, { useEffect, useState } from "react";
 import { ArrowLeft } from "lucide-react";
-import PdfViewer from "@/components/PdfViewer";
 import axios from "axios";
 
 function ViewNotes({ isOpen, topicId, setIsOpen }) {

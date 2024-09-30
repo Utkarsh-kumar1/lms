@@ -9,13 +9,15 @@ function ViewNotes({ isOpen, topicId, setIsOpen }) {
   const [loading, setLoading] = useState(true);
   const [selectedPdf, setSelectedPdf] = useState(null); // Track the selected PDF
 
-    useEffect(() => {
+  useEffect(() => {
     if (isOpen && topicId) {
       const fetchNotes = async () => {
         try {
           const response = await axios.get("/api/topic/notes", {
             params: { topicId: topicId },
           });
+          // console.log(response.data.data);
+          
           setNotes(JSON.parse(response.data.data));
         } catch (error) {
           console.error("Error fetching notes:", error);
@@ -57,7 +59,9 @@ function ViewNotes({ isOpen, topicId, setIsOpen }) {
                 <button
                   onClick={() =>
                     setSelectedPdf(
-                      `/api/files/${encodeURIComponent(note.filePath)}`
+                      `/api/topic/${encodeURIComponent(
+                        topicId
+                      )}/files/${encodeURIComponent(note.filePath)}`
                     )
                   }
                   className="text-blue-600 hover:text-blue-400 font-semibold transition"

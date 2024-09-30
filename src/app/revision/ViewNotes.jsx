@@ -7,15 +7,16 @@ import axios from "axios";
 function ViewNotes({ isOpen, topicId, setIsOpen }) {
   const [notes, setNotes] = useState([]);
   const [loading, setLoading] = useState(true);
-  const [selectedPdf, setSelectedPdf] = useState(null); // Track the selected PDF
 
-    useEffect(() => {
+  useEffect(() => {
     if (isOpen && topicId) {
       const fetchNotes = async () => {
         try {
           const response = await axios.get("/api/topic/notes", {
             params: { topicId: topicId },
           });
+          // console.log(response.data.data);
+
           setNotes(JSON.parse(response.data.data));
         } catch (error) {
           console.error("Error fetching notes:", error);
@@ -30,17 +31,7 @@ function ViewNotes({ isOpen, topicId, setIsOpen }) {
   if (!isOpen) return null;
 
   return (
-    <div className="absolute inset-0 top-16 bg-white bg-opacity-90 backdrop-blur-sm p-6 rounded-lg shadow-lg">
-      <div className="flex items-center justify-between mb-4">
-        <h2 className="text-2xl font-bold">View Notes</h2>
-        <button
-          onClick={() => setIsOpen(false)}
-          className="text-gray-500 hover:text-gray-800 transition"
-        >
-          <ArrowLeft size={24} />
-        </button>
-      </div>
-
+    <div className=" inset-0 top-16 bg-white bg-opacity-90 backdrop-blur-sm p-6 rounded-lg shadow-lg">
       {loading ? (
         <p className="text-gray-600">Loading notes...</p>
       ) : notes.length > 0 ? (
@@ -54,29 +45,23 @@ function ViewNotes({ isOpen, topicId, setIsOpen }) {
                 <span className="text-lg font-medium text-gray-800">
                   {note.fileName}
                 </span>
-                <button
-                  onClick={() =>
-                    setSelectedPdf(
-                      `/api/files/${encodeURIComponent(note.filePath)}`
-                    )
-                  }
+
+                <a
+                  href={`/api/topic/${encodeURIComponent(
+                    topicId
+                  )}/files/${encodeURIComponent(note.filePath)}`}
+                  target="_blank"
+                  rel="noopener noreferrer"
                   className="text-blue-600 hover:text-blue-400 font-semibold transition"
                 >
-                  View
-                </button>
+                  Open
+                </a>
               </div>
             </li>
           ))}
         </ul>
       ) : (
         <p className="text-gray-600">No notes available.</p>
-      )}
-
-      {selectedPdf && (
-        <div className="mt-4">
-          {/* Render the PDF Viewer */}
-          <PdfViewer fileUrl={selectedPdf} />
-        </div>
       )}
     </div>
   );

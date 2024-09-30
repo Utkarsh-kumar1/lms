@@ -28,7 +28,7 @@ export async function POST(req) {
         if (!file) {
             return NextResponse.json(ApiResponse.error(400, 'No file uploaded'), { status: 400 });
         }
-        console.log(file , type , typeId);
+        // console.log(file , type , typeId);
         
 
         const arrayBuffer = await file.arrayBuffer(); // Convert file to an ArrayBuffer
@@ -45,8 +45,8 @@ export async function POST(req) {
 
         const pool = dbconnect()
 
-        const savedData = await pool.execute(`Insert into notes(topic , subjectRef , fileName , fileType , filePath , fileSize) values (?,?,?,?,?,?)` , [typeId ,courseId , file.name , file.type , filePath , file.size])
-        console.log(savedData);
+        const savedData = await pool.execute(`Insert into notes(topic , subjectRef , fileName , fileType , filePath , fileSize) values (?,?,?,?,?,?)` , [typeId ,courseId , file.name , file.type , uniqueFileName , file.size])
+        // console.log(savedData);
         
 
         return NextResponse.json({

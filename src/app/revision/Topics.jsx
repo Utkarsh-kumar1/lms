@@ -63,14 +63,14 @@ function Topics({ topic: initialTopic, topicIndex }) {
 
             {/* View Notes button with icon */}
             <div
-              className="flex gap-2 items-center bg-blue-400 hover:bg-blue-300 p-2 rounded-md cursor-pointer transition duration-150 ml-auto mr-4"
+              className={`flex items-center gap-1 hover:bg-blue-400 py-1 px-2 rounded-md cursor-pointer transition duration-150 ml-auto mr-4 ${isModalOpen && 'bg-blue-400'}`}
               onClick={(e) => {
                 e.stopPropagation();
                 setIsModalOpen(!isModalOpen);
               }}
             >
               <NotebookPen className="text-white" />
-              <p className="text-sm text-white">View notes</p>
+              <p className="text-sm text-white">Notes</p>
             </div>
           </AccordionTrigger>
           {/* Modal for viewing notes */}

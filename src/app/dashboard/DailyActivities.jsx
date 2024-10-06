@@ -55,14 +55,17 @@ function formatDate(inputDate) {
 }
 
 export default function DailyActivities({ activities, setActivities }) {
+  const [isLoading, setIsLoading] = useState(true);
   const [date, setDate] = useState(
     new Date().toLocaleString("en-GB", { timeZone: "Asia/Kolkata" })
   ); // Default to today
 
   useEffect(() => {
     const loadData = async () => {
+      setIsLoading(true);
       const data = await fetchActivities(date);
       setActivities(data);
+      setIsLoading(false);
     };
     loadData();
   }, [date, setActivities]);
@@ -112,22 +115,35 @@ export default function DailyActivities({ activities, setActivities }) {
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
+          
           <TableBody>
-            {activities?.length > 0 ? (
-              activities?.map((activity, index) => (
-                <ActivityDataRow activity={activity} key={index} />
-              ))
-            ) : (
-              <TableRow>
-                <TableCell
-                  colSpan="3"
-                  className="text-center py-4 text-gray-500"
-                >
-                  No activities found for the day.
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
+  {isLoading === false ? (
+    activities?.length > 0 ? (
+      activities.map((activity, index) => (
+        <ActivityDataRow activity={activity} key={index} />
+      ))
+    ) : (
+      <TableRow>
+        <TableCell
+          colSpan="3"
+          className="text-center py-4 text-gray-500"
+        >
+          No activities found for the day.
+        </TableCell>
+      </TableRow>
+    )
+  ) : (
+    <TableRow>
+      <TableCell
+        colSpan="3"
+        className="text-center py-4 text-gray-500"
+      >
+      Loading ...
+      </TableCell>
+    </TableRow>
+  )}
+</TableBody>
+
         </Table>
       </div>
     </div>

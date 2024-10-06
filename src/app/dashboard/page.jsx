@@ -29,7 +29,7 @@ export default async function Page() {
 
   try {
     const userData = await fetchData(session.id);
-    const data = JSON.parse(userData.UserData)
+    const data = userData.UserData
     
     
     return (

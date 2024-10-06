@@ -70,7 +70,7 @@ export default async function ProtectedPage() {
      return (
        <div className="container mx-auto p-4 min-h-screen">
          {data?.map((course, courseIndex) => {
-           const topics = JSON.parse(course.topics);
+           const topics = course.topics;
            if (course.topics == null) return <></>;
            return (
              <div

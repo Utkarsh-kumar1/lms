@@ -21,7 +21,6 @@ import DataRow from "./DataRow";
 import Topics from "./Topics";
 
 async function fetchActivity(id) {
-  //TODO: wrap in trycatch
   const pool = dbconnect();
   const [data] = await pool.execute(
     "SELECT courseName, topics FROM activityView WHERE userId = ?",
@@ -50,7 +49,7 @@ export default async function ProtectedPage() {
   return (
     <div className="container mx-auto p-4 min-h-screen">
       {activity?.map((course, courseIndex) => {
-        const topics = JSON.parse(course.topics);
+        const topics = course.topics;
         return (
           <div
             key={`course-${courseIndex}`}

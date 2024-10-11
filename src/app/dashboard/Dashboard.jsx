@@ -88,11 +88,10 @@ export default function Dashboard({ userData }) {
       const response = await axios.patch("/api/dailyActivities", {
         activityName: activityInput,
       });
-      
 
       if (response.status === 200) {
         // Re-fetch activities or update the state directly
-        setActivities((prev)=>[...prev , response.data.data]);
+        setActivities((prev) => [...prev, response.data.data]);
         setActivityInput(""); // Clear the input field
         setIsDialogOpen(false); // Close the dialog
       }
@@ -102,9 +101,97 @@ export default function Dashboard({ userData }) {
   };
 
   return (
-    <div >
-      <ChartLine />
-    </div>
+    <div className="flex flex-col w-full gap-6 p-6 bg-gray-100 min-h-screen">
+      <div className="flex flex-col lg:flex-row gap-6">
+        {/* YouTube Search Card */}
+        {/* <Card className="w-full lg:w-2/3  bg-white shadow-md rounded-lg">
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <CardTitle className="text-lg font-bold text-gray-800">
+            Your YouTube Space
+          </CardTitle>
+          <form
+            className="flex items-center mt-4 sm:mt-0"
+            onSubmit={handleSubmit}
+          >
+            <div className="relative w-full sm:w-auto">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+              <Input
+                type="search"
+                placeholder="YouTube Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 w-full md:min-w-[300px] disabled:cursor-progress"
+                disabled={isSearching}
+                required
+              />
+            </div>
+          </form>
+        </CardHeader>
+        <CardContent className="mt-4">
+          {isSearching && <div className="text-gray-600">Loading...</div>}
+          {errors.queryError && (
+            <div className="text-red-500">{errors.queryError}</div>
+          )}
+          {queryResult && !isSearching && (
+            <YouTubeSearchResults
+              data={queryResult}
+              onShowMore={handleShowMore}
+            />
+          )}
+        </CardContent>
+      </Card> */}
 
+        <Card className="lg:w-2/3  bg-white shadow-md rounded-lg ">
+          <div className="text-lg font-bold text-gray-800 mt-4 w-1/2 mx-auto text-center">Weekly Activities and Revision Chart</div>
+          <ChartLine className="h-[30rem]"/>
+        </Card>
+
+        {/* Daily Activities Card */}
+        <Card className="h-fit lg:w-1/3  bg-white shadow-md rounded-lg">
+          <CardHeader>
+            <CardTitle className="text-lg font-bold text-gray-800 flex justify-between items-center">
+              <div> Daily Activities</div>
+              <Dialog
+                open={isDialogOpen}
+                onOpenChange={setIsDialogOpen}
+                className="flex"
+              >
+                <DialogTrigger
+                  asChild
+                  className=" shadow-xl hover:bg-slate-50 hover:scale-[1.1] min-h-11 min-w-11 "
+                >
+                  <Plus className=" cursor-pointer shadow-sm p-2   rounded-lg" />
+                </DialogTrigger>
+                <DialogContent className="sm:max-w-[425px] flex flex-col">
+                  <DialogHeader>
+                    <DialogTitle>Add Daily Activity</DialogTitle>
+                    <DialogDescription></DialogDescription>
+                  </DialogHeader>
+
+                  <Input
+                    id="name"
+                    onChange={(e) => setActivityInput(e.target.value)}
+                    value={activityInput}
+                    placeholder="Activity Name"
+                    className="col-span-3"
+                  />
+                  <DialogFooter>
+                    <Button type="button" onClick={addActivity}>
+                      Add Activity
+                    </Button>
+                  </DialogFooter>
+                </DialogContent>
+              </Dialog>
+            </CardTitle>
+          </CardHeader>
+          <CardContent className="">
+            <DailyActivities
+              activities={activities}
+              setActivities={setActivities}
+            />
+          </CardContent>
+        </Card>
+      </div>
+    </div>
   );
 }

@@ -1,0 +1,1 @@
+ALTER TABLE `users` MODIFY COLUMN `isVerified` boolean NOT NULL DEFAULT 0;

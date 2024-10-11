@@ -1,0 +1,1 @@
+ALTER TABLE `subject` MODIFY COLUMN `owner` char(36) NOT NULL;

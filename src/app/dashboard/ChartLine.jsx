@@ -12,7 +12,7 @@ export default function ChartLine() {
       setData(null);
       const response = await fetch("/api/chartLine");
       const result = await response.json();
-      console.log(result.data);
+      // console.log(result.data);
       setData(result.data);
     };
 
@@ -50,7 +50,7 @@ export default function ChartLine() {
             tickSize: 5,
             tickPadding: 5,
             tickRotation: 0,
-            legend: "count",
+            legend: "Completed",
             legendOffset: -40,
             legendPosition: "middle",
             truncateTickAt: 0,

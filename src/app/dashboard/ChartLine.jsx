@@ -12,7 +12,7 @@ export default function ChartLine() {
       setData(null);
       const response = await fetch("/api/chartLine");
       const result = await response.json();
-      console.log(result.data);
+      // console.log(result.data);
       setData(result.data);
     };
 

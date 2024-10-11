@@ -1,102 +1,123 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useState } from "react";
 import SubjectCard from "./SubjectCard";
+import { Check, Loader, X } from "lucide-react";
 import { IoAddCircleSharp } from "react-icons/io5";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
-import AddSubjectForm from "./AddSubjectForm";
+import { AddNewSubjectAction } from "@/actions/AddNewSubjectAction";
 
-export default function SubjectContent({ subjects: initialSubjects }) {
-  const [subjects, setSubjects] = useState(initialSubjects);
-  const [isActive, setIsActive] = useState(true);
-  const [isCompleted, setIsCompleted] = useState(true);
+import { useOptimistic } from "react";  
+
+export default function SubjectContent({ subjects }) {
   const [isAddingSubject, setIsAddingSubject] = useState(false);
-
-
-  // useEffect(() => {
-  //   setSubjects(initialSubjects);
-  // }, [initialSubjects]);
-
-  const filteredSubjects = subjects?.filter((subject) => {
-    if (isActive && isCompleted) {
-      return true;
-    } else if (isCompleted) {
-      return subject.isCompleted;
-    } else if (isActive) {
-      return subject.isActive;
-    } else {
-      return false;
+  const [subjectInput, setSubjectInput] = useState("");
+  const [errors, setErrors] = useState({ errorwhileSaving: "" });
+  const [optimisticSubject, addOptimisticSubject] = useOptimistic(
+    subjects,
+    (state, newSubject) => {
+      return [...state, ...newSubject];
     }
-  });
+  );
 
-  function onSubjectAdded(subject) {
-    setSubjects((prevSubjects) => [...prevSubjects, ...subject]);
-  }
+  const handleInputChange = (e) => {
+    if (errors.errorwhileSaving) {
+      setErrors((prev) => ({ ...prev, errorwhileSaving: "" }));
+    }
+    setSubjectInput(e.target.value);
+
+    // Auto-resize the textarea based on content
+    e.target.style.height = "auto"; // Reset height
+    e.target.style.height = `${e.target.scrollHeight}px`; // Set height based on content
+  };
 
   return (
-    <div className="p-4 bg-gray-50 min-h-screen flex flex-col gap-3">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Subject</h1>
-        <div className="flex mt-4 rounded-md border-2 gap-2 md:gap-6 p-4 sm:items-center flex-col sm:flex-row items-start justify-start">
-          <p>Filter :</p>
-          <Select
-            defaultValue="All"
-            onValueChange={(data) => {
-              if (data === "isCompleted") {
-                setIsCompleted(true);
-                setIsActive(false);
-              } else if (data === "isActive") {
-                setIsActive(true);
-                setIsCompleted(false);
-              } else if (data === "All") {
-                setIsCompleted(true);
-                setIsActive(true);
-              }
-            }}
-          >
-            <SelectTrigger className="w-[180px] bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <SelectValue placeholder="Filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All</SelectItem>
-              <SelectItem value="isActive">Active</SelectItem>
-              <SelectItem value="isCompleted">Completed</SelectItem>
-            </SelectContent>
-          </Select>
-        </div>
-      </div>
-     
+    <>
       <div className="">
-        {filteredSubjects.length > 0 ? (
-          filteredSubjects?.map((subject, index) => (
-            <SubjectCard key={subject.id} index={index} subject={subject} />
+        {subjects?.length > 0 ? (
+          optimisticSubject.map((subject, index) => (
+            <SubjectCard key={index} subject={subject} />
           ))
         ) : (
-          <p className="text-lg text-gray-500">No subjects Found.</p>
+          <p className="text-lg text-gray-500 text-center">
+            No subjects found.
+          </p>
         )}
       </div>
-      <div className="flex items-center w-full justify-center min-h-14 flex-col">
-        {isAddingSubject ? (
-          <AddSubjectForm
-            setIsAddingSubject={setIsAddingSubject}
-            onSubjectAdded={onSubjectAdded}
+     
+
+      {isAddingSubject ? (
+        <form
+          className="mt-8 space-y-4 flex flex-col items-center"
+          action={async (formdata) => {
+            const input = formdata.get("subjectName");
+            if (!input) {
+              return;
+            }
+            const subjectNameArray = input
+              .split(";")
+              .map((subject) => subject.trim());
+
+            const subjects = subjectNameArray?.map((subjectName) => {
+              return { owner: Math.random(), subjectName, isActive: true };
+            });
+
+            addOptimisticSubject(subjects);
+
+            const { error, success } = await AddNewSubjectAction(
+              subjectNameArray
+            );
+            console.log(error, success);
+            if (success) {
+              setIsAddingSubject(false);
+              setSubjectInput("");
+              return;
+            } else if (error) {
+              setErrors((prev) => ({ ...prev, errorwhileSaving: error }));
+            }
+          }}
+        >
+          <textarea
+            autoFocus
+            required
+            name="subjectName"
+            placeholder="Enter subjects (semi-colon separated)"
+            value={subjectInput}
+            onChange={handleInputChange}
+            maxLength={225}
+            className="text-center text-lg font-semibold text-gray-800 border-b border-gray-400 outline-none bg-transparent w-full placeholder:text-gray-500 sm:text-lg sm:placeholder:text-base py-2 resize-none overflow-hidden"
+            rows={1}
           />
-        ) : (
+
+          {errors.errorwhileSaving && <div>{errors.errorwhileSaving}</div>}
+
+          <div className="flex space-x-4">
+            <button
+              type="button"
+              className="flex items-center space-x-2 px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-red-500"
+              onClick={() => setIsAddingSubject(false)}
+            >
+              <X className="h-5 w-5" />
+              <span className="hidden sm:block">Cancel</span>
+            </button>
+            <button
+              type="submit"
+              className="flex items-center space-x-2 px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 focus:outline-none focus:ring-2 focus:ring-green-500"
+            >
+              <Check className="h-5 w-5" />
+              <span className="hidden sm:block">Save</span>
+            </button>
+          </div>
+        </form>
+      ) : (
+        <div className="mt-8 w-full flex items-center justify-center">
           <button
             type="button"
-            onClick={() => {
-              setIsAddingSubject(true);
-            }}
+            className="text-green-600 hover:text-green-700 focus:outline-none"
+            onClick={() => setIsAddingSubject(true)}
           >
-            <IoAddCircleSharp className="size-9 sm:h-14 sm:w-14" />
+            <IoAddCircleSharp className="h-12 w-12 sm:h-14 sm:w-14" />
           </button>
-        )}
-      </div>
-    </div>
+        </div>
+      )}
+    </>
   );
 }

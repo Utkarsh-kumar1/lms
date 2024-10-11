@@ -69,7 +69,7 @@ function Header() {
       name: "Subjects",
       url: "/subjects",
       isActive: status === "authenticated",
-      onNavbar: false,
+      onNavbar: false ,
     },
     {
       name: "Courses",
@@ -154,6 +154,23 @@ function Header() {
                 {option.name}
               </Button>
             ))}
+
+            {/* {NAV_OPTIONS.filter(
+              (option) => option.url === pathname
+            ).map((option) => (
+              <Button
+                key={option.name}
+                href={option.url}
+                className={clsx(
+                  pathname === option.url
+                    ? "bg-green-500 font-bold"
+                    : "bg-blue-500 hover:bg-blue-600",
+                  " sm:text-sm text-base  rounded-md flex md:hidden"
+                )}
+              >
+                {option.name}
+              </Button>
+            ))} */}
 
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger>

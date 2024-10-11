@@ -1,46 +1,70 @@
 import { getToken } from 'next-auth/jwt';
 import dbconnect from "@/lib/dbconnect"
 import ApiResponse from '@/helpers/ApiResponse';
+import { db } from '@/db/drizzle';
+import { course } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 export async function PATCH(req) {
     const secret = process.env.JWT_SECRET;
     const token = await getToken({ req, secret });
-    const { newcourseName : courseName, id } = await req.json();
+    const { newCourseName: courseName, id } = await req.json();
     if (!token) {
         return Response.json(ApiResponse.error(401, "Unauthorized access"), { status: 401 });
     }
 
+    if (!courseName && !id) {
+        return Response.json(ApiResponse.error(400, "newCourseName and course Id is requried"), { status: 401 });
 
+    }
 
     try {
-        const pool = dbconnect();
-        const [data] = await pool.execute(
-            "SELECT c.id , c.courseName FROM `course` c JOIN `subject` s ON c.subject = s.id WHERE s.owner = ? HAVING c.id = ?",
-            [token.id , id]
-        );
-        if (data.length === 0) {
-            return Response.json(ApiResponse.error(403, "Forbidden"), { status: 403 });
+        const user = await db.query.users.findFirst({
+            with: {
+                subjects: {
+                    with: {
+                        courses: true
+                    },
+                }
+            },
+            where: (user, { eq, and }) => eq(user.id, token.id)
+        })
+
+
+
+        if (user || user.subjects.length > 0) {
+
+            let isOwner = false
+            let courseData;
+            for (const subject of user.subjects) {
+                if (subject.courses && subject.courses.length > 0) {
+                    isOwner = true;
+                    courseData = subject.courses[0]
+                    break;
+                }
+            }
+
+            if (!isOwner) {
+                return Response.json(ApiResponse.error(403, "Forbidden"), { status: 403 });
+            }
+
+
+            if (courseData.courseName === courseName) {
+                return Response.json(ApiResponse.success("200", null, "Updated Successfully"), { status: 200 })
+            }
+
         }
 
-
-
-        if (data[0].courseName === courseName) {
-            return Response.json(ApiResponse.success("200", null, "Updated Successfully"), { status: 200 })
-        }
-        
-
-
-        await pool.execute(
-            `UPDATE course SET courseName = ? WHERE id = ? ;`,
-            [courseName, data[0].id]
-        );
+        await db.update(course).set({ courseName }).where(eq(course.id , id));
 
         return Response.json({ status: 200, message: "Update successful" });
 
     } catch (error) {
+        console.log(error);
 
 
-        return Response.json(ApiResponse.error(500, "Error while updating Activity "), { status: 500 })
+
+        return Response.json(ApiResponse.error(500, "Error while updating Course "), { status: 500 })
 
     }
 

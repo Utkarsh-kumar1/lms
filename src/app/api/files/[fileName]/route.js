@@ -2,11 +2,11 @@ import { NextResponse } from 'next/server';
 import { getToken } from 'next-auth/jwt';
 import path from 'path';
 import fs from 'fs';
-import dbconnect from "@/lib/dbconnect"
+import { db } from '@/db/drizzle';
 
 
 export async function GET(req, { params }) {
-    const { topicId, fileName } = params;
+    const { fileName } = params;
     const secret = process.env.JWT_SECRET;
     const token = await getToken({ req, secret });
 
@@ -14,28 +14,20 @@ export async function GET(req, { params }) {
         return NextResponse.json({ message: 'Unauthorized access' }, { status: 401 });
     }
 
-    const pool = dbconnect()
+    const user = await db.query.users.findFirst({
+        with: {
+            notes: {
+                where: (notes, { eq, and }) => eq(notes.filePath, fileName)
+            }
+        },
+        where: (user, { eq, and }) => eq(user.id, token.id)
+    })
 
-    const [data] = await pool.execute("SELECT * FROM topic_notes WHERE userId = ? and topicId = ?", [token.id, topicId])
-    // console.log(data);
-
-    const { notes } = data[0]
-
-    const notesData = JSON.parse(notes);
-    let fileData;
-
-    notesData.forEach(note => {
-        if (note.filePath == fileName) {
-            fileData = note
-            return;
-        }
-    });
-
-    // [{ "fileName": "Module+2+Homework.pdf", "fileType": "application/pdf", "filePath": "/home/deepansh/new_lms/lms/uploads/b2cf48e8-77ef-4b74-9899-f0761ca57e0c_Module+2+Homework.pdf", "fileSize": 136852 }]
-
+    const notes = user.notes[0]
 
     // Define the path to the file
-    const filePath = path.join(process.cwd(), 'uploads', fileData.filePath);
+    const filePath = path.join(process.cwd(), 'uploads', notes.filePath);
+
 
     try {
         if (!fs.existsSync(filePath)) {
@@ -77,7 +69,7 @@ export async function GET(req, { params }) {
                 'Content-Length': stat.size,
                 'Content-Type': contentType,
                 'Accept-Ranges': 'bytes',
-                'Content-Disposition': `inline; filename="${fileName}"`,
+                'Content-Disposition': `inline; filename="${notes.fileName}"`,
             },
         });
     } catch (error) {

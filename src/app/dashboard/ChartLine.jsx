@@ -54,7 +54,8 @@ export default function ChartLine() {
             legendOffset: -40,
             legendPosition: "middle",
             truncateTickAt: 0,
-          }}
+            }}
+          colors={{ scheme: 'category10' }}
           pointSize={10}
           pointColor={{ from: 'color', modifiers: [] }}
           pointBorderWidth={2}

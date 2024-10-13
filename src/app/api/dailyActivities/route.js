@@ -1,4 +1,4 @@
-import { NextResponse } from 'next/server';
+
 import dbconnect from "../../../lib/dbconnect" // Adjust import based on your MySQL setup
 import { getToken } from 'next-auth/jwt';
 import ApiResponse from '@/helpers/ApiResponse';

@@ -27,8 +27,6 @@ async function fetchSubject(id) {
       },
       where: (subject, { eq }) => eq(subject.owner, id),
     });
-
-    // console.log(JSON.stringify(subjects ));
     return subjects;
     
   } catch (error) {

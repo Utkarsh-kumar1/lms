@@ -1,0 +1,1 @@
+ALTER TABLE `subtopics` MODIFY COLUMN `isCompleted` boolean NOT NULL DEFAULT false;

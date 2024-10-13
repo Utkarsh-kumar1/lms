@@ -13,7 +13,7 @@ import {
 import { AddCourse } from "@/actions/AddCourse";
 import { useOptimistic } from "react";
 
-export default function CourseContent({ subjects }) {
+export default function CourseContent({ subjects , isShowSubjectName = true }) {
   const [isAddingCourse, setIsAddingCourse] = useState(false);
   const [errors, setErrors] = useState({ errorWhileSavingData: "" });
 
@@ -105,11 +105,11 @@ export default function CourseContent({ subjects }) {
           subjectsWithCourses.map((subject) => (
             <div key={subject.id} className="space-y-4">
               {/* Subject Header */}
-              <div className="border-b pb-3">
+              {isShowSubjectName && <div className="border-b pb-3">
                 <h2 className="text-2xl font-semibold text-gray-900">
                   {subject.subjectName}
                 </h2>
-              </div>
+              </div>}
 
               {/* Courses within the subject */}
               <div className="flex w-full items-center flex-col">

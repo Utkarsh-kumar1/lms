@@ -1,6 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useEffect, useState } from "react";
 import TopicCard from "./TopicCard";
+import { IoAddCircleSharp } from "react-icons/io5";
+import { Check, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -8,154 +10,223 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  MultiSelect,
-  SelectContent as MultiSelectContent,
-  SelectItem as MultiSelectItem,
-  SelectTrigger as MultiSelectTrigger,
-  SelectValue as MultiSelectValue,
-} from "../../components/MultiSelect";
-import { IoAddCircleSharp } from "react-icons/io5";
-import AddTopicForm from "./AddTopicForm";
+import { AddTopics } from "@/actions/AddTopics";
 
-export default function TopicContent({ topics: initialTopics }) {
-  const [topics, setTopics] = useState(initialTopics);
-  const [isCompleted, setIsCompleted] = useState(true);
-  const [isAll, setIsAll] = useState(true);
-  const [filtedSubject, setfiltedSubject] = useState([]);
-  const [filtedCourses, setfiltedCourses] = useState([]);
+export default function TopicContent({ subjects = [] }) {
   const [isAddingTopic, setIsAddingTopic] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [topicName, setTopicName] = useState("");
+  const [filteredCourses, setFilteredCourses] = useState([]);
+  const [errors, setErrors] = useState({ errorWhileSavingData: "" });
 
-  // useEffect(() => {
-  //   setTopics(initialTopics);
-  // }, [initialTopics]);
-
-  const subjects = Array.from(
-    new Set(topics.map((topic) => topic.subjectName))
-  );
-  const courses = Array.from(new Set(topics.map((topic) => topic.courseName)));
-
-  const filteredTopics = topics
-    ?.filter((topic) => {
-      if (filtedSubject.length === 0) {
-        return true;
-      } else {
-        return filtedSubject.includes(topic.subjectName);
-      }
-    })
-    ?.filter((topic) => {
-      if (filtedCourses.length === 0) {
-        return true;
-      } else {
-        return filtedCourses.includes(topic.courseName);
-      }
-    })
-    ?.filter((topic) => {
-      if (isAll) {
-        return true;
-      } else if (isCompleted) {
-        return topic.isCompleted;
-      } else {
-        return !topic.isCompleted;
-      }
-    });
-
-  function onTopicAdded(newTopic) {
-    
-    setTopics((prevTopics) => [...prevTopics, ...newTopic]);
-  }
+  // Update courses based on the selected subject
+  useEffect(() => {
+    if (selectedSubject) {
+      const subject = subjects.find((s) => s.id === selectedSubject);
+      setFilteredCourses(subject?.courses || []); // Default to empty array to prevent errors
+    } else {
+      setFilteredCourses([]); // Clear courses when subject is deselected
+    }
+  }, [selectedSubject ]); // Only re-run if `selectedSubject` changes
 
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Topics</h1>
-        <div className="flex mt-4 rounded-md border-2 gap-2 md:gap-6 p-4 sm:items-center flex-col sm:flex-row items-start justify-start">
-          <p className="">Filter :</p>
-          <MultiSelect
-            onChange={(value) => {
-              setfiltedSubject(value);
-            }}
-          >
-            <MultiSelectTrigger className="w-[180px]">
-              <MultiSelectValue placeholder="All" />
-            </MultiSelectTrigger>
-            <MultiSelectContent>
-              {subjects?.map((subject, index) => (
-                <MultiSelectItem key={index} value={subject}>
-                  {subject}
-                </MultiSelectItem>
-              ))}
-            </MultiSelectContent>
-          </MultiSelect>
-          <MultiSelect
-            onChange={(value) => {
-              setfiltedCourses(value);
-            }}
-          >
-            <MultiSelectTrigger className="w-[180px]">
-              <MultiSelectValue placeholder="All" />
-            </MultiSelectTrigger>
-            <MultiSelectContent>
-              {courses?.map((course, index) => (
-                <MultiSelectItem key={index} value={course}>
-                  {course}
-                </MultiSelectItem>
-              ))}
-            </MultiSelectContent>
-          </MultiSelect>
-          <Select
-            defaultValue="All"
-            onValueChange={(data) => {
-              if (data === "Completed") {
-                setIsAll(false);
-                setIsCompleted(true);
-              } else if (data === "UnCompleted") {
-                setIsAll(false);
-                setIsCompleted(false);
-              } else if (data === "All") {
-                setIsAll(true);
+    <div className="p-3 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Subjects & Topics
+          </h1>
+          <p className="text-gray-600">Explore your courses, and topics .</p>
+        </div>
+
+        {/* Add Topic Button */}
+        <button
+          type="button"
+          onClick={() => setIsAddingTopic(true)}
+          className="flex items-center text-indigo-600 hover:text-indigo-800 transition"
+        >
+          <IoAddCircleSharp className="h-8 w-8 mr-2" />
+          <span className="text-lg">Add Topic</span>
+        </button>
+      </div>
+
+      <div className="space-y-5">
+        {subjects.length > 0 ? (
+          subjects.map((subject, subjectIndex) => {
+            return subject.courses.length > 0 ? (
+              <div
+                key={subjectIndex}
+                className="border border-gray-200 bg-white rounded-md shadow-md p-4"
+              >
+                {/* Subject Name */}
+                <h2 className="text-2xl font-semibold text-indigo-600 mb-4">
+                  {subject.name}
+                </h2>
+
+                {/* Display Courses under the Subject */}
+                {subject.courses?.length > 0 ? (
+                  subject.courses.map((course, courseIndex) => (
+                    <div
+                      key={courseIndex}
+                      className="mt-4 border-l-4 pl-6 border-indigo-300"
+                    >
+                      {/* Course Name */}
+                      <h3 className="text-xl font-medium text-gray-800 flex items-center mb-4">
+                        📘 {course.courseName}
+                      </h3>
+
+                      {/* Display Topics under the Course */}
+                      {course.topics?.length > 0 ? (
+                        course.topics.map((topic) => (
+                          <TopicCard
+                            key={topic.id}
+                            topic={topic}
+                            courseId={course.id}
+                            subjectId={subject.id}
+                          />
+                        ))
+                      ) : (
+                        <p className="text-sm text-gray-500">
+                          No topics found for this course.
+                        </p>
+                      )}
+                    </div>
+                  ))
+                ) : (
+                  <p className="text-sm text-gray-500">
+                    No courses found under this subject.
+                  </p>
+                )}
+              </div>
+            ) : null;
+          })
+        ) : (
+          <p className="text-lg text-gray-500">No subjects found.</p>
+        )}
+      </div>
+
+      {/* Add Topic Form */}
+      {isAddingTopic && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2">
+          <form
+            className="p-6 rounded-lg shadow-lg bg-white max-w-lg w-full flex flex-col gap-6"
+            action={async (e) => {
+              const topicNameArray = e
+                .get("topicName")
+                .split(";")
+                .map((topic) => topic.trim());
+              const subjectId = e.get("subjectId");
+              const courseId = e.get("courseId");
+              console.log(topicNameArray, subjectId, courseId);
+              const { error, success } = await AddTopics(
+                topicNameArray,
+                subjectId,
+                courseId
+              );
+              console.log(error, success);
+
+              if (success) {
+                setIsAddingTopic(false);
+                setTopicName("");
+                selectedCourse("");
+                selectedSubject("");
+              }
+              if (error) {
+                setErrors((prev) => ({ ...prev, errorWhileSavingData: error }));
               }
             }}
           >
-            <SelectTrigger className="w-[180px] bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <SelectValue placeholder="Filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All</SelectItem>
-              <SelectItem value="Completed">Completed</SelectItem>
-              <SelectItem value="UnCompleted">UnCompleted</SelectItem>
-            </SelectContent>
-          </Select>
+            <h3 className="text-lg font-bold mb-4">Add Topic</h3>
+
+            {/* Topic Name Input */}
+            <input
+              name="topicName"
+              type="text"
+              placeholder="Enter Topic Name (semicolon Separated)"
+              className="p-3 border-b w-full outline-none text-sm sm:text-lg"
+              value={topicName}
+              onChange={(e) => setTopicName(e.target.value)}
+              required
+            />
+
+            {/* Subject Selection */}
+            <Select
+              onValueChange={(value) => {
+                setSelectedSubject(value);
+                setSelectedCourse(null); // Reset course selection when subject changes
+              }}
+              value={selectedSubject || ""}
+              required
+              name="subjectId"
+            >
+              <SelectTrigger className="w-full bg-white border rounded-md shadow-sm p-3 ">
+                <SelectValue placeholder="Select Subject" />
+              </SelectTrigger>
+              <SelectContent>
+                {subjects.map((subject) => (
+                  <SelectItem key={subject.id} value={subject.id}>
+                    {subject.subjectName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Course Selection (disabled until subject is selected) */}
+            <Select
+              onValueChange={(value) => setSelectedCourse(value)}
+              value={selectedCourse || ""}
+              required
+              disabled={!selectedSubject}
+              name="courseId"
+            >
+              <SelectTrigger
+                className={`w-full bg-white border rounded-md shadow-sm p-3 ${
+                  !selectedSubject ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                <SelectValue placeholder="Select Course" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredCourses.map((course) => (
+                  <SelectItem key={course.id} value={course.id}>
+                    {course.courseName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {errors.errorWhileSavingData && (
+              <p className="w-full text-center text-red-400">
+                {errors.errorWhileSavingData}
+              </p>
+            )}
+            {/* Buttons */}
+            <div className="flex items-center justify-around sm:justify-end gap-7  w-full">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAddingTopic(false);
+                  setSelectedCourse("");
+                  setSelectedSubject("");
+                  setTopicName("");
+                }}
+                className="flex items-center justify-center text-lg font-semibold  py-3 px-5 border border-transparent rounded-md shadow-sm text-white bg-red-500 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                <X className="mr-2" />
+                <span className="text-sm "> Cancel</span>
+              </button>
+              <button
+                type="submit"
+                className="flex items-center justify-center text-lg font-semibold  py-3 px-5 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <Check className="mr-2" />
+                <span className="text-sm "> Save</span>
+              </button>
+            </div>
+          </form>
         </div>
-      </div>
-      <div className="space-y-4">
-        {filteredTopics.length > 0 ? (
-          filteredTopics?.map((topic, index) => (
-            <TopicCard key={topic.id} index={topic.topicIndex} topic={topic} />
-          ))
-        ) : (
-          <p className="text-lg text-gray-500">
-            No topics Found.
-          </p>
-        )}
-      </div>
-      <div className="flex items-center w-full justify-center min-h-28 flex-col">
-        {isAddingTopic ? (
-          <AddTopicForm
-            setIsTopicAdding={setIsAddingTopic}
-            onTopicAdded={onTopicAdded}
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setIsAddingTopic(true);
-            }}
-          >
-            <IoAddCircleSharp className="size-9 sm:h-14 sm:w-14" />
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 }

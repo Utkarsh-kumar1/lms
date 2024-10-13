@@ -1,27 +1,44 @@
-import dbconnect from "@/lib/dbconnect";
 import React from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
-import CourseCard from "@/app/courses/CourseCard";
-import TopicCard from "@/app/topics/TopicCard";
-import Course from "./Course";
-
+import { db } from "@/db/drizzle";
+// import TopicContent from "@/app/topics/TopicContent";
+import dynamic from "next/dynamic";
+import { LoaderCircle } from "lucide-react";
+const TopicContent = dynamic(() => import("@/app/topics/TopicContent"), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+      <div className="flex flex-col items-center gap-4 p-6 bg-white rounded-lg shadow-lg">
+        <LoaderCircle className="animate-spin text-blue-600" size={36} />
+      </div>
+    </div>
+  ),
+});
 async function fetchSubject(owner, courseId) {
-  const pool = dbconnect();
   try {
-    const [courses] = await pool.execute(
-      "SELECT c.* , s.id AS subjectId FROM `course` c JOIN `subject` s ON c.subject = s.id WHERE s.owner = ? AND c.id = ?;",
-      [owner , courseId]
-    );
+    const subjects = await db.query.subject.findMany({
+      with: {
+        courses: {
+          with: {
+            topics: {
+              with: {
+                notes: true,
+              },
+              orderBy  : (topic , {asc})=>[asc(topic.topicIndex)]
+            },
 
-      const [topics] = await pool.execute(
-        "SELECT t.* FROM topics t JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? AND c.id = ? ORDER BY t.topicIndex",
-        [owner , courseId]
-      );
+          },
+          where : (course , {eq})=>eq(course.id , courseId)
+        },
+      },
+      where: (course, { eq }) => eq(course.owner, owner),
+    });
 
-
-    return { courses , topics};
+    return subjects.filter(subject=>subject.courses.length > 0 );
   } catch (error) {
+    console.log(error);
+
     throw new Error("Error while fetching Data");
   }
 }
@@ -32,25 +49,15 @@ export default async function page({ params }) {
     return <div>Unauthorized Access</div>;
   }
   try {
-    const { courses, topics } = await fetchSubject(session.id, params.id);
-    if (courses.length === 0) {
+    const subjects = await fetchSubject(session.id, params.id);
+    if (subjects.length === 0) {
       return <div>No subjects Found</div>;
     }
 
     return (
-      <Course course={courses[0]} topics={topics} />
-      // <>
-      //   <CourseCard course={courses[0]} />
-      //   <div className="p-3">
-      //     {topics.length === 0 ? (
-      //       <div>No Topic Found</div>
-      //     ) : (
-      //       topics.map((topic, index) => (
-      //         <TopicCard topic={topic} index={index} key={index} />
-      //       ))
-      //     )}
-      //   </div> 
-      // </>
+      <>
+        <TopicContent subjects={subjects} />
+      </>
     );
   } catch (error) {
     return (

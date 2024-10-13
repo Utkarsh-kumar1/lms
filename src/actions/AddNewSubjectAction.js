@@ -7,6 +7,9 @@ import { revalidatePath } from "next/cache"
 
 export async function AddNewSubjectAction(subjectNames) {
     const token = await getServerSession(authOptions)
+    if (!token) {
+        return { error: "Unauthorized request" }
+    }
 
     try {
         const subjects = subjectNames?.map((subjectName) => {

@@ -7,6 +7,9 @@ import { revalidatePath } from "next/cache"
 
 export async function AddCourse(subjectId, courseNames) {
     const token = await getServerSession(authOptions)
+    if (!token) {
+        return { error: "Unauthorized request" }
+    }
 
     try {
         if (!subjectId) {
@@ -25,7 +28,7 @@ export async function AddCourse(subjectId, courseNames) {
     } catch (error) {
         // Return a plain object with a serializable error message
         return {
-            error: error.message || "SomethingWent Wrong"
+            error: error.message || "Something Went Wrong"
         }
     }
 

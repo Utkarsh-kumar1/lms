@@ -14,11 +14,11 @@ export const revisionView = mysqlTable("RevisionView", {
 
 export const activity = mysqlTable("activity", {
 	id: char("id", { length: 36 }).notNull(),
-	owner: char("owner", { length: 36 }).notNull().references(() => users.id, { onUpdate: "cascade" }),
-	subTopic: char("subTopic", { length: 36 }).notNull().references(() => subtopics.id, { onUpdate: "cascade" }),
+	owner: char("owner", { length: 36 }).notNull().references(() => users.id, { onUpdate: "cascade"  , onDelete : "restrict"}),
+	subTopic: char("subTopic", { length: 36 }).notNull().references(() => subtopics.id, { onUpdate: "cascade" , onDelete : "restrict" }),
 	start: timestamp("start", { mode: 'string' }).defaultNow().notNull(),
 	end: timestamp("end", { mode: 'string' }),
-	session: int("session"),
+	session: int("session").notNull(),
 },
 	(table) => {
 		return {
@@ -33,15 +33,18 @@ export const activityView = mysqlTable("activityView", {
 	username: varchar("username", { length: 255 }).notNull(),
 	courseName: varchar("courseName", { length: 255 }).notNull(),
 	courseId: char("courseId", { length: 36 }).notNull(),
+	subjectId: char("subjectId", { length: 36 }).notNull(),
 	topics: json("topics"),
 });
 
 export const course = mysqlTable("course", {
-	id: char("id", { length: 36 }).notNull().$defaultFn(()=>uuidv4()),
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
 	courseName: varchar("courseName", { length: 255 }).notNull(),
 	subject: char("subject", { length: 36 }).references(() => subject.id, { onUpdate: "cascade" }).notNull(),
-	isCompleted: tinyint("isCompleted").default(0),
+	isCompleted: boolean("isCompleted").default(false).notNull(),
 	session: int("session").default(0),
+	wantRevision: boolean("wantRevision").default(true).notNull(),
+	isActive: boolean("isActive").notNull().default(true)
 },
 	(table) => {
 		return {
@@ -116,12 +119,12 @@ export const notes = mysqlTable("notes", {
 	});
 
 export const revision = mysqlTable("revision", {
-	id: char("id", { length: 36 }).notNull(),
-	subtopic: char("subtopic", { length: 36 }).references(() => subtopics.id, { onUpdate: "cascade" }),
+	id: char("id", { length: 36 }).notNull().$defaultFn(()=>uuidv4()),
+	subtopic: char("subtopic", { length: 36 }).references(() => subtopics.id, { onUpdate: "cascade" }).notNull(),
 	start: timestamp("start", { mode: 'string' }).defaultNow().notNull(),
 	end: timestamp("end", { mode: 'string' }),
-	owner: char("owner", { length: 36 }).references(() => users.id, { onUpdate: "cascade" }),
-	session: int("session"),
+	owner: char("owner", { length: 36 }).references(() => users.id, { onUpdate: "cascade" }).notNull(),
+	session: int("session").notNull(),
 	nextSchedule: timestamp("nextSchedule", { mode: 'string' }),
 	revisionCounter: int("revisionCounter", { unsigned: true }).default(1),
 	isNextScheduled: tinyint("isNextScheduled").default(0).notNull(),
@@ -149,11 +152,11 @@ export const subject = mysqlTable("subject", {
 	});
 
 export const subtopics = mysqlTable("subtopics", {
-	id: char("id", { length: 36 }).notNull(),
+	id: char("id", { length: 36 }).notNull().$defaultFn(()=>uuidv4()),
 	subtopicName: varchar("subtopicName", { length: 255 }).notNull(),
-	subTopicIndex: int("subTopicIndex"),
-	topic: char("topic", { length: 36 }).references(() => topics.id, { onUpdate: "cascade" }),
-	isCompleted: tinyint("isCompleted").default(0),
+	subTopicIndex: int("subTopicIndex").notNull(),
+	topic: char("topic", { length: 36 }).references(() => topics.id, { onUpdate: "cascade"  , onDelete : "restrict"}).notNull(),
+	isCompleted: boolean("isCompleted").notNull().default(false),
 },
 	(table) => {
 		return {
@@ -176,11 +179,11 @@ export const topicNotes = mysqlTable("topic_notes", {
 });
 
 export const topics = mysqlTable("topics", {
-	id: char("id", { length: 36 }).notNull(),
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
 	topicName: varchar("topicName", { length: 255 }).notNull(),
-	course: char("course", { length: 36 }).references(() => course.id, { onUpdate: "cascade" }),
-	isCompleted: tinyint("isCompleted").default(0),
-	topicIndex: int("topicIndex"),
+	course: char("course", { length: 36 }).references(() => course.id, { onUpdate: "cascade" }).notNull(),
+	isCompleted: boolean("isCompleted").notNull().default(false),
+	topicIndex: int("topicIndex").notNull(),
 },
 	(table) => {
 		return {
@@ -281,7 +284,7 @@ export const courseRelations = relations(course, ({ one, many }) => ({
 		references: [subject.id]
 	}),
 	topics: many(topics),
-	notes : many(notes)
+	notes: many(notes)
 }));
 
 export const subjectRelations = relations(subject, ({ one, many }) => ({

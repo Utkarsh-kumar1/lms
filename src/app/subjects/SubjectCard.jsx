@@ -1,16 +1,10 @@
+"use client";
 import React, { useState } from "react";
 import clsx from "clsx";
-import { X, Check, Pencil, Trash2, FilePlus2, NotebookPen } from "lucide-react";
+import { X, Pencil, FilePlus2, NotebookPen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
 import { DeleteSubjectAction } from "@/actions/DeleteSubjectAction";
-import {
-  Select,
-  SelectContent,
-  SelectItem,
-  SelectTrigger,
-  SelectValue,
-} from "@/components/ui/select";
 
 const SubjectCard = ({ subject }) => {
   const [newSubjectName, setNewSubjectName] = useState(subject.subjectName);
@@ -19,15 +13,14 @@ const SubjectCard = ({ subject }) => {
   const [file, setFile] = useState(null);
   const [errors, setErrors] = useState({ fileError: "", savingError: "" });
   const [isSavingData, setIsSavingData] = useState(false);
-  const [newStatus, setNewStatus] = useState(subject.isActive);
   const [isFileViewOpen, setIsFileViewOpen] = useState(false);
   const router = useRouter();
 
   const getColor = () => {
     if (subject.isCompleted)
       return "bg-gradient-to-r from-green-100 to-green-300";
-    if (!subject.isActive) return "bg-gradient-to-r from-gray-100 to-gray-300";
-    return "bg-gradient-to-r from-yellow-100 to-yellow-300";
+
+    return "bg-gradient-to-r from-gray-100 to-gray-300";
   };
 
   const handleEditClick = (e) => {
@@ -50,7 +43,7 @@ const SubjectCard = ({ subject }) => {
 
     //uploading file
     if (file) {
-      const MAX_FILE_SIZE = 20 * 1024 * 1024; //20 MB
+      const MAX_FILE_SIZE = 1024 * 1024 * 1024; //1 GB
       if (file.size > MAX_FILE_SIZE) {
         setErrors((prev) => ({ ...prev, fileError: "File Size Exceed" }));
       } else {
@@ -60,15 +53,6 @@ const SubjectCard = ({ subject }) => {
         });
         reqArray.push(fileUploadResponse);
       }
-    }
-
-    //Handling update Satus
-    if (subject.isActive !== newStatus) {
-      const statusUpdateResponse = axios.patch("/api/updateSubject", {
-        isActive: !subject.isActive,
-        id: subject.id,
-      });
-      reqArray.push(statusUpdateResponse);
     }
 
     Promise.all([...reqArray])
@@ -93,7 +77,7 @@ const SubjectCard = ({ subject }) => {
   };
 
   const handleFileChange = (e) => {
-    const MAX_FILE_SIZE = 20 * 1024 * 1024; //20 MB
+    const MAX_FILE_SIZE = 1024 * 1024 * 1024; //1 GB
     if (e.target.files[0].size < MAX_FILE_SIZE) {
       setErrors((prev) => ({ ...prev, fileError: "" }));
       setFile(e.target.files[0]);
@@ -127,14 +111,11 @@ const SubjectCard = ({ subject }) => {
       >
         <div className="flex w-full flex-col">
           <div className="w-full sm:w-6/12 sm:mr-auto">
-            <p className="text-lg font-semibold text-gray-800 truncate">
+            <p className="text-lg font-semibold text-gray-800 text-wrap truncate">
               {subject.subjectName}
             </p>
             <p className="text-sm text-gray-600">
               Status: {subject.isCompleted ? "Completed" : "Not Completed"}
-            </p>
-            <p className="text-sm text-gray-600">
-              Working Status: {subject.isActive ? "Active" : "Inactive"}
             </p>
           </div>
 
@@ -254,21 +235,6 @@ const SubjectCard = ({ subject }) => {
             {errors.savingError && (
               <p className="text-red-600">{errors.savingError}</p>
             )}
-            <div className=" mb-4">
-              <Select
-                onValueChange={(data) => {
-                  setNewStatus(data);
-                }}
-              >
-                <SelectTrigger className="bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-                  <SelectValue placeholder="Status" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="Activate">Activate</SelectItem>
-                  <SelectItem value="Deactivate">Deactivate</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
 
             <div className="flex justify-end gap-4">
               <button

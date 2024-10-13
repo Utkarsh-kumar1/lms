@@ -9,13 +9,18 @@ import { revalidatePath } from "next/cache"
 export async function DeleteCourse(courseId) {
 
     const token = await getServerSession(authOptions)
+    if (!token) {
+        return { error: "Unauthorized request" }
+    }
 
     try {
         const user = await db.query.users.findFirst({
             with: {
                 subjects: {
                     with: {
-                        courses: true
+                        courses: {
+                            where: (course, { eq }) => eq(course.id, courseId)
+                        }
                     },
                 }
             },

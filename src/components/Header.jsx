@@ -12,9 +12,10 @@ import {
   SheetTitle,
   SheetTrigger,
 } from "@/components/ui/sheet";
-import { CircleUser, Menu } from "lucide-react";
+import { CircleUser, LogOut, Menu } from "lucide-react";
 import clsx from "clsx";
 import Image from "next/image";
+import { IoPersonCircle, IoSettingsSharp } from "react-icons/io5";
 
 // Reusable Button Component
 const Button = ({ href, onClick, children, className }) => {
@@ -28,7 +29,7 @@ const Button = ({ href, onClick, children, className }) => {
       {children}
     </Link>
   ) : (
-    <button onClick={onClick} className={classes}>
+    <button onClick={onClick} className={classes} tabIndex={-1}>
       {children}
     </button>
   );
@@ -69,7 +70,7 @@ function Header() {
       name: "Subjects",
       url: "/subjects",
       isActive: status === "authenticated",
-      onNavbar: false ,
+      onNavbar: false,
     },
     {
       name: "Courses",
@@ -155,30 +156,12 @@ function Header() {
               </Button>
             ))}
 
-            {/* {NAV_OPTIONS.filter(
-              (option) => option.url === pathname
-            ).map((option) => (
-              <Button
-                key={option.name}
-                href={option.url}
-                className={clsx(
-                  pathname === option.url
-                    ? "bg-green-500 font-bold"
-                    : "bg-blue-500 hover:bg-blue-600",
-                  " sm:text-sm text-base  rounded-md flex md:hidden"
-                )}
-              >
-                {option.name}
-              </Button>
-            ))} */}
-
             <Sheet open={isOpen} onOpenChange={setIsOpen}>
               <SheetTrigger>
                 {status === "authenticated" ? (
-                  <CircleUser
-                    className="h-10 w-10 text-white cursor-pointer"
-                    onClick={() => setIsOpen(true)}
-                  />
+                  <div className="flex border-2 p-2 rounded-sm">
+                    <CircleUser size={24} />
+                  </div>
                 ) : (
                   <Menu
                     className="h-6 w-6 text-white cursor-pointer"
@@ -186,45 +169,69 @@ function Header() {
                   />
                 )}
               </SheetTrigger>
-              <SheetContent className="w-[17rem] sm:w-[18rem] md:w-[20rem] lg:w-[22rem] xl:w-[24rem] bg-white text-black">
-                <SheetHeader className="flex items-center justify-between border-b border-gray-200 p-4">
-                  <SheetTitle className="text-lg font-semibold">
-                    {status === "authenticated"
-                      ? `Welcome, ${data.firstName}`
-                      : `Welcome`}
-                  </SheetTitle>
-                </SheetHeader>
-                <SheetDescription className="flex flex-col space-y-2 p-4 px-0 h-full">
-                  {NAV_OPTIONS.filter((option) => option.isActive).map(
-                    (option) => (
-                      <Button
-                        key={option.name}
-                        href={option.url}
-                        onClick={() => setIsOpen(false)}
-                        className={clsx(
-                          pathname === option.url
-                            ? "bg-green-500 font-bold"
-                            : "",
-                          "bg-blue-500 hover:bg-blue-600 text-base md:text-base lg:text-lg rounded-md text-black"
-                        )}
-                      >
-                        {option.name}
-                      </Button>
-                    )
-                  )}
+              <SheetContent className="flex flex-col h-full w-[17rem] sm:w-[18rem] md:w-[20rem] lg:w-[22rem] xl:w-[24rem] bg-white text-black ">
+                <div className="flex-1">
+                  <SheetHeader className="flex items-center justify-between border-b border-gray-200 p-4">
+                    <SheetTitle className="text-lg font-semibold">
+                      {status === "authenticated"
+                        ? `Welcome, ${data?.firstName}`
+                        : `Welcome`}
+                    </SheetTitle>
+                  </SheetHeader>
+                  <SheetDescription className="flex flex-col space-y-2 p-4 px-0 gap-px">
+                    {NAV_OPTIONS.filter((option) => option.isActive).map(
+                      (option) => (
+                        <Button
+                          key={option.name}
+                          href={option.url}
+                          onClick={() => {
+                            setIsOpen(false);
+                          }}
+                          className={clsx(
+                            pathname.startsWith(option.url)
+                              ? "bg-green-500 font-bold"
+                              : "",
+                            "bg-blue-500 hover:bg-blue-600 text-base md:text-base lg:text-lg rounded-md text-black"
+                          )}
+                        >
+                          {option.name}
+                        </Button>
+                      )
+                    )}
+                  </SheetDescription>
+                </div>
+                {status === "authenticated" && (
+                  <div className=" w-full flex flex-col gap-1">
+                    <Button
+                      className="bg-blue-500 hover:bg-blue-600 text-white text-sm md:text-base lg:text-lg rounded-lg px-5 py-3 transition-colors duration-300 ease-in-out shadow-lg hover:shadow-xl mt-auto flex items-center justify-center space-x-2"
+                      href={"/"}
+                    >
+                      <IoPersonCircle className="h-5 w-5" />
+                      <span>Profile</span>
+                    </Button>
 
-                  {status === "authenticated" && (
+                    <Button
+                      className="bg-gray-500 hover:bg-gray-600 text-white text-sm md:text-base lg:text-lg rounded-lg px-5 py-3 transition-colors duration-300 ease-in-out shadow-lg hover:shadow-xl mt-auto flex items-center justify-center space-x-2 "
+                      href={"/"}
+                    >
+                      <IoSettingsSharp className="h-5 w-5" />
+                      <span>Settings</span>
+                    </Button>
+
                     <Button
                       onClick={() => {
                         setIsOpen(false);
                         signOut({ callbackUrl: "/" });
                       }}
-                      className="bg-red-500 hover:bg-red-600 text-sm md:text-base lg:text-lg rounded-md text-black"
+                      className="bg-red-500 hover:bg-red-600 text-white text-sm md:text-base lg:text-lg rounded-lg px-5 py-3 transition-colors duration-300 ease-in-out shadow-lg hover:shadow-xl mt-auto flex items-center justify-center space-x-2"
+                      tabIndex="-1"
+                      
                     >
-                      Sign Out
+                      <LogOut className="h-5 w-5" />
+                      <span>Sign Out</span>
                     </Button>
-                  )}
-                </SheetDescription>
+                  </div>
+                )}
               </SheetContent>
             </Sheet>
           </div>

@@ -1,7 +1,6 @@
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
 import { db } from "@/db/drizzle";
-// import SubjectContent from "./SubjectContent";
 import dynamic from "next/dynamic";
 import { LoaderCircle } from "lucide-react";
 const SubjectContent = dynamic(() => import("./SubjectContent"), {
@@ -45,8 +44,7 @@ export default async function Page() {
   }
 
   return (
-    <div className="p-4 bg-gray-50 min-h-screen flex flex-col gap-3">
-      <h1 className="text-2xl font-bold text-gray-800">Subjects</h1>
+    <div className="p-4 bg-gray-50 min-h-screen flex flex-col">
       <SubjectContent subjects={subjects} />
     </div>
   );

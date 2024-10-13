@@ -25,24 +25,34 @@ export async function POST(req) {
         }
         // console.log(file , type , typeId);
 
-        if (!topicId && !subjectId && !courseId) {
-            return NextResponse.json(ApiResponse.error(400, 'topicId or subjectId or courseId is required'), { status: 400 });
+        if (topicId && !subjectId && !courseId) {
+
+            return NextResponse.json(ApiResponse.error(400, 'topicId , subjectId and courseId is required'), { status: 400 });
+        }
+        else if (subjectId && !courseId) {
+
+            return NextResponse.json(ApiResponse.error(400, 'topicId , subjectId and courseId is required'), { status: 400 });
+        }
+        else if (!courseId) {
+
+            return NextResponse.json(ApiResponse.error(400, 'topicId , subjectId and courseId is required'), { status: 400 });
         }
 
-        // Validate that the topic, subject, or course belongs to the user
-        let isOwner = false;
+
+        console.log(topicId, subjectId, courseId);
+
 
         // Check if the subject exists and belongs to the user
         const subject = await db.query.subject.findFirst({
             with: {
-                courses: {
+                courses: courseId ? {
                     with: {
                         topics: topicId ? {
-                            where: (topic, { eq }) => eq(topic.id, topicId)
+                            where: (topic, { eq }) => eq(topic.id, topicId),
                         } : false
                     },
-                    where: courseId ? (course, { eq }) => eq(course.id, courseId) : undefined
-                }
+                    where: (course, { eq }) => eq(course.id, courseId)
+                } : false
             },
             where: (subject, { eq, and }) => and(
                 eq(subject.owner, token.id),
@@ -50,12 +60,26 @@ export async function POST(req) {
             )
         });
 
-        // Validate ownership based on subject, course, or topic
+        console.log(JSON.stringify(subject, null, 2));
+
+
+        // Initialize isOwner to false
+        let isOwner = false;
+
+        // Validate ownership based on the presence of topicId, courseId, or subjectId
         if (subject) {
-            if (topicId && subject.courses[0]?.topics.length > 0) isOwner = true;
-            else if (courseId && subject.courses.length > 0) isOwner = true;
-            else if (subjectId && subject) isOwner = true;
-            else isOwner = false
+            // Check ownership by topicId
+            if (topicId && subject.courses?.[0]?.topics?.length > 0) {
+                isOwner = true;
+            }
+            // Check ownership by courseId
+            else if (!topicId && courseId && subject.courses?.length > 0) {
+                isOwner = true;
+            }
+            // Check ownership by subjectId
+            else if (!topicId && !courseId && subjectId && subject) {
+                isOwner = true;
+            }
         }
 
         if (!isOwner) {
@@ -85,7 +109,7 @@ export async function POST(req) {
             subjectRef: subjectId ? subjectId : null,
             courseRef: courseId ? courseId : null,
             fileSize: file.size,
-            userId : token.id
+            userId: token.id
         })
         revalidatePath("/subjects")
         return NextResponse.json({

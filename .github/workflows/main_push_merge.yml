@@ -16,7 +16,7 @@ jobs:
         echo "${{secrets.SSH_PRIVATE_KEY}}" > ~/.ssh/id_rsa
         ssh-keyscan -H ${{secrets.SSH_HOST}} > ~/.ssh/known_hosts
     - name: connect and pull
-      run: ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} "cd ${{REPO_DIR}} && git checkout ${{MAIN_BRANCH}} && git pull && npm i && npm run build && pm2 restart all"
+      run: ssh ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} "cd ${{secrets.REPO_DIR}} && git checkout ${{secrets.MAIN_BRANCH}} && git pull && npm i && npm run build && pm2 restart all"
     - name: cleanup
       run: rm -rf ~/.ssh
       

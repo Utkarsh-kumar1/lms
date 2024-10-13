@@ -75,7 +75,7 @@ export default function ChartLine() {
               itemDirection: "left-to-right",
               itemWidth: 80,
               itemHeight: 20,
-              itemOpacity: 0.8,
+              itemOpacity: 1,
               symbolSize: 12,
               symbolShape: "circle",
               symbolBorderColor: "rgba(0, 0, 0, .5)",

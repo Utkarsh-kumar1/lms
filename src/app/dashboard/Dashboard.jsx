@@ -19,6 +19,7 @@ import StatisticsDashboard from "./StatisticsDashboard";
 import DailyActivities from "./DailyActivities";
 import { IoAddCircleSharp } from "react-icons/io5";
 import { Button } from "@/components/ui/button";
+import ChartLine from "./ChartLine";
 
 export default function Dashboard({ userData }) {
   const [searchQuery, setSearchQuery] = useState(""); // State to store input value
@@ -87,11 +88,10 @@ export default function Dashboard({ userData }) {
       const response = await axios.patch("/api/dailyActivities", {
         activityName: activityInput,
       });
-      
 
       if (response.status === 200) {
         // Re-fetch activities or update the state directly
-        setActivities((prev)=>[...prev , response.data.data]);
+        setActivities((prev) => [...prev, response.data.data]);
         setActivityInput(""); // Clear the input field
         setIsDialogOpen(false); // Close the dialog
       }
@@ -104,41 +104,46 @@ export default function Dashboard({ userData }) {
     <div className="flex flex-col w-full gap-6 p-6 bg-gray-100 min-h-screen">
       <div className="flex flex-col lg:flex-row gap-6">
         {/* YouTube Search Card */}
-        <Card className="w-full lg:w-2/3  bg-white shadow-md rounded-lg">
-          <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
-            <CardTitle className="text-lg font-bold text-gray-800">
-              Your YouTube Space
-            </CardTitle>
-            <form
-              className="flex items-center mt-4 sm:mt-0"
-              onSubmit={handleSubmit}
-            >
-              <div className="relative w-full sm:w-auto">
-                <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
-                <Input
-                  type="search"
-                  placeholder="YouTube Search..."
-                  value={searchQuery}
-                  onChange={(e) => setSearchQuery(e.target.value)}
-                  className="pl-8 w-full md:min-w-[300px] disabled:cursor-progress"
-                  disabled={isSearching}
-                  required
-                />
-              </div>
-            </form>
-          </CardHeader>
-          <CardContent className="mt-4">
-            {isSearching && <div className="text-gray-600">Loading...</div>}
-            {errors.queryError && (
-              <div className="text-red-500">{errors.queryError}</div>
-            )}
-            {queryResult && !isSearching && (
-              <YouTubeSearchResults
-                data={queryResult}
-                onShowMore={handleShowMore}
+        {/* <Card className="w-full lg:w-2/3  bg-white shadow-md rounded-lg">
+        <CardHeader className="flex flex-col sm:flex-row justify-between items-start sm:items-center">
+          <CardTitle className="text-lg font-bold text-gray-800">
+            Your YouTube Space
+          </CardTitle>
+          <form
+            className="flex items-center mt-4 sm:mt-0"
+            onSubmit={handleSubmit}
+          >
+            <div className="relative w-full sm:w-auto">
+              <Search className="absolute left-2.5 top-2.5 h-4 w-4 text-gray-500" />
+              <Input
+                type="search"
+                placeholder="YouTube Search..."
+                value={searchQuery}
+                onChange={(e) => setSearchQuery(e.target.value)}
+                className="pl-8 w-full md:min-w-[300px] disabled:cursor-progress"
+                disabled={isSearching}
+                required
               />
-            )}
-          </CardContent>
+            </div>
+          </form>
+        </CardHeader>
+        <CardContent className="mt-4">
+          {isSearching && <div className="text-gray-600">Loading...</div>}
+          {errors.queryError && (
+            <div className="text-red-500">{errors.queryError}</div>
+          )}
+          {queryResult && !isSearching && (
+            <YouTubeSearchResults
+              data={queryResult}
+              onShowMore={handleShowMore}
+            />
+          )}
+        </CardContent>
+      </Card> */}
+
+        <Card className="lg:w-2/3  bg-white shadow-md rounded-lg ">
+          <div className="text-lg font-bold text-gray-800 mt-4 w-1/2 mx-auto text-center">Weekly Activities and Revision Chart</div>
+          <ChartLine className="h-[30rem]"/>
         </Card>
 
         {/* Daily Activities Card */}

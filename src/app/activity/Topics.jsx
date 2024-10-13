@@ -1,7 +1,7 @@
 "use client"; // Ensure the component runs on the client side
 
 import React, { useState } from "react";
-import { FilePenLine, FilePlus2 } from "lucide-react"; // Import the FilePlus2 icon from lucide-react
+import { FilePenLine, FilePlus2, NotebookPen } from "lucide-react"; // Import the FilePlus2 icon from lucide-react
 import {
   Table,
   TableBody,
@@ -9,78 +9,89 @@ import {
   TableHead,
   TableHeader,
   TableRow,
-} from "@/components/ui/table"; // Table components
+} from "@/components/ui/table";
 import {
   Accordion,
   AccordionItem,
   AccordionTrigger,
   AccordionContent,
-} from "@/components/ui/accordion"; // Accordion components
-import DataRow from "./DataRow"; // Import DataRow for rendering subtopics
-import FileUploadModal from "./FileUploadModal"; // Import your file upload modal
-
-function Topics({ topic: initialTopic, topicIndex, courseId }) {
-  const [topic, setTopic] = useState(initialTopic); // State to manage the topic and its subtopics
-  const [isModalOpen, setIsModalOpen] = useState(false); // Modal visibility state
-
-  // Function to update subtopics after a change
-  function onsubtopicUpdate(data) {
-    const updatedSubtopics = topic.subtopics?.map((subtopic) => {
-      if (subtopic.id === data.id) {
-        return {
-          ...subtopic,
-          ...data,
-        };
-      }
-      return subtopic;
-    });
-
-    setTopic({
-      ...topic,
-      subtopics: updatedSubtopics,
-    });
-  }
-
-  // Handle modal close
-  const handleModalClose = () => {
-    setIsModalOpen(false);
-  };
-
-  // Handle successful file upload
-  const handleFileUpload = () => {
-    console.log("File uploaded successfully");
-  };
+} from "@/components/ui/accordion";
+import DataRow from "./DataRow";
+import FileUploadModal from "./FileUploadModal";
+import clsx from "clsx";
+function Topics({ topic, topicIndex, courseId, subjectId }) {
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [isFileViewOpen, setIsFileViewOpen] = useState(false);
 
   return (
     <Accordion
       type="single"
       collapsible
       key={`accordion-${topicIndex}`}
-      className="mb-4" // Add margin for better spacing
+      className="mb-4"
     >
       <AccordionItem value={`item-${topicIndex}`} className="border rounded-lg">
         <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out shadow-md flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-300">
-          {/* Topic name */}
           <span>{topic.topicName}</span>
 
-          {/* FilePlus2 icon button to trigger the modal */}
           <div className="flex items-center gap-4 ml-auto mr-4">
-            {" "}
-            {/* Add ml-auto to push icons to the right */}
             <FilePlus2
               onClick={(e) => {
-                e.stopPropagation(); // Prevent the accordion from collapsing
-                setIsModalOpen(true); // Open the modal
+                e.stopPropagation();
+                setIsModalOpen(true);
               }}
               className="cursor-pointer text-white hover:text-gray-200 transition duration-150 ease-in-out"
-              size={24} // Adjust size of the icon
-            />
-            <FilePenLine
-              className="text-white hover:text-gray-200 transition duration-150 ease-in-out"
               size={24}
+            />
+
+            <NotebookPen
+              onClick={(e) => {
+                e.preventDefault();
+                setIsFileViewOpen((prev) => !prev);
+              }}
             />
           </div>
         </AccordionTrigger>
+        <div
+          className={clsx(
+            " rounded-b-lg bg-gray-300 p-4  transition-max-height duration-700 ease-in-out w-full overflow-hidden",
+            isFileViewOpen
+              ? " flex max-h-96 opacity-100"
+              : " hidden max-h-0 opacity-0"
+          )}
+        >
+          {topic?.notes?.length > 0 ? (
+            <div className="mt-2 transition-max-height duration-700 ease-in-out w-full ">
+              <p className="text-sm font-semibold">Notes:</p>
+              <ul className=" text-sm text-gray-700 w-full">
+                {topic.notes.map((note, idx) => (
+                  <li
+                    key={idx}
+                    className="max-w-full truncate"
+                    title={note.fileName}
+                  >
+                    <a
+                      href={`api/files/${note.filePath}`}
+                      target="_blank"
+                      className="text-blue-600 underline"
+                      rel="noopener noreferrer"
+                    >
+                      {note.fileName}
+                    </a>
+                    <p className="flex flex-col w-full text-wrap ml-3">
+                      <span className="font-bold"> Uploaded At : </span>
+                      {new Date(note.createdAt)
+                        .toString()
+                        .replace("GMT+0530 (India Standard Time)", "")}
+                    </p>
+                  </li>
+                ))}
+              </ul>
+            </div>
+          ) : (
+            <p>No Notes Found</p>
+          )}
+        </div>
 
         <AccordionContent className="bg-gray-100 sm:p-4 p-2 rounded-b-lg">
           <Table className="w-full">
@@ -102,7 +113,6 @@ function Topics({ topic: initialTopic, topicIndex, courseId }) {
                   key={subIndex}
                   subtopic={subtopic}
                   subIndex={subIndex}
-                  onsubtopicUpdate={onsubtopicUpdate}
                 />
               ))}
             </TableBody>
@@ -111,16 +121,14 @@ function Topics({ topic: initialTopic, topicIndex, courseId }) {
       </AccordionItem>
 
       {/* File Upload Modal */}
-      {isModalOpen && (
-        <FileUploadModal
-          isOpen={isModalOpen}
-          onClose={handleModalClose}
-          onFileUpload={handleFileUpload}
-          typeId={topic.topicId}
-          type={"topic"}
-          courseId={courseId}
-        />
-      )}
+
+      <FileUploadModal
+        isOpen={isModalOpen}
+        setIsOpen={setIsModalOpen}
+        courseId={courseId}
+        subjectId={subjectId}
+        topicId={topic.topicId}
+      />
     </Accordion>
   );
 }

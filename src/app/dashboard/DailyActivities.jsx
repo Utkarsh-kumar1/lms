@@ -39,7 +39,9 @@ function formatDate(inputDate) {
     "Dec",
   ];
   // Split the date and time string
-  const timePart = inputDate.split(", ")[1] ?? new Date().toLocaleTimeString('en-GB', { timeZone: 'Asia/Kolkata' });
+  const timePart =
+    inputDate.split(", ")[1] ??
+    new Date().toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata" });
   const [day, month, year] = inputDate.split(",")[0].split("/");
 
   // Create a new Date object using the parsed values
@@ -80,10 +82,7 @@ export default function DailyActivities({ activities, setActivities }) {
   };
 
   const handleToday = () => {
-    setDate(
-      new Date()
-        .toLocaleString("en-GB", { timeZone: "Asia/Kolkata" })
-    );
+    setDate(new Date().toLocaleString("en-GB", { timeZone: "Asia/Kolkata" }));
   };
 
   return (
@@ -103,7 +102,7 @@ export default function DailyActivities({ activities, setActivities }) {
             See Today
           </button>
         </div>
-        <p bold>{formatDate(date)}</p>
+        <p className=" font-bold">{formatDate(date)}</p>
       </div>
       <div className=" overflow-auto max-h-64">
         <Table>
@@ -115,35 +114,34 @@ export default function DailyActivities({ activities, setActivities }) {
               <TableHead>Action</TableHead>
             </TableRow>
           </TableHeader>
-          
-          <TableBody>
-  {isLoading === false ? (
-    activities?.length > 0 ? (
-      activities.map((activity, index) => (
-        <ActivityDataRow activity={activity} key={index} />
-      ))
-    ) : (
-      <TableRow>
-        <TableCell
-          colSpan="3"
-          className="text-center py-4 text-gray-500"
-        >
-          No activities found for the day.
-        </TableCell>
-      </TableRow>
-    )
-  ) : (
-    <TableRow>
-      <TableCell
-        colSpan="3"
-        className="text-center py-4 text-gray-500"
-      >
-      Loading ...
-      </TableCell>
-    </TableRow>
-  )}
-</TableBody>
 
+          <TableBody>
+            {isLoading === false ? (
+              activities?.length > 0 ? (
+                activities.map((activity, index) => (
+                  <ActivityDataRow activity={activity} key={index} />
+                ))
+              ) : (
+                <TableRow>
+                  <TableCell
+                    colSpan="3"
+                    className="text-center py-4 text-gray-500"
+                  >
+                    No activities found for the day.
+                  </TableCell>
+                </TableRow>
+              )
+            ) : (
+              <TableRow>
+                <TableCell
+                  colSpan="3"
+                  className="text-center py-4 text-gray-500"
+                >
+                  Loading ...
+                </TableCell>
+              </TableRow>
+            )}
+          </TableBody>
         </Table>
       </div>
     </div>

@@ -1,0 +1,1177 @@
+{
+  "id": "00000000-0000-0000-0000-000000000000",
+  "prevId": "",
+  "version": "5",
+  "dialect": "mysql",
+  "tables": {
+    "RevisionView": {
+      "name": "RevisionView",
+      "columns": {
+        "userId": {
+          "autoincrement": false,
+          "name": "userId",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "username": {
+          "autoincrement": false,
+          "name": "username",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "courseName": {
+          "autoincrement": false,
+          "name": "courseName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "topics": {
+          "autoincrement": false,
+          "name": "topics",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {}
+    },
+    "activity": {
+      "name": "activity",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner": {
+          "autoincrement": false,
+          "name": "owner",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subTopic": {
+          "autoincrement": false,
+          "name": "subTopic",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "start",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end": {
+          "autoincrement": false,
+          "name": "end",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "session": {
+          "autoincrement": false,
+          "name": "session",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "activity_id": {
+          "name": "activity_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "owner": {
+          "name": "owner",
+          "columns": [
+            "owner"
+          ],
+          "isUnique": false
+        },
+        "subTopic": {
+          "name": "subTopic",
+          "columns": [
+            "subTopic"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "FK_activity_subtopics": {
+          "name": "FK_activity_subtopics",
+          "tableFrom": "activity",
+          "tableTo": "subtopics",
+          "columnsFrom": [
+            "subTopic"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "cascade"
+        },
+        "FK_activity_users": {
+          "name": "FK_activity_users",
+          "tableFrom": "activity",
+          "tableTo": "users",
+          "columnsFrom": [
+            "owner"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "activityView": {
+      "name": "activityView",
+      "columns": {
+        "userId": {
+          "autoincrement": false,
+          "name": "userId",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "username": {
+          "autoincrement": false,
+          "name": "username",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "courseName": {
+          "autoincrement": false,
+          "name": "courseName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "courseId": {
+          "autoincrement": false,
+          "name": "courseId",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "topics": {
+          "autoincrement": false,
+          "name": "topics",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {}
+    },
+    "course": {
+      "name": "course",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "courseName": {
+          "autoincrement": false,
+          "name": "courseName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subject": {
+          "autoincrement": false,
+          "name": "subject",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isCompleted": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "isCompleted",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "session": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "session",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "course_id": {
+          "name": "course_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "course": {
+          "name": "course",
+          "columns": [
+            "subject"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "FK_course_subject": {
+          "name": "FK_course_subject",
+          "tableFrom": "course",
+          "tableTo": "subject",
+          "columnsFrom": [
+            "subject"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "dailyActivitiesScheduled": {
+      "name": "dailyActivitiesScheduled",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner": {
+          "autoincrement": false,
+          "name": "owner",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "startDate": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "startDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "task": {
+          "autoincrement": false,
+          "name": "task",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "isCompleted": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "isCompleted",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "dailyActivitiesScheduled_id": {
+          "name": "dailyActivitiesScheduled_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {
+        "FK_dailyActivitiesScheduled_users": {
+          "name": "FK_dailyActivitiesScheduled_users",
+          "tableFrom": "dailyActivitiesScheduled",
+          "tableTo": "users",
+          "columnsFrom": [
+            "owner"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "dailyActivitiesScheduledView": {
+      "name": "dailyActivitiesScheduledView",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner": {
+          "autoincrement": false,
+          "name": "owner",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "task": {
+          "autoincrement": false,
+          "name": "task",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "startDate": {
+          "default": "'0000-00-00 00:00:00'",
+          "autoincrement": false,
+          "name": "startDate",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isCompleted": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "isCompleted",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "streak": {
+          "autoincrement": false,
+          "name": "streak",
+          "type": "bigint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isBestStreak": {
+          "autoincrement": false,
+          "name": "isBestStreak",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {}
+    },
+    "eventLogs": {
+      "name": "eventLogs",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "eventName": {
+          "autoincrement": false,
+          "name": "eventName",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "procedureName": {
+          "autoincrement": false,
+          "name": "procedureName",
+          "type": "varchar(50)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "start": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "start",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end": {
+          "autoincrement": false,
+          "name": "end",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "eventLogs_id": {
+          "name": "eventLogs_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {}
+    },
+    "notes": {
+      "name": "notes",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "topic": {
+          "autoincrement": false,
+          "name": "topic",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subjectRef": {
+          "autoincrement": false,
+          "name": "subjectRef",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fileName": {
+          "autoincrement": false,
+          "name": "fileName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fileType": {
+          "autoincrement": false,
+          "name": "fileType",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "filePath": {
+          "autoincrement": false,
+          "name": "filePath",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "fileSize": {
+          "autoincrement": false,
+          "name": "fileSize",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "notes_id": {
+          "name": "notes_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "topic": {
+          "name": "topic",
+          "columns": [
+            "topic"
+          ],
+          "isUnique": false
+        },
+        "subjectRef": {
+          "name": "subjectRef",
+          "columns": [
+            "subjectRef"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {},
+      "uniqueConstraints": {}
+    },
+    "revision": {
+      "name": "revision",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subtopic": {
+          "autoincrement": false,
+          "name": "subtopic",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "start": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "start",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "end": {
+          "autoincrement": false,
+          "name": "end",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "owner": {
+          "autoincrement": false,
+          "name": "owner",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "session": {
+          "autoincrement": false,
+          "name": "session",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "nextSchedule": {
+          "autoincrement": false,
+          "name": "nextSchedule",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "revisionCounter": {
+          "default": 1,
+          "autoincrement": false,
+          "name": "revisionCounter",
+          "type": "int unsigned",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isNextScheduled": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "isNextScheduled",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": true
+        }
+      },
+      "compositePrimaryKeys": {
+        "revision_id": {
+          "name": "revision_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "subtopic": {
+          "name": "subtopic",
+          "columns": [
+            "subtopic"
+          ],
+          "isUnique": false
+        },
+        "owner": {
+          "name": "owner",
+          "columns": [
+            "owner"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "FK_revision_subtopics": {
+          "name": "FK_revision_subtopics",
+          "tableFrom": "revision",
+          "tableTo": "subtopics",
+          "columnsFrom": [
+            "subtopic"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "cascade"
+        },
+        "FK_revision_users": {
+          "name": "FK_revision_users",
+          "tableFrom": "revision",
+          "tableTo": "users",
+          "columnsFrom": [
+            "owner"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "subject": {
+      "name": "subject",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subjectName": {
+          "autoincrement": false,
+          "name": "subjectName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "owner": {
+          "autoincrement": false,
+          "name": "owner",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isCompleted": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "isCompleted",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isActive": {
+          "default": 1,
+          "autoincrement": false,
+          "name": "isActive",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "subject_id": {
+          "name": "subject_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "owner": {
+          "name": "owner",
+          "columns": [
+            "owner"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "FK_subject_users": {
+          "name": "FK_subject_users",
+          "tableFrom": "subject",
+          "tableTo": "users",
+          "columnsFrom": [
+            "owner"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "subtopics": {
+      "name": "subtopics",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subtopicName": {
+          "autoincrement": false,
+          "name": "subtopicName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subTopicIndex": {
+          "autoincrement": false,
+          "name": "subTopicIndex",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "topic": {
+          "autoincrement": false,
+          "name": "topic",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isCompleted": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "isCompleted",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "subtopics_id": {
+          "name": "subtopics_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "topic": {
+          "name": "topic",
+          "columns": [
+            "topic"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "FK_subtopics_topics": {
+          "name": "FK_subtopics_topics",
+          "tableFrom": "subtopics",
+          "tableTo": "topics",
+          "columnsFrom": [
+            "topic"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "topic_notes": {
+      "name": "topic_notes",
+      "columns": {
+        "userId": {
+          "autoincrement": false,
+          "name": "userId",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "username": {
+          "autoincrement": false,
+          "name": "username",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "autoincrement": false,
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "subjectName": {
+          "autoincrement": false,
+          "name": "subjectName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "courseName": {
+          "autoincrement": false,
+          "name": "courseName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "topicName": {
+          "autoincrement": false,
+          "name": "topicName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "topicIndex": {
+          "autoincrement": false,
+          "name": "topicIndex",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isCompleted": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "isCompleted",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "topicId": {
+          "autoincrement": false,
+          "name": "topicId",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "notes": {
+          "autoincrement": false,
+          "name": "notes",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {}
+    },
+    "topics": {
+      "name": "topics",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "topicName": {
+          "autoincrement": false,
+          "name": "topicName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "course": {
+          "autoincrement": false,
+          "name": "course",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isCompleted": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "isCompleted",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "topicIndex": {
+          "autoincrement": false,
+          "name": "topicIndex",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "topics_id": {
+          "name": "topics_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {
+        "subject": {
+          "name": "subject",
+          "columns": [
+            "course"
+          ],
+          "isUnique": false
+        }
+      },
+      "foreignKeys": {
+        "FK_topics_course": {
+          "name": "FK_topics_course",
+          "tableFrom": "topics",
+          "tableTo": "course",
+          "columnsFrom": [
+            "course"
+          ],
+          "columnsTo": [
+            "id"
+          ],
+          "onDelete": "no action",
+          "onUpdate": "cascade"
+        }
+      },
+      "uniqueConstraints": {}
+    },
+    "userData": {
+      "name": "userData",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "userName": {
+          "autoincrement": false,
+          "name": "userName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "autoincrement": false,
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "firstName": {
+          "autoincrement": false,
+          "name": "firstName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "UserData": {
+          "autoincrement": false,
+          "name": "UserData",
+          "type": "json",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {},
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {}
+    },
+    "users": {
+      "name": "users",
+      "columns": {
+        "id": {
+          "autoincrement": false,
+          "name": "id",
+          "type": "char(36)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "created": {
+          "default": "(CURRENT_TIMESTAMP)",
+          "autoincrement": false,
+          "name": "created",
+          "type": "timestamp",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "username": {
+          "autoincrement": false,
+          "name": "username",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "email": {
+          "autoincrement": false,
+          "name": "email",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": true
+        },
+        "firstName": {
+          "autoincrement": false,
+          "name": "firstName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "lastName": {
+          "autoincrement": false,
+          "name": "lastName",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "avatarUrl": {
+          "autoincrement": false,
+          "name": "avatarUrl",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "userPassword": {
+          "autoincrement": false,
+          "name": "userPassword",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "refreshToken": {
+          "autoincrement": false,
+          "name": "refreshToken",
+          "type": "varchar(255)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "spaceRepetition": {
+          "autoincrement": false,
+          "name": "spaceRepetition",
+          "type": "longtext",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "ActivityScheduleCount": {
+          "default": 4,
+          "autoincrement": false,
+          "name": "ActivityScheduleCount",
+          "type": "int",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "otp": {
+          "autoincrement": false,
+          "name": "otp",
+          "type": "varchar(4)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "isVerified": {
+          "default": 0,
+          "autoincrement": false,
+          "name": "isVerified",
+          "type": "tinyint",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "otpExpiry": {
+          "autoincrement": false,
+          "name": "otpExpiry",
+          "type": "varchar(100)",
+          "primaryKey": false,
+          "notNull": false
+        },
+        "tasks": {
+          "autoincrement": false,
+          "name": "tasks",
+          "type": "longtext",
+          "primaryKey": false,
+          "notNull": false
+        }
+      },
+      "compositePrimaryKeys": {
+        "users_id": {
+          "name": "users_id",
+          "columns": [
+            "id"
+          ]
+        }
+      },
+      "indexes": {},
+      "foreignKeys": {},
+      "uniqueConstraints": {
+        "username": {
+          "name": "username",
+          "columns": [
+            "username"
+          ]
+        },
+        "email": {
+          "name": "email",
+          "columns": [
+            "email"
+          ]
+        }
+      }
+    }
+  },
+  "_meta": {
+    "schemas": {},
+    "tables": {},
+    "columns": {}
+  },
+  "internal": {
+    "tables": {
+      "activity": {
+        "columns": {
+          "start": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "dailyActivitiesScheduled": {
+        "columns": {
+          "startDate": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "eventLogs": {
+        "columns": {
+          "start": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "revision": {
+        "columns": {
+          "start": {
+            "isDefaultAnExpression": true
+          }
+        }
+      },
+      "users": {
+        "columns": {
+          "created": {
+            "isDefaultAnExpression": true
+          }
+        }
+      }
+    },
+    "indexes": {}
+  }
+}

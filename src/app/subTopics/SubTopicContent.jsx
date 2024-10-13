@@ -1,6 +1,8 @@
 "use client";
-import React, { useState, useEffect } from "react";
-import SubTopicCard from "./SubTopicCard";
+import React, { useEffect, useState } from "react";
+import { IoAddCircleSharp } from "react-icons/io5";
+
+import { Check, X } from "lucide-react";
 import {
   Select,
   SelectContent,
@@ -8,159 +10,257 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import {
-  MultiSelect,
-  SelectContent as MultiSelectContent,
-  SelectItem as MultiSelectItem,
-  SelectTrigger as MultiSelectTrigger,
-  SelectValue as MultiSelectValue,
-} from "../../components/MultiSelect";
-import { IoAddCircleSharp } from "react-icons/io5";
-import AddSubtopicForm from "./AddSubtopicForm";
+import SubTopicCard from "./SubTopicCard";
+import { AddSubTopics } from "@/actions/AddSubTopics";
 
-export default function TopicContent({ subtopics: initialSubtopics }) {
-  const [subtopics, setSubtopics] = useState(initialSubtopics);
-  const [isCompleted, setIsCompleted] = useState(false);
-  const [isAll, setIsAll] = useState(true);
-  const [filtedSubject, setFiltedSubject] = useState([]);
-  const [filtedCourses, setFiltedCourses] = useState([]);
-  const [filtedTopics, setFiltedTopics] = useState([]);
-  const [issubTopicAdding, setIsSubTopicAdding] = useState(false);
+export default function SubTopicContent({ subjects = [] }) {
+  const [isAddingTopic, setIsAddingTopic] = useState(false);
+  const [selectedSubject, setSelectedSubject] = useState(null);
+  const [selectedCourse, setSelectedCourse] = useState(null);
+  const [selectedTopic, setSelectedTopic] = useState(null)
+  const [topicName, setTopicName] = useState("");
+  const [filteredCourses, setFilteredCourses] = useState([]);
+  const [filteredTopics, setFilteredTopics] = useState([]);
+  const [errors, setErrors] = useState({ errorWhileSavingData: "" });
 
-  // useEffect(() => {
-  //   setSubtopics(initialSubtopics);
-  // }, [initialSubtopics]);
-
-  const subjects = Array.from(
-    new Set(subtopics.map((subtopic) => subtopic.subjectName))
-  );
-  const courses = Array.from(
-    new Set(subtopics.map((subtopic) => subtopic.courseName))
-  );
-  const topics = Array.from(
-    new Set(subtopics.map((subtopic) => subtopic.topicName))
-  );
-
-  const filteredSubtopics = subtopics
-    ?.filter(
-      (subtopic) =>
-        filtedSubject.length === 0 ||
-        filtedSubject.includes(subtopic.subjectName)
-    )
-    .filter(
-      (subtopic) =>
-        filtedCourses.length === 0 ||
-        filtedCourses.includes(subtopic.courseName)
-    )
-    .filter(
-      (subtopic) =>
-        filtedTopics.length === 0 || filtedTopics.includes(subtopic.topicName)
-    )
-    .filter(
-      (subtopic) =>
-        isAll || (isCompleted ? subtopic.isCompleted : !subtopic.isCompleted)
-    );
-
-  function onSubtopicAdded(AddedSubtopics) {
-    console.log(AddedSubtopics);
-    setSubtopics((prevSubtopics) => [...prevSubtopics, ...AddedSubtopics]);
-  }
+  // Update courses based on the selected subject
+  useEffect(() => {
+    if (selectedSubject) {
+      const subject = subjects.find((s) => s.id === selectedSubject);
+      setFilteredCourses(subject?.courses || []); // Default to empty array to prevent errors
+    } else {
+      setFilteredCourses([]); // Clear courses when subject is deselected
+    }
+  }, [selectedSubject ]); // Only re-run if `selectedSubject` changes
+  useEffect(() => {
+    if (selectedCourse) {
+      
+      const course = filteredCourses.find((c) => c.id === selectedCourse);
+      setFilteredTopics(course?.topics || []); // Default to empty array to prevent errors
+    } else {
+      setFilteredTopics([]); // Clear courses when subject is deselected
+    }
+  }, [selectedCourse , filteredCourses]); // Only re-run if `selectedSubject` changes
 
   return (
-    <div className="p-4 bg-gray-50 min-h-screen">
-      <div className="mb-6">
-        <h1 className="text-2xl font-bold text-gray-800">Subtopics</h1>
-        <div className="flex mt-4 rounded-md border-2 gap-2 md:gap-6 p-4 sm:items-center flex-col sm:flex-row items-start justify-start">
-          <p>Filter :</p>
-          <MultiSelect onChange={(value) => setFiltedSubject(value)}>
-            <MultiSelectTrigger className="w-[180px]">
-              <MultiSelectValue placeholder="All" />
-            </MultiSelectTrigger>
-            <MultiSelectContent>
-              {subjects?.map((subject, index) => (
-                <MultiSelectItem key={index} value={subject}>
-                  {subject}
-                </MultiSelectItem>
-              ))}
-            </MultiSelectContent>
-          </MultiSelect>
-          <MultiSelect onChange={(value) => setFiltedCourses(value)}>
-            <MultiSelectTrigger className="w-[180px]">
-              <MultiSelectValue placeholder="All" />
-            </MultiSelectTrigger>
-            <MultiSelectContent>
-              {courses?.map((course, index) => (
-                <MultiSelectItem key={index} value={course}>
-                  {course}
-                </MultiSelectItem>
-              ))}
-            </MultiSelectContent>
-          </MultiSelect>
-          <MultiSelect onChange={(value) => setFiltedTopics(value)}>
-            <MultiSelectTrigger className="w-[180px]">
-              <MultiSelectValue placeholder="All" />
-            </MultiSelectTrigger>
-            <MultiSelectContent>
-              {topics?.map((topic, index) => (
-                <MultiSelectItem key={index} value={topic}>
-                  {topic}
-                </MultiSelectItem>
-              ))}
-            </MultiSelectContent>
-          </MultiSelect>
-          <Select
-            defaultValue="All"
-            onValueChange={(data) => {
-              if (data === "Completed") {
-                setIsAll(false);
-                setIsCompleted(true);
-              } else if (data === "UnCompleted") {
-                setIsAll(false);
-                setIsCompleted(false);
-              } else {
-                setIsAll(true);
+    <div className="p-3 bg-gray-50 min-h-screen">
+      <div className="flex justify-between items-center mb-8">
+        <div>
+          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+            Topics & SubTopic
+          </h1>
+          <p className="text-gray-600">Explore your topic, and subTopic .</p>
+        </div>
+
+        {/* Add Topic Button */}
+        <button
+          type="button"
+          onClick={() => setIsAddingTopic(true)}
+          className="flex items-center text-indigo-600 hover:text-indigo-800 transition"
+        >
+          <IoAddCircleSharp className="h-8 w-8 mr-2" />
+          <span className="text-lg">Add Subtopic</span>
+        </button>
+      </div>
+
+      <div className="space-y-5">
+        {subjects.length > 0 ? (
+          subjects
+            .flatMap((subject) => subject.courses)
+            .map((course, courseIndex) => {
+              return course.topics?.length > 0 ? (
+                <div
+                  key={courseIndex}
+                  className="border border-gray-200 bg-white rounded-md shadow-md p-4"
+                >
+                  {/* Subject Name */}
+                  <h2 className="text-2xl font-semibold text-indigo-600 mb-4">
+                    {course.courseName}
+                  </h2>
+
+                  {/* Display Courses under the Subject */}
+                  {course.topics?.length > 0 ? (
+                    course.topics.map((topic, topicIndex) => (
+                      <div
+                        key={topicIndex}
+                        className="mt-4 border-l-4 pl-6 border-indigo-300"
+                      >
+                        {/* Course Name */}
+                        <h3 className="text-xl font-medium text-gray-800 flex items-center mb-4">
+                          📘 {topic.topicName}
+                        </h3>
+
+                        {/* Display Topics under the Course */}
+                        {topic?.subtopics?.length > 0 ? (
+                          topic.subtopics.map((subtopic) => (
+                            <SubTopicCard
+                              subtopic={subtopic}
+                              key={subtopic.id}
+                              courseId={course.id}
+                              subjectId={course.subject}
+                              topicId={topic.id}
+                            />
+                          ))
+                        ) : (
+                          <p className="text-sm text-gray-500">
+                            No SubTopics found for this Topic.
+                          </p>
+                        )}
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-sm text-gray-500">
+                      No courses found under this subject.
+                    </p>
+                  )}
+                </div>
+              ) : null;
+            })
+        ) : (
+          <p className="text-lg text-gray-500">No subjects found.</p>
+        )}
+      </div>
+
+      {/* Add Topic Form */}
+      {isAddingTopic && (
+        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2">
+          <form
+            className="p-6 rounded-lg shadow-lg bg-white max-w-lg w-full flex flex-col gap-6"
+            action={async (e) => {
+              const subtopicNames = e
+                .get("subtopicName")
+                .split(";")
+                .map((topic) => topic.trim());
+              const subjectId = e.get("subjectId");
+              const courseId = e.get("courseId");
+              const topicId = e.get("topicId");
+              console.log(subtopicNames, subjectId, courseId);
+              const { error, success } = await AddSubTopics(subtopicNames , subjectId , courseId , topicId)
+              console.log(error, success);
+
+              if (success) {
+                setIsAddingTopic(false);
+                setTopicName("");
+                selectedCourse("");
+                selectedSubject("");
+              }
+              if (error) {
+                setErrors((prev) => ({ ...prev, errorWhileSavingData: error }));
               }
             }}
           >
-            <SelectTrigger className="w-[180px] bg-white border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-indigo-500">
-              <SelectValue placeholder="Filter" />
-            </SelectTrigger>
-            <SelectContent>
-              <SelectItem value="All">All</SelectItem>
-              <SelectItem value="Completed">Completed</SelectItem>
-              <SelectItem value="UnCompleted">UnCompleted</SelectItem>
-            </SelectContent>
-          </Select>
+            <h3 className="text-lg font-bold mb-4">Add SubTopic</h3>
+
+            {/* Topic Name Input */}
+            <input
+              name="subtopicName"
+              type="text"
+              placeholder="Enter SubTopic Name (semicolon Separated)"
+              className="p-3 border-b w-full outline-none text-sm sm:text-lg placeholder:"
+              value={topicName}
+              onChange={(e) => setTopicName(e.target.value)}
+              required
+            />
+
+            {/* Subject Selection */}
+            <Select
+              onValueChange={(value) => {
+                setSelectedSubject(value);
+                setSelectedCourse(null); // Reset course selection when subject changes
+              }}
+              value={selectedSubject || ""}
+              required
+              name="subjectId"
+            >
+              <SelectTrigger className="w-full bg-white border rounded-md shadow-sm p-3 ">
+                <SelectValue placeholder="Select Subject" />
+              </SelectTrigger>
+              <SelectContent>
+                {subjects.map((subject) => (
+                  <SelectItem key={subject.id} value={subject.id}>
+                    {subject.subjectName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {/* Course Selection (disabled until subject is selected) */}
+            <Select
+              onValueChange={(value) => setSelectedCourse(value)}
+              value={selectedCourse || ""}
+              required
+              disabled={!selectedSubject}
+              name="courseId"
+            >
+              <SelectTrigger
+                className={`w-full bg-white border rounded-md shadow-sm p-3 ${
+                  !selectedSubject ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                <SelectValue placeholder="Select Course" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredCourses.map((course) => (
+                  <SelectItem key={course.id} value={course.id}>
+                    {course.courseName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+            <Select
+              onValueChange={(value) => setSelectedTopic(value)}
+              value={selectedTopic || ""}
+              required
+              disabled={!selectedCourse}
+              name="topicId"
+            >
+              <SelectTrigger
+                className={`w-full bg-white border rounded-md shadow-sm p-3 ${
+                  !selectedCourse ? "opacity-50 cursor-not-allowed" : ""
+                }`}
+              >
+                <SelectValue placeholder="Select Topic" />
+              </SelectTrigger>
+              <SelectContent>
+                {filteredTopics.map((topic) => (
+                  <SelectItem key={topic.id} value={topic.id}>
+                    {topic.topicName}
+                  </SelectItem>
+                ))}
+              </SelectContent>
+            </Select>
+
+            {errors.errorWhileSavingData && (
+              <p className="w-full text-center text-red-400">
+                {errors.errorWhileSavingData}
+              </p>
+            )}
+            {/* Buttons */}
+            <div className="flex items-center justify-around sm:justify-end gap-7  w-full">
+              <button
+                type="button"
+                onClick={() => {
+                  setIsAddingTopic(false);
+                  setSelectedCourse("");
+                  setSelectedSubject("");
+                  setTopicName("");
+                }}
+                className="flex items-center justify-center text-lg font-semibold  py-3 px-5 border border-transparent rounded-md shadow-sm text-white bg-red-500 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+              >
+                <X className="mr-2" />
+                <span className="text-sm "> Cancel</span>
+              </button>
+              <button
+                type="submit"
+                className="flex items-center justify-center text-lg font-semibold  py-3 px-5 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+              >
+                <Check className="mr-2" />
+                <span className="text-sm "> Save</span>
+              </button>
+            </div>
+          </form>
         </div>
-      </div>
-      <div className="space-y-4">
-        {filteredSubtopics.length > 0 ? (
-          filteredSubtopics?.map((subtopic, index) => (
-            <SubTopicCard key={subtopic.id} index={subtopic.subTopicIndex} subtopic={subtopic} />
-          ))
-        ) : (
-          <p className="text-lg text-gray-500">
-            No subtopics Found.
-          </p>
-        )}
-      </div>
-      <div className="flex items-center w-full justify-center min-h-28 flex-col">
-        {issubTopicAdding ? (
-          <AddSubtopicForm
-            setIsSubTopicAdding={setIsSubTopicAdding}
-            onSubtopicAdded={onSubtopicAdded}
-          />
-        ) : (
-          <button
-            type="button"
-            onClick={() => {
-              setIsSubTopicAdding(true);
-            }}
-          >
-            <IoAddCircleSharp className="size-9 sm:h-14 sm:w-14" />
-          </button>
-        )}
-      </div>
+      )}
     </div>
   );
 }

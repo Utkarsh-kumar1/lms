@@ -1,16 +1,9 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import axios from "axios";
-
-async function updateActivity(id, status) {
-  const response = await axios.patch("/api/updateActivity", {
-    status,
-    id,
-  });
-  return response;
-}
+import { useRouter } from "next/navigation";
 
 function formatDate(inputDate) {
   const dateObj = new Date(inputDate);
@@ -34,10 +27,56 @@ function formatDate(inputDate) {
   return `${day} ${month} ${year}`;
 }
 
-export default function DataRow({ subtopic, subIndex, onsubtopicUpdate }) {
-  const [updating, setUpdating] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(false);
+export default function DataRow({ subtopic, subIndex }) {
+  const [isUpdating, setIsUpdating] = useState(false);
+  const [isCompleted, setIsCompleted] = useState(!!subtopic.end);
   const [endDate, setEndDate] = useState(subtopic.end);
+  const router = useRouter();
+
+  useEffect(() => {
+    const handler = setTimeout(() => {
+      if (isCompleted !== !!subtopic.end) {
+        setIsUpdating(true);
+        axios
+          .patch("/api/updateActivity", {
+            status: isCompleted,
+            activityId: subtopic.activityId,
+            subtopicId: subtopic.id,
+          })
+          .then((result) => {
+            setIsUpdating(false);
+            router.refresh(); // Or trigger state update to re-render
+          })
+          .catch((err) => {
+            setIsCompleted(!!subtopic.end);
+            setEndDate(subtopic.end);
+            setIsUpdating(false);
+          });
+      }
+    }, 2000);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [
+    isCompleted,
+    subtopic.end,
+    subtopic.id,
+    subtopic.revisionId,
+    router,
+    subtopic.activityId,
+  ]);
+
+  const handleChange = async (status) => {
+    if (!isUpdating) {
+      setIsCompleted(status);
+      if (status) {
+        setEndDate(subtopic.end || new Date());
+      } else {
+        setEndDate(null);
+      }
+    }
+  };
 
   return (
     <>
@@ -54,26 +93,14 @@ export default function DataRow({ subtopic, subIndex, onsubtopicUpdate }) {
           {formatDate(subtopic.start)}
         </TableCell>
         <TableCell className="p-2 text-[.7rem] sm:text-base">
-          {endDate ? formatDate(endDate) : "-"}
+          {isCompleted ? formatDate(endDate) : "-"}
         </TableCell>
         <TableCell className="p-2 text-[.7rem] sm:text-base">
           <Switch
             className="bg-slate-50"
-            disabled={updating}
-            defaultChecked={!!subtopic.end}
-            onCheckedChange={async (status) => {
-              setUpdating(true);
-              const response = await updateActivity(subtopic.id, status);
-              setUpdating(false);
-              if (response.status === 200) {
-                onsubtopicUpdate({
-                  ...subtopic,
-                  end: status ? new Date() : null,
-                });
-                setIsCompleted(status);
-                setEndDate(status ? new Date() : null);
-              }
-            }}
+            disabled={isUpdating}
+            onCheckedChange={handleChange}
+            checked={isCompleted}
           />
         </TableCell>
       </TableRow>

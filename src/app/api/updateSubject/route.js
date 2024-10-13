@@ -1,58 +1,55 @@
 import { getToken } from 'next-auth/jwt';
-import dbconnect from "@/lib/dbconnect"
 import ApiResponse from '@/helpers/ApiResponse';
+import { db } from '@/db/drizzle';
+import { subject } from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 
 export async function PATCH(req) {
     const secret = process.env.JWT_SECRET;
     const token = await getToken({ req, secret });
 
-    if(!token){
+    if (!token) {
         return Response.json(ApiResponse.error(400, "Unauthorized access"), { status: 401 });
     }
-    
-    const { isActive, newSubjectName , id } = await req.json();
-    
-
-    if((isActive == null) && !newSubjectName){
+    const { newSubjectName, id } = await req.json();
+    if (!newSubjectName) {
         return Response.json(ApiResponse.error(400, "Subject Name is required"), { status: 400 });
     }
-    
-    
 
     try {
-        const pool = dbconnect();
-        const [data] = await pool.execute(
-            "SELECT id , isActive , subjectName FROM subject WHERE id = ? AND owner = ?",
-            [ id , token.id]
-        );
-        if (data.length === 0) {
+
+        const subjectData = await db.query.subject.findFirst({
+            where: (subject, { eq, and }) => and(
+                eq(subject.owner, token.id),
+                eq(subject.id, id)
+            )
+        })
+        if (subjectData.length <= 0) {
             return Response.json(ApiResponse.error(403, "Forbidden"), { status: 403 });
         }
 
-        const field = isActive !== undefined ? "isActive" : "subjectName";
-        const value = isActive !== undefined ? isActive : newSubjectName;
-        
+        if (subjectData.subjectName == newSubjectName) {
+            return Response.json(ApiResponse.success("200", null, "Updated Successfully"), { status: 200 })
+        }
 
-        if(field == "subjectName" && data[0].subjectName == value)
-        {
-            return Response.json(ApiResponse.success("200" , null , "Updated Successfully"), { status: 200 })
-        }
-        if(field == "isActive" && data[0].isActive == value)
-        {
-            return Response.json(ApiResponse.success("200" , null , "Updated Successfully"), { status: 200 })
-        }
-        
-        
-        await pool.execute(
-            `UPDATE subject SET ${field} = ? WHERE id = ? AND owner = ?`,
-            [value, id, token.id]
-        );
+
+        await db
+            .update(subject)
+            .set({
+                subjectName: newSubjectName
+            })
+            .where(
+                and(
+                    eq(subject.id, id),
+                    eq(subject.owner, token.id)
+                )
+            )
 
         return Response.json({ status: 200, message: "Update successful" });
 
     } catch (error) {
-    
-        
+
+
         return Response.json(ApiResponse.error(500, "Error while updating Activity "), { status: 500 })
 
     }
@@ -60,66 +57,4 @@ export async function PATCH(req) {
 }
 
 
-export async function POST(req) {
-    const secret = process.env.JWT_SECRET;
-    const token = await getToken({ req, secret });
-
-    if (!token) {
-        return Response.json(ApiResponse.error(401, "Unauthorized access"), { status: 401 });
-    }
-
-    const { subjects } = await req.json();
-
-    if (!Array.isArray(subjects) || subjects.length === 0) {
-        return Response.json(ApiResponse.error(400, "Subject(s) are required"), { status: 400 });
-    }
-
-    const pool = dbconnect();
-    const client = await pool.getConnection();
-
-    try {
-        await client.beginTransaction();
-
-        // Check for existing subjects
-        const [existingSubjects] = await client.query(
-            "SELECT subjectName FROM subject WHERE subjectName IN (?) AND owner = ?",
-            [subjects, token.id]
-        );
-
-        const existingSubjectNames = existingSubjects.map(sub => sub.subjectName);
-        const newSubjects = subjects.filter(subject => !existingSubjectNames.includes(subject));
-
-        if (newSubjects.length === 0) {
-            await client.rollback();
-            return Response.json(ApiResponse.success(200, null, "All subjects already exist"), { status: 200 });
-        }
-
-        // Prepare data for bulk insert
-        const subjectsToInsert = newSubjects.map(subjectName => [subjectName, token.id]);
-
-        // Bulk insert new subjects
-        await client.query(
-            "INSERT INTO subject (subjectName, owner) VALUES ?",
-            [subjectsToInsert]
-        );
-
-        await client.commit();
-
-        // Fetch the inserted subjects
-        const [insertedSubjects] = await client.query(
-            `SELECT id, subjectName, isCompleted, isActive 
-       FROM subject 
-       WHERE subjectName IN (?) AND owner = ?`,
-            [newSubjects, token.id]
-        );
-
-        return Response.json(ApiResponse.success(200, insertedSubjects, "Subjects created successfully"), { status: 200 });
-    } catch (error) {
-        await client.rollback();
-        console.error(error);
-        return Response.json(ApiResponse.error(500, "Error while creating subjects"), { status: 500 });
-    } finally {
-        client.release();
-    }
-}
 

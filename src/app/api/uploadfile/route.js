@@ -3,33 +3,90 @@ import fs from 'fs/promises';
 import path from 'path';
 import ApiResponse from '@/helpers/ApiResponse';
 import { v4 as uuidv4 } from 'uuid';
-import dbconnect from "@/lib/dbconnect"
 import { getToken } from 'next-auth/jwt';
+import { db } from '@/db/drizzle';
+import { notes } from '@/db/schema';
+import { revalidatePath } from 'next/cache';
 
 export async function POST(req) {
     const secret = process.env.JWT_SECRET;
     const token = await getToken({ req, secret });
-    if(!token)
-    {
+    if (!token) {
         return NextResponse.json(ApiResponse.error(400, 'Unauthorized Access'), { status: 400 });
     }
     try {
-        //type defines wheather it is for the subject or the topic
-
-
         const formData = await req.formData();
         const file = formData.get('file');
-        const type = formData.get('type');
-        const typeId = formData.get('typeId');
+        const topicId = formData.get('topicId');
         const courseId = formData.get('courseId');
-        if (!type || !typeId || !courseId) {
-            return NextResponse.json(ApiResponse.error(400, 'type and typeId is required'), { status: 400 });
-        }
+        const subjectId = formData.get('subjectId')
         if (!file) {
-            return NextResponse.json(ApiResponse.error(400, 'No file uploaded'), { status: 400 });
+            return NextResponse.json(ApiResponse.error(400, 'No file Found'), { status: 400 });
         }
         // console.log(file , type , typeId);
-        
+
+        if (topicId && !subjectId && !courseId) {
+
+            return NextResponse.json(ApiResponse.error(400, 'topicId , subjectId and courseId is required'), { status: 400 });
+        }
+        else if (subjectId && !courseId) {
+
+            return NextResponse.json(ApiResponse.error(400, 'topicId , subjectId and courseId is required'), { status: 400 });
+        }
+        else if (!courseId) {
+
+            return NextResponse.json(ApiResponse.error(400, 'topicId , subjectId and courseId is required'), { status: 400 });
+        }
+
+
+        console.log(topicId, subjectId, courseId);
+
+
+        // Check if the subject exists and belongs to the user
+        const subject = await db.query.subject.findFirst({
+            with: {
+                courses: courseId ? {
+                    with: {
+                        topics: topicId ? {
+                            where: (topic, { eq }) => eq(topic.id, topicId),
+                        } : false
+                    },
+                    where: (course, { eq }) => eq(course.id, courseId)
+                } : false
+            },
+            where: (subject, { eq, and }) => and(
+                eq(subject.owner, token.id),
+                eq(subject.id, subjectId)
+            )
+        });
+
+        console.log(JSON.stringify(subject, null, 2));
+
+
+        // Initialize isOwner to false
+        let isOwner = false;
+
+        // Validate ownership based on the presence of topicId, courseId, or subjectId
+        if (subject) {
+            // Check ownership by topicId
+            if (topicId && subject.courses?.[0]?.topics?.length > 0) {
+                isOwner = true;
+            }
+            // Check ownership by courseId
+            else if (!topicId && courseId && subject.courses?.length > 0) {
+                isOwner = true;
+            }
+            // Check ownership by subjectId
+            else if (!topicId && !courseId && subjectId && subject) {
+                isOwner = true;
+            }
+        }
+
+        if (!isOwner) {
+            return NextResponse.json(ApiResponse.error(403, 'You do not have permission to access this resource'), { status: 403 });
+        }
+
+
 
         const arrayBuffer = await file.arrayBuffer(); // Convert file to an ArrayBuffer
         const buffer = Buffer.from(arrayBuffer); // Convert ArrayBuffer to Buffer
@@ -38,20 +95,25 @@ export async function POST(req) {
         await fs.mkdir(uploadDir, { recursive: true });
 
         // Generate a unique file name by using uuid
-        const uniqueFileName = uuidv4()+ "_"+file.name
+        const uniqueFileName = uuidv4() + "_" + file.name
         const filePath = path.join(uploadDir, uniqueFileName);
 
         await fs.writeFile(filePath, buffer); // Save the file to the uploads folder
 
-        const pool = dbconnect()
 
-        const savedData = await pool.execute(`Insert into notes(topic , subjectRef , fileName , fileType , filePath , fileSize) values (?,?,?,?,?,?)` , [typeId ,courseId , file.name , file.type , uniqueFileName , file.size])
-        // console.log(savedData);
-        
-
+        const savedData = await db.insert(notes).values({
+            fileName: file.name,
+            filePath: uniqueFileName,
+            fileType: file.type,
+            topic: topicId ? topicId : null,
+            subjectRef: subjectId ? subjectId : null,
+            courseRef: courseId ? courseId : null,
+            fileSize: file.size,
+            userId: token.id
+        })
+        revalidatePath("/subjects")
         return NextResponse.json({
             message: 'File uploaded successfully',
-            filePath,
         }, { status: 200 });
 
     } catch (error) {

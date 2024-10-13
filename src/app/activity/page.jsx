@@ -1,32 +1,20 @@
 import { getServerSession } from "next-auth";
 import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/options";
-import dbconnect from "@/lib/dbconnect";
-
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import {
-  Accordion,
-  AccordionItem,
-  AccordionTrigger,
-  AccordionContent,
-} from "@/components/ui/accordion";
-import DataRow from "./DataRow";
 import Topics from "./Topics";
+import { db } from "@/db/drizzle";
 
 async function fetchActivity(id) {
-  const pool = dbconnect();
-  const [data] = await pool.execute(
-    "SELECT courseName, topics FROM activityView WHERE userId = ?",
-    [id]
-  );
-  
+  // const pool = dbconnect();
+  // const [data] = await pool.execute(
+  //   "SELECT courseName, topics FROM activityView WHERE userId = ?",
+  //   [id]
+  // );
+  const data = await db.query.activityView.findMany({
+    where: (activityview, { eq }) => eq(activityview.userId, id),
+  });
+  console.log(JSON.stringify(data, null, 2));
+
   return data;
 }
 
@@ -59,7 +47,13 @@ export default async function ProtectedPage() {
               {course.courseName}
             </h2>
             {topics?.map((topic, topicIndex) => (
-              <Topics topic={topic} topicIndex={topicIndex} key={topicIndex} subjectId={course.courseId}/>
+              <Topics
+                topic={topic}
+                topicIndex={topicIndex}
+                key={topicIndex}
+                subjectId={course.subjectId}
+                courseId={course.courseId}
+              />
             ))}
           </div>
         );

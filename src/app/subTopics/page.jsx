@@ -1,18 +1,47 @@
-import dbconnect from "@/lib/dbconnect";
 import React from "react";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
-import SubTopicContent from "./SubTopicContent";
+// import SubTopicContent from "./SubTopicContent"
+import { db } from "@/db/drizzle";
+import { LoaderCircle } from "lucide-react";
+import dynamic from "next/dynamic";
 
-async function fetchSubtopics(id) {
-  const pool = dbconnect();
+const SubTopicContent = dynamic(() => import("./SubTopicContent"), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+      <div className="flex flex-col items-center gap-4 p-6 bg-white rounded-lg shadow-lg">
+        <LoaderCircle className="animate-spin text-blue-600" size={36} />
+      </div>
+    </div>
+  ),
+});
+
+async function fetchSubtopics(owner) {
   try {
-    const [subtopics] = await pool.execute(
-      "SELECT st.*,t.topicName , c.courseName, s.subjectName FROM subtopics st JOIN topics t ON st.topic = t.id JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? ORDER BY t.topicIndex , st.subtopicIndex ; ",
-      [id]
-    );
 
-    return subtopics;
+    const subjects = await db.query.subject.findMany({
+      with :{
+        courses : {
+          with : {
+            topics : {
+              with : {
+                subtopics : {
+                   orderBy : (subtopic ,{asc})=>[asc(subtopic.subTopicIndex)]
+                }
+               
+              },
+              orderBy : (topic ,{asc})=>[asc(topic.topicIndex)]
+            }
+          }
+        }
+      } ,
+      where : (subject , {eq})=>eq(subject.owner , owner )
+    })
+
+    // console.log(JSON.stringify(subjects, null , 2));
+    
+    return subjects;
   } catch (error) {
     console.log(error);
     
@@ -22,17 +51,13 @@ async function fetchSubtopics(id) {
 
 export default async function page() {
   const session = await getServerSession(authOptions);
-  let subtopics = null;
+  
   try {
-    subtopics = await fetchSubtopics(session.id);
+   const subjects = await fetchSubtopics(session.id);
+      return <SubTopicContent subjects={subjects} />;
+      
   } catch (error) {
     return <div className=" text-red-600 font-bold"> {error.message} </div>;
   }
 
-
-  return (
-    <>
-      <SubTopicContent subtopics={subtopics} />
-    </>
-  );
 }

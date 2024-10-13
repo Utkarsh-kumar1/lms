@@ -1,5 +1,4 @@
 "use client";
-
 import {
   Table,
   TableBody,
@@ -19,35 +18,15 @@ import React, { useState } from "react";
 import { NotebookPen } from "lucide-react";
 import ViewNotes from "./ViewNotes";
 
-function Topics({ topic: initialTopic, topicIndex }) {
-  const [topic, setTopic] = useState(initialTopic);
+ function Topics({ topic, topicIndex }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
-
-  function onsubtopicUpdate(data) {
-    const updatedSubtopics = topic.subtopics?.map((subtopic) => {
-      if (subtopic.id === data.id) {
-        // Update the matching subtopic
-        return {
-          ...subtopic,
-          ...data,
-        };
-      }
-      return subtopic;
-    });
-
-    // Update the topic with the new subtopics
-    setTopic({
-      ...topic,
-      subtopics: updatedSubtopics,
-    });
-  }
 
   return (
     <>
       <Accordion
         type="single"
         collapsible
-        key={`accordion-${topicIndex}`}
+        // key={`accordion-${topicIndex}`}
         className="mb-4"
       >
         <AccordionItem
@@ -57,13 +36,15 @@ function Topics({ topic: initialTopic, topicIndex }) {
           {/* Styled Accordion Trigger */}
           <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out flex justify-between items-center">
             {/* Topic Name */}
-            <span className=" text-xs sm:text-lg font-semibold">
+            <span className=" text-sm sm:text-lg font-semibold text-wrap">
               {topic.topicName}
             </span>
 
             {/* View Notes button with icon */}
             <div
-              className={`flex items-center gap-1 hover:bg-blue-400 py-1 px-2 rounded-md cursor-pointer transition duration-150 ml-auto mr-4 ${isModalOpen && 'bg-blue-400'}`}
+              className={`flex items-center gap-1 hover:bg-blue-400 py-1 px-2 rounded-md cursor-pointer transition duration-150 ml-auto mr-4 ${
+                isModalOpen && "bg-blue-400"
+              }`}
               onClick={(e) => {
                 e.stopPropagation();
                 setIsModalOpen(!isModalOpen);
@@ -75,11 +56,7 @@ function Topics({ topic: initialTopic, topicIndex }) {
           </AccordionTrigger>
           {/* Modal for viewing notes */}
           {isModalOpen && (
-            <ViewNotes
-              topicId={topic.topicId}
-              isOpen={isModalOpen}
-              setIsOpen={setIsModalOpen}
-            />
+            <ViewNotes isOpen={isModalOpen} notes={topic.notes} />
           )}
 
           {/* Accordion Content */}
@@ -104,20 +81,13 @@ function Topics({ topic: initialTopic, topicIndex }) {
               </TableHeader>
               <TableBody>
                 {topic.subtopics?.map((subtopic, subIndex) => (
-                  <DataRow
-                    key={subIndex}
-                    subtopic={subtopic}
-                    subIndex={subIndex}
-                    onsubtopicUpdate={onsubtopicUpdate}
-                  />
+                  <DataRow key={subIndex} subtopic={subtopic} />
                 ))}
               </TableBody>
             </Table>
           </AccordionContent>
         </AccordionItem>
       </Accordion>
-      
-      
     </>
   );
 }

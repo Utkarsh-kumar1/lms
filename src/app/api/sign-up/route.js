@@ -1,10 +1,11 @@
 import ApiResponse from "@/helpers/ApiResponse";
 import SignupSchema from "@/Schema/SignupSchema";
-import dbconnect from "@/lib/dbconnect";
 import bcrypt from "bcrypt"
 import sendUserVeficationMail from "@/helpers/sendmail";
 import jwt from "jsonwebtoken";
 import { cookies } from "next/headers";
+import { db } from "@/db/drizzle";
+import { users } from "@/db/schema";
 
 
 export async function POST(request) {
@@ -20,28 +21,30 @@ export async function POST(request) {
     // check for unique username and email
     //check for user by username
     try {
-        const pool = dbconnect();
-        const [userCheckResult] = await pool.execute(`
-            SELECT 
-                (SELECT COUNT(*) FROM users WHERE username = ?) as usernameCount, 
-                (SELECT COUNT(*) FROM users WHERE email = ?) as emailCount;
-        `, [username, email]);
-        
-        const { usernameCount, emailCount } = userCheckResult[0];
-        
-        if (usernameCount > 0) {
-            return Response.json(ApiResponse.error(400, "User already exists with this username"), { status: 400 });
+
+        const user = await db.query.users.findFirst({
+            where: (user, { eq, or }) => or(
+                eq(user.username, username),
+                eq(user.email, email),
+            )
+        })
+
+        if (user) {
+            //is user exists by username
+            if (user.username === username) {
+                return Response.json(ApiResponse.error(400, "User already exists with this username"), { status: 400 });
+            }
+            //is user exists by email
+            if (user.email === email) {
+                return Response.json(ApiResponse.error(400, "User already exists with this Email"), { status: 400 });
+            }
         }
-        //check for user by email
-        
-        if (emailCount > 0) {
-            return Response.json(ApiResponse.error(400, "User already exists with this Email"), { status: 400 });
-        }
-        
     } catch (error) {
+        console.log(error);
+
         return Response.json(ApiResponse.error(400, "Error while connection to Database"), { status: 400 })
     }
-    
+
     // Proceed with user creation since neither username nor email exists
 
     // hash the password
@@ -65,27 +68,50 @@ export async function POST(request) {
 
     }
     // save it to db {Username , Email , Password , Otp , OtpExpiry} 
-    let user;
     try {
-        const pool = dbconnect()
-        const [response] = await pool.execute("INSERT INTO users(username, email ,firstname , lastname , userPassword , otp , otpExpiry) VALUES(?,?,?,?,?,?,?);", [username, email, firstName, lastName, hashedPassword, userOtp, otpExpiry])
 
-        user = await pool.execute("SELECT id, username , email , firstName , lastName from users where id = ? ;", [response.insertId])
+        const insertedUser = await db
+            .insert(users)
+            .values({
+                username,
+                email,
+                firstName,
+                lastName,
+                userPassword: hashedPassword,
+                otp: userOtp,
+                otpExpiry: otpExpiry
+            }).$returningId();
+
+        const user = await db.query.users.findFirst({
+            columns: {
+                userPassword: false
+            },
+            where: (user, { eq }) => eq(user.id, insertedUser[0].id)
+        });
+
+        console.log(user);
+
+        const token = jwt.sign({ userId: user.id, username: user.username, userOtp: user.otp }, process.env.JWT_SECRET, { expiresIn: '5m' });
+
+        cookies().set({
+            name: 'token',
+            value: token,
+            httpOnly: true,
+            secure: process.env.NODE_ENV === 'production',  // only send over HTTPS
+            sameSite: 'strict',  // prevent CSRF
+            path: '/',
+        });
+
+
+
+        return Response.json(ApiResponse.success(200, user, "Sign-up Successfull "), { status: 200 });
 
 
     } catch (error) {
-        return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
-    }
-
-    const token = jwt.sign({ userId: user[0][0].id,  username: user[0][0].username, userOtp }, process.env.JWT_SECRET, { expiresIn: '5m' });
-
-    cookies().set({
-        name: 'token',
-        value: token,
-        httpOnly: true,
-        path: '/',
-    })
+    console.error("Database insert error:", error);
+    return Response.json(ApiResponse.error(500, "Internal Server Error"), { status: 500 });
+}
 
 
-    return Response.json(ApiResponse.success(200, user[0][0], "Sign-up Successfull "), { status: 200});
+
 }

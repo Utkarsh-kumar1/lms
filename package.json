@@ -27,11 +27,13 @@
     "bcrypt": "^5.1.1",
     "class-variance-authority": "^0.7.0",
     "clsx": "^2.1.1",
+    "dotenv": "^16.4.5",
+    "drizzle-orm": "^0.33.0",
     "fs": "^0.0.1-security",
     "input-otp": "^1.2.4",
     "jsonwebtoken": "^9.0.2",
     "lucide-react": "^0.412.0",
-    "mysql2": "^3.10.2",
+    "mysql2": "^3.11.3",
     "next": "^14.2.13",
     "next-auth": "^4.24.7",
     "nodemailer": "^6.9.14",
@@ -46,6 +48,7 @@
     "zod": "^3.23.8"
   },
   "devDependencies": {
+    "drizzle-kit": "^0.24.2",
     "eslint": "^8",
     "eslint-config-next": "14.2.5",
     "postcss": "^8",

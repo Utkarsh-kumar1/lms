@@ -1,0 +1,1 @@
+ALTER TABLE `subtopics` MODIFY COLUMN `topic` char(36) NOT NULL;

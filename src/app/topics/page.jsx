@@ -1,37 +1,55 @@
-import dbconnect from "@/lib/dbconnect";
 import React from "react";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import { getServerSession } from "next-auth";
-import TopicContent from "./TopicContent";
+import { db } from "@/db/drizzle";
+import dynamic from "next/dynamic";
+import { LoaderCircle } from "lucide-react";
+const TopicContent = dynamic(() => import("./TopicContent"), {
+  ssr: false,
+  loading: () => (
+    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
+      <div className="flex flex-col items-center gap-4 p-6 bg-white rounded-lg shadow-lg">
+        <LoaderCircle className="animate-spin text-blue-600" size={36} />
+      </div>
+    </div>
+  ),
+});
 
 async function fetchTopics(id) {
-  const pool = dbconnect();
   try {
-    const [topics] = await pool.execute(
-      "SELECT t.*, c.courseName, s.subjectName FROM topics t JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? ORDER BY t.topicIndex ",
-      [id]
-    );
-
-    return topics;
+    const subjects = await db.query.subject.findMany({
+      with : {
+        courses : {
+          with : {
+            topics :{
+              with :{
+                notes : true
+              },
+              orderBy : (topics , {asc})=>[asc(topics.topicIndex)]
+            }
+          }
+        }
+      },
+      where : (subject , {eq})=>eq(subject.owner , id)
+    })
+    return subjects;
   } catch (error) {
+    console.log(error);
+    
     throw new Error("Error while fetching Topics");
   }
 }
 
 export default async function page() {
   const session = await getServerSession(authOptions);
-  let topics = null;
   try {
-    topics = await fetchTopics(session.id);
+    const subjects = await fetchTopics(session.id);
+      return (
+        <>
+          <TopicContent subjects={subjects} />
+        </>
+      );
   } catch (error) {
     return <div className=" text-red-600 font-bold"> {error.message} </div>;
   }
-
-
-
-  return (
-    <>
-      <TopicContent  topics={topics} />
-    </>
-  );
 }

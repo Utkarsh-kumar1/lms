@@ -1,37 +1,60 @@
 import { getToken } from 'next-auth/jwt';
-import dbconnect from "@/lib/dbconnect"
 import ApiResponse from '@/helpers/ApiResponse';
-import { NextResponse } from 'next/server';
+import { db } from '@/db/drizzle';
+import { topics } from '@/db/schema';
+import { and, eq } from 'drizzle-orm';
 
 export async function PATCH(req) {
     const secret = process.env.JWT_SECRET;
     const token = await getToken({ req, secret });
-    const { newtopicName: topicName, id } = await req.json();
+    const { newtopicName: topicName, id, isCompleted, subjectId, courseId } = await req.json();
 
 
+    if (!token) {
+        return Response.json(ApiResponse.error(401, "Unauthorized access"), { status: 401 });
+    }
+
+    if (!id && !subjectId && !courseId && (!isCompleted && !topicName)) {
+        return Response.json(ApiResponse.error(400, "newCourseName , courseId , subjectId , id  is requried"), { status: 401 });
+
+    }
     try {
-        const pool = dbconnect();
-        const [data] = await pool.execute(
-            "SELECT t.id , t.topicName FROM topics t JOIN course c ON t.course = c.id JOIN subject s ON c.subject = s.id WHERE s.owner = ? HAVING t.id = ? ",
-            [token.id, id]
-        );
 
-        if (data.length === 0) {
+        const subjectData = await db.query.subject.findFirst({
+            with: {
+                courses: {
+                    with: {
+                        topics: {
+                            where: (topic, { eq }) => eq(topic.id, id)
+                        }
+                    },
+                    where: (course, { eq }) => eq(course.id, courseId)
+                }
+            },
+            where: (subject, { eq, and }) => and(
+                eq(subject.id, subjectId),
+                eq(subject.owner, token.id)
+            )
+        })
+
+        if (!subjectData && subjectData.courses.length <= 0 && subjectData.courses[0].topics.length <= 0) {
             return Response.json(ApiResponse.error(403, "Forbidden"), { status: 403 });
         }
 
+        const topic = subjectData.courses[0].topics[0]
 
 
-        if (data[0].topicName === topicName) {
+        if (topic.topicName === topicName && topic.isCompleted === isCompleted) {
             return Response.json(ApiResponse.success("200", null, "Updated Successfully"), { status: 200 })
         }
 
-
-
-        await pool.execute(
-            `UPDATE topics SET topicName = ? WHERE id = ? ;`,
-            [topicName, data[0].id]
-        );
+        await db
+            .update(topics)
+            .set({
+                topicName,
+                isCompleted: isCompleted ?? topic.isCompleted
+            })
+            .where(and(eq(topics.id, id), eq(topic.course, courseId)))
 
         return Response.json({ status: 200, message: "Update successful" }, { status: 200 });
 
@@ -42,99 +65,6 @@ export async function PATCH(req) {
 
     }
 
-}
-
-
-
-
-
-export async function POST(req) {
-    const secret = process.env.JWT_SECRET;
-    const token = await getToken({ req, secret });
-
-    if (!token) {
-        return NextResponse.json(ApiResponse.error(401, "Unauthorized access"), { status: 401 });
-    }
-
-    const { topics, subjectId, courseId } = await req.json();
-    
-
-    if (!Array.isArray(topics) || topics.length === 0 || !subjectId || !courseId) {
-        return NextResponse.json(ApiResponse.error(400, "Invalid input data"), { status: 400 });
-    }
-
-    const pool = dbconnect();
-    const client = await pool.getConnection();
-
-    try {
-        await client.beginTransaction();
-
-        // Check if the course belongs to the user
-        const [courses] = await client.query(
-            "SELECT c.id FROM `course` c JOIN `subject` s ON c.subject = s.id WHERE s.owner = ? and c.id = ?;",
-            [token.id, courseId]
-        );
-
-        if (!courses.length) {
-            await client.rollback();
-            return NextResponse.json(ApiResponse.error(400, "No such course found"), { status: 400 });
-        }
-
-        // Fetch existing topics
-        const [existingTopics] = await client.query(
-            "SELECT topicName FROM topics WHERE topicName IN (?) AND course = ?",
-            [topics, courseId]
-        );
-
-        const existingTopicNames = existingTopics.map(topic => topic.topicName);
-        const newTopics = topics.filter(topic => !existingTopicNames.includes(topic));
-
-        if (newTopics.length === 0) {
-            await client.rollback();
-            return NextResponse.json(ApiResponse.success(200, null, "All topics already exist"), { status: 200 });
-        }
-
-        // Get the highest topicIndex for the course
-        const [highestIndex] = await client.query(
-            "SELECT MAX(topicIndex) as maxIndex FROM topics WHERE course = ?",
-            [courseId]
-        );
-
-        const maxIndex = highestIndex[0].maxIndex || 0;
-
-        // Prepare data for bulk insert
-        const topicsToInsert = newTopics.map((topic, index) => [
-            topic,
-            courseId,
-            maxIndex + index + 1
-        ]);
-
-        // Bulk insert new topics
-        await client.query(
-            "INSERT INTO topics (topicName, course, topicIndex) VALUES ?",
-            [topicsToInsert]
-        );
-
-        await client.commit();
-
-        // Fetch the inserted data
-        const [insertedData] = await client.query(`
-            SELECT t.*, c.courseName, s.subjectName 
-            FROM topics t 
-            JOIN course c ON t.course = c.id 
-            JOIN subject s ON c.subject = s.id 
-            WHERE t.topicName IN (?) AND t.course = ?
-        `, [newTopics, courseId]);
-        
-
-        return NextResponse.json(ApiResponse.success(200, insertedData, "Topics added successfully"), { status: 200 });
-    } catch (error) {
-        await client.rollback();
-        console.error(error);
-        return NextResponse.json(ApiResponse.error(500, "Error while saving the topics."), { status: 500 });
-    } finally {
-        client.release();
-    }
 }
 
 

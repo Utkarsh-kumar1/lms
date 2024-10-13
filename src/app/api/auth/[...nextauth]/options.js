@@ -4,6 +4,7 @@ import CredentialsProvider from "next-auth/providers/credentials"
 import bcrypt from "bcrypt"
 import dbconnect from "@/lib/dbconnect"
 import SignInSchema from "@/Schema/signInSchema"
+import { db } from "@/db/drizzle"
 
 export const authOptions = {
     providers: [
@@ -28,31 +29,41 @@ export const authOptions = {
 
 
 
-                    const pool = dbconnect();
+                    // const pool = dbconnect();
 
-                    const [user] = await pool.execute(`SELECT id , username , firstName , lastName, userPassword , isVerified from users where ${fieldName} = ?; `, [credentials.usernameOrEmail])
+                    // const [user] = await pool.execute(`SELECT id , username , firstName , lastName, userPassword , isVerified from users where ${fieldName} = ?; `, [credentials.usernameOrEmail])
 
-                    if (user.length < 1) {
+                    const user = await db.query.users.findFirst({
+                        where: (user, { eq, and,or, sql }) =>or(
+                            eq(user.username, credentials.usernameOrEmail),
+                            eq(user.email, credentials.usernameOrEmail),
+                        )
+                    })
+
+                    console.log(user);
+                    
+
+                    if (!user) {
                         throw new Error(`No user exists with this ${fieldName} , First Create Account `)
                     }
 
                     //Check wheather user is verified or not
-                    if (user[0].isVerified == false) {
+                    if (user.isVerified == false) {
                         throw new Error("Please verify your Account first")
                     }
 
                     //Check weather the password is Correct
-                    const isPasswordCorrect = await bcrypt.compare(credentials.password, user[0].userPassword);
+                    const isPasswordCorrect = await bcrypt.compare(credentials.password, user.userPassword);
 
 
                     if (isPasswordCorrect) {
                         const verifiedUser = {
-                            id: user[0].id,
-                            userName: user[0].username,
-                            firstName: user[0].firstName,
-                            lastName: user[0].lastName,
-                            email: user[0].email,
-                            isVerified: user[0].isVerified
+                            id: user.id,
+                            userName: user.username,
+                            firstName: user.firstName,
+                            lastName: user.lastName,
+                            email: user.email,
+                            isVerified: user.isVerified
 
                         }
                         return verifiedUser;
@@ -64,7 +75,7 @@ export const authOptions = {
 
 
 
-                    
+
                 } catch (error) {
                     throw new Error(error.message)
                 }

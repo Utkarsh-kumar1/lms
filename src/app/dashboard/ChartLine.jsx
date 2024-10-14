@@ -4,99 +4,100 @@ import React, { useEffect, useState } from "react";
 export default function ChartLine() {
   const [data, setData] = useState(null);
 
-    
   useEffect(() => {
-      const fetchData = async () => {
-        
-      setData(null);
-      const response = await fetch("/api/chartLine");
-      const result = await response.json();
+    const fetchData = async () => {
+      try {
+        const response = await fetch("/api/chartLine");
+        const result = await response.json();
 
-      // console.log(JSON.stringify(result.data , null , 2));
-      
-      // console.log(result.data);
-      setData(result.data);
+        setData(result.data);
+      } catch (error) {
+        
+      }
     };
 
     fetchData();
   }, []);
 
   return (
-      <div>
-          { data ?
-      <div className="w-full h-[30rem]">
-        <ResponsiveLine 
-          data={data}
-          margin={{ top: 20, right: 40, bottom: 50, left: 60 }}
-          xScale={{ type: "point" }}
-          yScale={{
-            type: "linear",
-            min: "auto",
-            max: "auto",
-            stacked: false,
-            reverse: false,
-          }}
-          yFormat=" >-.2f"
-          axisTop={null}
-          axisRight={null}
-          axisBottom={{
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: "",
-            legendOffset: 36,
-            legendPosition: "middle",
-            truncateTickAt: 0,
-          }}
-          axisLeft={{
-            tickSize: 5,
-            tickPadding: 5,
-            tickRotation: 0,
-            legend: "Completed",
-            legendOffset: -40,
-            legendPosition: "middle",
-            truncateTickAt: 0,
+    <div>
+      {data ? (
+        <div className="w-full h-[30rem]">
+          <ResponsiveLine
+            enableArea
+            areaOpacity={0.1}
+            curve="monotoneX"
+            data={data}
+            margin={{ top: 20, right: 40, bottom: 50, left: 60 }}
+            xScale={{ type: "point" }}
+            yScale={{
+              type: "linear",
+              min: "auto",
+              max: "auto",
+              stacked: false,
+              reverse: false,
             }}
-          colors={{ scheme: 'category10' }}
-          pointSize={10}
-          pointColor={{ from: 'color', modifiers: [] }}
-          pointBorderWidth={2}
-          pointBorderColor={{ from: "serieColor" }}
-          pointLabel="data.yFormatted"
-          pointLabelYOffset={-12}
-          enableTouchCrosshair={true}
-          useMesh={true}
-          legends={[
-            {
-              anchor: "top-right",
-              direction: "column",
-              justify: false,
-              translateX: 0,
-              translateY: 0,
-              itemsSpacing: 0,
-              itemDirection: "left-to-right",
-              itemWidth: 80,
-              itemHeight: 20,
-              itemOpacity: 1,
-              symbolSize: 12,
-              symbolShape: "circle",
-              symbolBorderColor: "rgba(0, 0, 0, .5)",
-              effects: [
-                {
-                  on: "hover",
-                  style: {
-                    itemBackground: "rgba(0, 0, 0, .03)",
-                    itemOpacity: 1,
+            yFormat=" >-.2f"
+            axisTop={null}
+            axisRight={null}
+            axisBottom={{
+              tickSize: 5,
+              tickPadding: 5,
+              tickRotation: 0,
+              legend: "",
+              legendOffset: 36,
+              legendPosition: "middle",
+              truncateTickAt: 0,
+            }}
+            axisLeft={{
+              tickSize: 5,
+              tickPadding: 5,
+              tickRotation: 0,
+              legend: "Completed",
+              legendOffset: -40,
+              legendPosition: "middle",
+              truncateTickAt: 0,
+            }}
+            colors={{ scheme: "category10" }}
+            pointSize={10}
+            pointColor={{ from: "color", modifiers: [] }}
+            pointBorderWidth={2}
+            pointBorderColor={{ from: "serieColor" }}
+            pointLabel="data.yFormatted"
+            pointLabelYOffset={-12}
+            enableTouchCrosshair={true}
+            useMesh={true}
+            legends={[
+              {
+                anchor: "top-right",
+                direction: "column",
+                justify: false,
+                translateX: 0,
+                translateY: 0,
+                itemsSpacing: 0,
+                itemDirection: "left-to-right",
+                itemWidth: 80,
+                itemHeight: 20,
+                itemOpacity: 1,
+                symbolSize: 12,
+                symbolShape: "circle",
+                symbolBorderColor: "rgba(0, 0, 0, .5)",
+                effects: [
+                  {
+                    on: "hover",
+                    style: {
+                      itemBackground: "rgba(0, 0, 0, .03)",
+                      itemOpacity: 1,
+                    },
                   },
-                },
-              ],
-            },
-          ]}
-                  />
-
-              </div>
-              : <></>
-            }
+                ],
+              },
+            ]}
+          />
+        </div>
+      ) : (
+        <></>
+      )}
     </div>
   );
 }

@@ -1,6 +1,6 @@
 import { getToken } from 'next-auth/jwt';
-import dbconnect from "@/lib/dbconnect";
 import ApiResponse from '@/helpers/ApiResponse';
+import { db } from '@/db/drizzle';
 
 export async function GET(req) {
     const secret = process.env.JWT_SECRET;
@@ -10,73 +10,108 @@ export async function GET(req) {
     }
 
     try {
-        const pool = dbconnect();
-
-        // Combined query for both activity and revision tables for the last 7 days
-        const [rows] = await pool.execute(`
-        (
-            SELECT 'activity' AS id, DAYNAME(end) AS x, COUNT(*) AS y
-            FROM activity
-            WHERE owner = ? AND end BETWEEN NOW() - INTERVAL 6 DAY AND NOW() 
-            GROUP BY x
-        )
-        UNION ALL
-        (
-            SELECT 'revision' AS id, DAYNAME(end) AS x, COUNT(*) AS y
-            FROM revision
-            WHERE owner = ? AND end BETWEEN NOW() - INTERVAL 6 DAY AND NOW()
-            GROUP BY x
-        )
-        ORDER BY FIELD(x, 'Monday', 'Tuesday', 'Wednesday', 'Thursday', 'Friday', 'Saturday', 'Sunday');
-        `, [token.id, token.id]);
-
-        // Get today's day index
-        const today = new Date().getDay(); // 0 for Sunday, 1 for Monday, ..., 6 for Saturday
-
-        // Array of abbreviated weekdays starting from the day after today
-        const weekdays = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
-        const orderedWeekdays = weekdays.slice(today + 1).concat(weekdays.slice(0, today + 1));
-
-        // Initialize data structures for activity and revision with zero counts
-        const activityData = orderedWeekdays.map(day => ({ x: day, y: 0 }));
-        const revisionData = orderedWeekdays.map(day => ({ x: day, y: 0 }));
-
-        // Fill in the data from the query results
-        rows.forEach(row => {
-            const dayMap = {
-                'Sunday': 'Sun',
-                'Monday': 'Mon',
-                'Tuesday': 'Tue',
-                'Wednesday': 'Wed',
-                'Thursday': 'Thu',
-                'Friday': 'Fri',
-                'Saturday': 'Sat'
-            };
-
-            const shortDay = dayMap[row.x];
-            const dayIndex = orderedWeekdays.indexOf(shortDay);
-            if (dayIndex !== -1) {
-                if (row.id === 'activity') {
-                    activityData[dayIndex].y = row.y;
-                } else if (row.id === 'revision') {
-                    revisionData[dayIndex].y = row.y;
+        // Fetch activities and revisions for the last 6 days
+        const result = await db.query.users.findFirst({
+            columns: {},
+            with: {
+                activities: {
+                    where: (activities, { between, sql }) => between(activities.end, sql`NOW() - INTERVAL 6 DAY`, sql`NOW()`),
+                    columns: {
+                        end: true,
+                    },
+                },
+                revisions: {
+                    where: (revisions, { between, sql }) => between(revisions.end, sql`NOW() - INTERVAL 6 DAY`, sql`NOW()`),
+                    columns: {
+                        end: true,
+                    },
                 }
-            }
+                ,
+                dailyActivitiesScheduleds: {
+                    where: (dailyActivitiesScheduleds, { between, sql, and, eq }) => and(
+                        between(dailyActivitiesScheduleds.startDate, sql`NOW() - INTERVAL 6 DAY`, sql`NOW()`),
+                        eq(dailyActivitiesScheduleds.isCompleted, true)
+
+                    ),
+                    columns: {
+                        startDate: true
+                    },
+                }
+
+            },
+            where: (user, { eq }) => eq(user.id, token.id)
         });
+
+
+        // Helper function to get the name of the day
+        const getDayName = (date) => ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'][date.getDay()];
+
+        // Helper function to get the dates for the last 6 days
+        const getLast6Days = () => {
+            const days = [];
+            for (let i = 6; i >= 0; i--) {
+                const date = new Date();
+                date.setDate(date.getDate() - i);
+                days.push({
+                    dayName: getDayName(date),
+                    date,
+                });
+            }
+            return days;
+        };
+
+        const processResults = (data) => {
+            return data.reduce((acc, item) => {
+                const dayName = getDayName(new Date(item.end || item.startDate));
+                acc[dayName] = (acc[dayName] || 0) + 1;
+                return acc;
+            }, {});
+        };
+
+        const activityCounts = processResults(result.activities);
+        const revisionCounts = processResults(result.revisions);
+        const dailyActivitiesScheduledsCounts = processResults(result.dailyActivitiesScheduleds);
+
+        // Get the last 6 days in the correct order
+        const last6Days = getLast6Days();
+
+        // Map the results to match the last 6 days
+        const activityResult = last6Days.map(({ dayName }) => ({
+            id: 'activity',
+            x: dayName,
+            y: activityCounts[dayName] || 0,
+        }));
+
+        const revisionResult = last6Days.map(({ dayName }) => ({
+            id: 'revision',
+            x: dayName,
+            y: revisionCounts[dayName] || 0,
+        }));
+        const dailyActivitiesScheduledsResult = last6Days.map(({ dayName }) => ({
+            id: 'DailyActivity',
+            x: dayName,
+            y: dailyActivitiesScheduledsCounts[dayName] || 0,
+        }));
 
         // Format the final response for Nivo
         const response = [
             {
                 id: 'activity',
                 color: 'hsl(81, 70%, 50%)',
-                data: activityData
+                data: activityResult
             },
             {
                 id: 'revision',
                 color: 'hsl(70, 70%, 50%)',
-                data: revisionData
+                data: revisionResult
+            },
+            {
+                id: 'DailyActivity',
+                color: 'hsl(70, 70%, 50%)',
+                data: dailyActivitiesScheduledsResult
             }
         ];
+
 
         return Response.json(ApiResponse.success(200, response, "Data fetched successfully"), { status: 200 });
 

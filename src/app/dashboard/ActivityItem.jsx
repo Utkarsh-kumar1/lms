@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
 import { Trash2 } from "lucide-react";
@@ -101,12 +101,15 @@ export const ActivityItem = ({ activity }) => {
           }`}
         />
         {/* Delete Button */}
-        <button
-          onClick={() => setIsModalOpen(true)}
-          className=" text-white rounded"
-        >
-          <Trash2 className="w-5 h-5 " color="red" />
-        </button>
+        {new Date().toDateString() ===
+          new Date(activity.startDate).toDateString() && (
+          <button
+            onClick={() => setIsModalOpen(true)}
+            className=" text-white rounded"
+          >
+            <Trash2 className="w-5 h-5 " color="red" />
+          </button>
+        )}
       </div>
 
       {/* Modal for Confirmation */}

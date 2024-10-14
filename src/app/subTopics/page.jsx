@@ -39,11 +39,9 @@ async function fetchSubtopics(owner) {
       where : (subject , {eq})=>eq(subject.owner , owner )
     })
 
-    // console.log(JSON.stringify(subjects, null , 2));
     
     return subjects;
   } catch (error) {
-    console.log(error);
     
     throw new Error("Error while fetching subtopic");
   }

@@ -30,7 +30,6 @@ async function fetchSubject(id) {
     return subjects;
     
   } catch (error) {
-    console.log(error);
     
     throw new Error("Error while fetching Data");
   }

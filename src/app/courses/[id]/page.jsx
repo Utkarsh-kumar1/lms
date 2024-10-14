@@ -37,7 +37,6 @@ async function fetchSubject(owner, courseId) {
 
     return subjects.filter(subject=>subject.courses.length > 0 );
   } catch (error) {
-    console.log(error);
 
     throw new Error("Error while fetching Data");
   }

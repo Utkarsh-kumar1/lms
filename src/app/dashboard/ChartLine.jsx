@@ -1,6 +1,5 @@
 import { ResponsiveLine } from "@nivo/line";
 import React, { useEffect, useState } from "react";
-// import { ResponsiveLine } from '@nivo/line';
 
 export default function ChartLine() {
   const [data, setData] = useState(null);
@@ -12,6 +11,9 @@ export default function ChartLine() {
       setData(null);
       const response = await fetch("/api/chartLine");
       const result = await response.json();
+
+      // console.log(JSON.stringify(result.data , null , 2));
+      
       // console.log(result.data);
       setData(result.data);
     };

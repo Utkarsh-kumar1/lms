@@ -40,7 +40,6 @@ export async function POST(request) {
             }
         }
     } catch (error) {
-        console.log(error);
 
         return Response.json(ApiResponse.error(400, "Error while connection to Database"), { status: 400 })
     }
@@ -89,7 +88,6 @@ export async function POST(request) {
             where: (user, { eq }) => eq(user.id, insertedUser[0].id)
         });
 
-        console.log(user);
 
         const token = jwt.sign({ userId: user.id, username: user.username, userOtp: user.otp }, process.env.JWT_SECRET, { expiresIn: '5m' });
 

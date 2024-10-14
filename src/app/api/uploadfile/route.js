@@ -23,7 +23,6 @@ export async function POST(req) {
         if (!file) {
             return NextResponse.json(ApiResponse.error(400, 'No file Found'), { status: 400 });
         }
-        // console.log(file , type , typeId);
 
         if (topicId && !subjectId && !courseId) {
 
@@ -39,7 +38,6 @@ export async function POST(req) {
         }
 
 
-        console.log(topicId, subjectId, courseId);
 
 
         // Check if the subject exists and belongs to the user
@@ -60,7 +58,6 @@ export async function POST(req) {
             )
         });
 
-        console.log(JSON.stringify(subject, null, 2));
 
 
         // Initialize isOwner to false

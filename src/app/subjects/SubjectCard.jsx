@@ -88,7 +88,6 @@ const SubjectCard = ({ subject }) => {
 
   const handleDeleteClick = async () => {
     const { success, error } = await DeleteSubjectAction(subject.id);
-    console.log(success, error);
     if (success) {
       setIsModalOpen(false);
       setIsEditModalOpen(false);

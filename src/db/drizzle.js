@@ -14,4 +14,4 @@ const poolConnection = mysql.createPool({
     port: process.env.DB_PORT
 });
 
-export const db = drizzle(poolConnection, { schema, logger: true, mode: "default" });
+export const db = drizzle(poolConnection, { schema , mode: "default" });

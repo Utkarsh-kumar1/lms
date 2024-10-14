@@ -14,8 +14,8 @@ export const revisionView = mysqlTable("RevisionView", {
 
 export const activity = mysqlTable("activity", {
 	id: char("id", { length: 36 }).notNull(),
-	owner: char("owner", { length: 36 }).notNull().references(() => users.id, { onUpdate: "cascade"  , onDelete : "restrict"}),
-	subTopic: char("subTopic", { length: 36 }).notNull().references(() => subtopics.id, { onUpdate: "cascade" , onDelete : "restrict" }),
+	owner: char("owner", { length: 36 }).notNull().references(() => users.id, { onUpdate: "cascade", onDelete: "restrict" }),
+	subTopic: char("subTopic", { length: 36 }).notNull().references(() => subtopics.id, { onUpdate: "cascade", onDelete: "restrict" }),
 	start: timestamp("start", { mode: 'string' }).defaultNow().notNull(),
 	end: timestamp("end", { mode: 'string' }),
 	session: int("session").notNull(),
@@ -54,7 +54,7 @@ export const course = mysqlTable("course", {
 	});
 
 export const dailyActivitiesScheduled = mysqlTable("dailyActivitiesScheduled", {
-	id: char("id", { length: 36 }).notNull(),
+	id: char("id", { length: 36 }).notNull().$defaultFn(()=>uuidv4()),
 	owner: char("owner", { length: 36 }).notNull().references(() => users.id, { onUpdate: "cascade" }),
 	startDate: timestamp("startDate", { mode: 'string' }).defaultNow().notNull(),
 	task: varchar("task", { length: 50 }).notNull(),
@@ -119,7 +119,7 @@ export const notes = mysqlTable("notes", {
 	});
 
 export const revision = mysqlTable("revision", {
-	id: char("id", { length: 36 }).notNull().$defaultFn(()=>uuidv4()),
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
 	subtopic: char("subtopic", { length: 36 }).references(() => subtopics.id, { onUpdate: "cascade" }).notNull(),
 	start: timestamp("start", { mode: 'string' }).defaultNow().notNull(),
 	end: timestamp("end", { mode: 'string' }),
@@ -152,10 +152,10 @@ export const subject = mysqlTable("subject", {
 	});
 
 export const subtopics = mysqlTable("subtopics", {
-	id: char("id", { length: 36 }).notNull().$defaultFn(()=>uuidv4()),
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
 	subtopicName: varchar("subtopicName", { length: 255 }).notNull(),
 	subTopicIndex: int("subTopicIndex").notNull(),
-	topic: char("topic", { length: 36 }).references(() => topics.id, { onUpdate: "cascade"  , onDelete : "restrict"}).notNull(),
+	topic: char("topic", { length: 36 }).references(() => topics.id, { onUpdate: "cascade", onDelete: "restrict" }).notNull(),
 	isCompleted: boolean("isCompleted").notNull().default(false),
 },
 	(table) => {
@@ -275,7 +275,8 @@ export const usersRelations = relations(users, ({ many }) => ({
 	dailyActivitiesScheduleds: many(dailyActivitiesScheduled),
 	revisions: many(revision),
 	subjects: many(subject),
-	notes: many(notes)
+	notes: many(notes),
+	dailyActivitiesScheduledsView: many(dailyActivitiesScheduledView)
 }));
 
 export const courseRelations = relations(course, ({ one, many }) => ({
@@ -299,6 +300,13 @@ export const subjectRelations = relations(subject, ({ one, many }) => ({
 export const dailyActivitiesScheduledRelations = relations(dailyActivitiesScheduled, ({ one }) => ({
 	user: one(users, {
 		fields: [dailyActivitiesScheduled.owner],
+		references: [users.id]
+	}),
+}));
+
+export const dailyActivitiesScheduledViewRelations = relations(dailyActivitiesScheduledView, ({ one }) => ({
+	user: one(users, {
+		fields: [dailyActivitiesScheduledView.owner],
 		references: [users.id]
 	}),
 }));

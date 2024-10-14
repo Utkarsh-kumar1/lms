@@ -1,149 +1,163 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import React, { useRef, useState, useEffect } from "react";
+import { LoaderCircle, Plus} from "lucide-react";
 import axios from "axios";
-import {
-  Table,
-  TableBody,
-  TableCaption,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from "@/components/ui/table";
-import ActivityDataRow from "./ActivityDataRow";
+import { AddActivity } from "@/actions/AddActivity";
+import { useOptimistic } from "react";
+import { ActivityItem } from "./ActivityItem";
 
-const fetchActivities = async (date) => {
-  const response = await axios.get(
-    `/api/dailyActivities?date=${date
-      .split(", ")[0]
-      .split("/")
-      .reverse()
-      .join("-")}`
-  );
-  return response.data.data;
-};
+function DailyActivities({ userData }) {
+  const [showPrevious, setShowPrevious] = useState(false);
+  const [date, setDate] = useState(new Date());
+  const [isLoading, setIsLoading] = useState(false);
+  const [previousDayActivities, setPreviousDayActivities] = useState([]);
+  const [activityCache, setActivityCache] = useState({}); // Cache to store fetched activities
+  const formRef = useRef();
 
-function formatDate(inputDate) {
-  const months = [
-    "Jan",
-    "Feb",
-    "Mar",
-    "Apr",
-    "May",
-    "Jun",
-    "Jul",
-    "Aug",
-    "Sep",
-    "Oct",
-    "Nov",
-    "Dec",
-  ];
-  // Split the date and time string
-  const timePart =
-    inputDate.split(", ")[1] ??
-    new Date().toLocaleTimeString("en-GB", { timeZone: "Asia/Kolkata" });
-  const [day, month, year] = inputDate.split(",")[0].split("/");
-
-  // Create a new Date object using the parsed values
-  const formattedDate = new Date(`${year}-${month}-${day}T${timePart}`);
-
-  // Get the day of the week
-  const dayOfWeek = formattedDate.toLocaleString("en-US", {
+  const formattedDate = date.toLocaleDateString("en-US", {
     weekday: "long",
-    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "long",
+    day: "numeric",
   });
 
-  return `${dayOfWeek}, ${day} ${months[parseInt(month) - 1]} ${year}`;
-}
+  const [optimisticActivities, addOptimisticActivities] = useOptimistic(
+    userData.dailyActivitiesScheduledsView,
+    (state, newActivity) => [...state, newActivity]
+  );
 
-export default function DailyActivities({ activities, setActivities }) {
-  const [isLoading, setIsLoading] = useState(true);
-  const [date, setDate] = useState(
-    new Date().toLocaleString("en-GB", { timeZone: "Asia/Kolkata" })
-  ); // Default to today
-
+  // Effect to trigger API call when the date changes
   useEffect(() => {
-    const loadData = async () => {
-      setIsLoading(true);
-      const data = await fetchActivities(date);
-      setActivities(data);
-      setIsLoading(false);
-    };
-    loadData();
-  }, [date, setActivities]);
+    const fetchActivities = async () => {
+      try {
+        const formattedDate = date.toISOString().split("T")[0]; // Format as YYYY-MM-DD
 
-  const handlePreviousDay = () => {
-    const oneDayAgo = new Date(
-      new Date(date.split(", ")[0].split("/").reverse().join("-")).setDate(
-        date.split(", ")[0].split("/")[0] - 1
-      )
-    ).toLocaleDateString("en-GB", { timeZone: "Asia/Kolkata" });
-    setDate(oneDayAgo);
+        // Check if activities for the current date are already cached
+        if (activityCache[formattedDate]) {
+          setPreviousDayActivities(activityCache[formattedDate]); // Use cached data
+          return;
+        }
+
+        setIsLoading(true);
+        const {
+          data: { data },
+        } = await axios.get(`/api/dailyActivities?date=${formattedDate}`);
+
+        // Store fetched activities in cache
+        setActivityCache((prevCache) => ({
+          ...prevCache,
+          [formattedDate]: data,
+        }));
+
+        setPreviousDayActivities(data);
+        setIsLoading(false);
+      } catch (error) {
+        console.error("Error fetching previous day activities:", error);
+        setIsLoading(false);
+      }
+    };
+
+    if (showPrevious) {
+      fetchActivities(); // Fetch activities if we're showing the previous day
+    }
+  }, [date, showPrevious]);
+
+  // Handle show previous day activities
+  const handleShowPrevious = () => {
+    setDate((prevDate) => {
+      const newDate = new Date(prevDate);
+      newDate.setDate(prevDate.getDate() - 1);
+      return newDate;
+    });
+    setShowPrevious(true);
   };
 
-  const handleToday = () => {
-    setDate(new Date().toLocaleString("en-GB", { timeZone: "Asia/Kolkata" }));
+  // Handle showing today's activities
+  const handleShowToday = () => {
+    setShowPrevious(false);
+    setDate(new Date());
   };
 
   return (
-    <div className=" overflow-y-auto max-h-96 mx-auto rounded-lg">
-      <div className="mb-6">
-        <div className="flex justify-between gap-4 mb-4">
-          <button
-            onClick={handlePreviousDay}
-            className="px-4 py-2 bg-gray-200 text-gray-800 rounded-lg hover:bg-gray-300 transition-colors"
-          >
-            See Previous Day
-          </button>
-          <button
-            onClick={handleToday}
-            className="px-4 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors"
-          >
-            See Today
-          </button>
-        </div>
-        <p className=" font-bold">{formatDate(date)}</p>
+    <>
+      <div className="text-xl font-bold text-gray-800 mb-4 text-center">
+        Daily Activities
       </div>
-      <div className=" overflow-auto max-h-64">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead className="w-[100px]">Task</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead>Streak</TableHead>
-              <TableHead>Action</TableHead>
-            </TableRow>
-          </TableHeader>
-
-          <TableBody>
-            {isLoading === false ? (
-              activities?.length > 0 ? (
-                activities.map((activity, index) => (
-                  <ActivityDataRow activity={activity} key={index} />
-                ))
-              ) : (
-                <TableRow>
-                  <TableCell
-                    colSpan="3"
-                    className="text-center py-4 text-gray-500"
-                  >
-                    No activities found for the day.
-                  </TableCell>
-                </TableRow>
-              )
+      {/* Add New Activity */}
+      <form
+        className="flex items-center mb-6"
+        action={async (e) => {
+          const activityName = e.get("newActivity");
+          showPrevious && setShowPrevious(false);
+          addOptimisticActivities({
+            id: Math.random(),
+            owner: userData.id,
+            task: activityName,
+            startDate: new Date().toISOString().split("T")[0],
+            isCompleted: 0,
+            streak: 0,
+            isBestStreak: null,
+          });
+          AddActivity(activityName).then(({ error, success }) => {});
+          formRef.current.reset();
+        }}
+        ref={formRef}
+      >
+        <input
+          type="text"
+          placeholder="Add New Activity"
+          className="flex-1 p-2 border border-gray-300 rounded-lg"
+          name="newActivity"
+        />
+        <button
+          type="submit"
+          className="bg-blue-500 text-white p-2 ml-2 rounded-lg hover:bg-blue-600"
+        >
+          <Plus className="w-5 h-5" />
+        </button>
+      </form>
+      {/* Toggle Show Previous Day Activity */}
+      <div className="flex justify-between items-center mb-4">
+        <button
+          onClick={handleShowPrevious}
+          className="text-white bg-gray-500 px-4 py-2 rounded-lg hover:bg-gray-600"
+        >
+          Show Previous
+        </button>
+        <button
+          onClick={handleShowToday}
+          className="text-white bg-gray-500 px-4 py-2 rounded-lg hover:bg-gray-600"
+        >
+          Today
+        </button>
+      </div>
+      {/* Display Activities */}
+      <p className="font-bold mb-4">{formattedDate}</p>
+      <div className="overflow-auto max-h-[400px] border border-gray-200 rounded-lg p-1 sm:p-4 bg-gray-50  ">
+        {!showPrevious ? (
+          optimisticActivities?.map((activity) => (
+            <ActivityItem key={activity.id} activity={activity} />
+          ))
+        ) : (
+          <>
+            {isLoading ? (
+              <div className="flex flex-col items-center justify-center gap-4 p-6 bg-gray-100 rounded-lg shadow-md min-h-[350px]">
+                <LoaderCircle
+                  className="animate-spin text-blue-600"
+                  size={36}
+                />
+                <p>Loading previous day activities...</p>
+              </div>
             ) : (
-              <TableRow>
-                <TableCell
-                  colSpan="3"
-                  className="text-center py-4 text-gray-500"
-                >
-                  Loading ...
-                </TableCell>
-              </TableRow>
+              previousDayActivities?.map((activity) => (
+                <ActivityItem key={activity.id} activity={activity} />
+              ))
             )}
-          </TableBody>
-        </Table>
+          </>
+        )}
       </div>
-    </div>
+    </>
   );
 }
+
+export default DailyActivities;

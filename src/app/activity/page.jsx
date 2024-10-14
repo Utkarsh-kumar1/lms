@@ -5,15 +5,10 @@ import Topics from "./Topics";
 import { db } from "@/db/drizzle";
 
 async function fetchActivity(id) {
-  // const pool = dbconnect();
-  // const [data] = await pool.execute(
-  //   "SELECT courseName, topics FROM activityView WHERE userId = ?",
-  //   [id]
-  // );
+
   const data = await db.query.activityView.findMany({
     where: (activityview, { eq }) => eq(activityview.userId, id),
   });
-  console.log(JSON.stringify(data, null, 2));
 
   return data;
 }

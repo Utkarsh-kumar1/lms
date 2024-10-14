@@ -13,7 +13,6 @@ export async function PATCH(req) {
 
     const { status, subtopicId, activityId } = await req.json();
 
-    console.log(status, subtopicId, activityId);
 
     if (status == null || !subtopicId || !activityId) {
         return Response.json(ApiResponse.error(400, "status , subtopicId and  activityId is required"), { status: 400 })

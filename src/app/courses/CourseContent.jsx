@@ -72,7 +72,6 @@ export default function CourseContent({ subjects , isShowSubjectName = true }) {
         setErrors((prev) => ({ ...prev, errorWhileSavingData: "" }));
       }
     } catch (err) {
-      console.log(err);
       
       setErrors((prev) => ({
         ...prev,

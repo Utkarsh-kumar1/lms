@@ -118,13 +118,11 @@ export default function TopicContent({ subjects = [] }) {
                 .map((topic) => topic.trim());
               const subjectId = e.get("subjectId");
               const courseId = e.get("courseId");
-              console.log(topicNameArray, subjectId, courseId);
               const { error, success } = await AddTopics(
                 topicNameArray,
                 subjectId,
                 courseId
               );
-              console.log(error, success);
 
               if (success) {
                 setIsAddingTopic(false);

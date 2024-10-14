@@ -23,11 +23,9 @@ async function fetchSubject(id) {
       where: (subject, { eq }) => eq(subject.owner, id),
       orderBy: (subject, { asc }) => [asc(subject.subjectName)],
     });
-    console.log(JSON.stringify(subjects,null , 2));
     
     return subjects;
   } catch (error) {
-    console.log(error);
     
     throw new Error("Error while fetching Data");
   }

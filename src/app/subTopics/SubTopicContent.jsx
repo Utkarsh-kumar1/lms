@@ -134,9 +134,7 @@ export default function SubTopicContent({ subjects = [] }) {
               const subjectId = e.get("subjectId");
               const courseId = e.get("courseId");
               const topicId = e.get("topicId");
-              console.log(subtopicNames, subjectId, courseId);
               const { error, success } = await AddSubTopics(subtopicNames , subjectId , courseId , topicId)
-              console.log(error, success);
 
               if (success) {
                 setIsAddingTopic(false);

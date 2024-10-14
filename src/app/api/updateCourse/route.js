@@ -70,7 +70,6 @@ export async function PATCH(req) {
         return Response.json({ status: 200, message: "Update successful" });
 
     } catch (error) {
-        console.log(error);
 
 
 

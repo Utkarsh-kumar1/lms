@@ -24,14 +24,7 @@ export const authOptions = {
                         throw new Error(validationResponse.error.errors[0].message)
                     }
 
-                    const fieldName = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentials.usernameOrEmail) ? "email" : "username";
-
-
-
-
-                    // const pool = dbconnect();
-
-                    // const [user] = await pool.execute(`SELECT id , username , firstName , lastName, userPassword , isVerified from users where ${fieldName} = ?; `, [credentials.usernameOrEmail])
+                    const fieldName = /^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(credentials.usernameOrEmail) ? "email" : "username"
 
                     const user = await db.query.users.findFirst({
                         where: (user, { eq, and,or, sql }) =>or(
@@ -40,7 +33,6 @@ export const authOptions = {
                         )
                     })
 
-                    console.log(user);
                     
 
                     if (!user) {

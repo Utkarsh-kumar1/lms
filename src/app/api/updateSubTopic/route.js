@@ -44,7 +44,6 @@ export async function PATCH(req) {
 
         const subtopic = subject[0].courses[0].topics[0].subtopics[0]
 
-        console.log(subtopic.subtopicName);
 
 
         if (subtopic.subtopicName === subtopicName && subtopic.isCompleted === isCompleted) {
@@ -69,7 +68,6 @@ export async function PATCH(req) {
         return Response.json({ status: 200, message: "Update successful" }, { status: 200 });
 
     } catch (error) {
-        console.log(error);
 
 
         return Response.json(ApiResponse.error(500, "Error while updating Subtopic "), { status: 500 })

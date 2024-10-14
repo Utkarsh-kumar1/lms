@@ -34,7 +34,6 @@ async function fetchTopics(id) {
     })
     return subjects;
   } catch (error) {
-    console.log(error);
     
     throw new Error("Error while fetching Topics");
   }

@@ -1,5 +1,4 @@
 import { getToken } from 'next-auth/jwt';
-import dbconnect from "@/lib/dbconnect"
 import ApiResponse from '@/helpers/ApiResponse';
 import { db } from '@/db/drizzle';
 import { revision } from '@/db/schema';

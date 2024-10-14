@@ -72,12 +72,12 @@ export async function POST(request) {
         const insertedUser = await db
             .insert(users)
             .values({
-                username,
-                email,
-                firstName,
-                lastName,
-                userPassword: hashedPassword,
-                otp: userOtp,
+                username: username.trim(),
+                email: email.trim(),
+                firstName: firstName.trim(),
+                lastName: lastName.trim(),
+                userPassword: hashedPassword.trim(),
+                otp: userOtp.trim(),
                 otpExpiry: otpExpiry
             }).$returningId();
 
@@ -106,9 +106,9 @@ export async function POST(request) {
 
 
     } catch (error) {
-    console.error("Database insert error:", error);
-    return Response.json(ApiResponse.error(500, "Internal Server Error"), { status: 500 });
-}
+        console.error("Database insert error:", error);
+        return Response.json(ApiResponse.error(500, "Internal Server Error"), { status: 500 });
+    }
 
 
 

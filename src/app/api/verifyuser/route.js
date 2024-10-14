@@ -3,7 +3,9 @@ import { cookies } from 'next/headers'
 import jwt from "jsonwebtoken"
 import ApiResponse from '@/helpers/ApiResponse'
 import { z } from "zod";
-import dbconnect from '@/lib/dbconnect';
+import { db } from '@/db/drizzle';
+import { users } from '@/db/schema';
+import { eq } from 'drizzle-orm';
 
 const otpSchema = z.object({
     OTP: z.string({ required_error: "Username is required" })
@@ -29,52 +31,52 @@ export async function PATCH(request) {
     if (!otpValidation.success) {
         return Response.json(ApiResponse.error(400, otpValidation.error.errors[0].message), { status: 400 })
     }
-    const pool = dbconnect();
     //check for otp expiry
-    let data;
     try {
-        [data] = await pool.execute("select otp , otpExpiry , isVerified from users where id = ?", [decodedToken.userId || null])
-        if (data[0].isVerified == true)
-        {
+        const data = await db.query.users.findFirst({
+            where: (user, { eq }) => eq(user.id, decodedToken.id)
+        })
+        if (data.isVerified == true) {
             return Response.json(ApiResponse.error(400, "User is already Verified"), { status: 400 })
         }
         //check for otp in token and otp in request should be same
         if (decodedToken.userOtp !== OTP) {
             return Response.json(ApiResponse.error(400, "OTP is invalid Regenerate OTP"), { status: 400 })
         }
+
+        if (!data) {
+            return Response.json(ApiResponse.error(400, "Wrong token"), { status: 400 })
+        }
+        const otpExpiry = new Date(data.otpExpiry);
+        const currentDate = new Date();
+
+        if (currentDate.getTime() > otpExpiry.getTime()) {
+            return Response.json(ApiResponse.error(400, "Otp expired || timed out"), { status: 400 })
+        }
+
+        //match the otp from database
+        if (OTP !== data.otp) {
+            return Response.json(ApiResponse.error(400, "Invalid otp"), { status: 400 })
+        }
+        //if otp expiry and otp are true the marked user verified in db
+        try {
+
+            await db.update(users).set({ isVerified: true, otp: null }).where(eq(users.id, decodedToken.id))
+            try {
+                const updateduser = await db.query.users.findFirst({
+                    where: (user, { eq }) => eq(user.id, decodedToken.id)
+                })
+                return Response.json(ApiResponse.success(200, updateduser, "User verified successfully"), { status: 200 })
+            } catch (error) {
+                return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
+            }
+
+        } catch (error) {
+            return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
+        }
+
     } catch (error) {
         return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
     }
-
-    if (data.length == 0) {
-        return Response.json(ApiResponse.error(400, "Wrong token"), { status: 400 })
-    }
-    const otpExpiry = new Date(data[0].otpExpiry);
-    const currentDate = new Date();
-
-    if (currentDate.getTime() > otpExpiry.getTime()) {
-        return Response.json(ApiResponse.error(400, "Otp expired || timed out"), { status: 400 })
-    }
-
-    //match the otp from database
-    if (OTP !== data[0].otp) {
-        return Response.json(ApiResponse.error(400, "Invalid otp"), { status: 400 })
-    }
-    //if otp expiry and otp are true the marked user verified in db
-    try {
-        const update = await pool.execute("UPDATE users SET isVerified = True , otp = null where id = ?", [decodedToken.userId])
-    } catch (error) {
-        return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
-    }
-
-    let updateduser;
-    try {
-        [updateduser] = await pool.execute("SELECT id , userName , email , firstName , lastName from users where id = ?", [decodedToken.userId])
-
-    } catch (error) {
-        return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
-    }
-
-    return Response.json(ApiResponse.success(200, updateduser[0], "User verified successfully"), { status: 200 })
 
 }

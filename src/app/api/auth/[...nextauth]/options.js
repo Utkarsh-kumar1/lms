@@ -2,7 +2,6 @@
 import CredentialsProvider from "next-auth/providers/credentials"
 
 import bcrypt from "bcrypt"
-import dbconnect from "@/lib/dbconnect"
 import SignInSchema from "@/Schema/signInSchema"
 import { db } from "@/db/drizzle"
 

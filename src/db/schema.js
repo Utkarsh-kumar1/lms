@@ -54,7 +54,7 @@ export const course = mysqlTable("course", {
 	});
 
 export const dailyActivitiesScheduled = mysqlTable("dailyActivitiesScheduled", {
-	id: char("id", { length: 36 }).notNull().$defaultFn(()=>uuidv4()),
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
 	owner: char("owner", { length: 36 }).notNull().references(() => users.id, { onUpdate: "cascade" }),
 	startDate: timestamp("startDate", { mode: 'string' }).defaultNow().notNull(),
 	task: varchar("task", { length: 50 }).notNull(),
@@ -210,12 +210,12 @@ export const users = mysqlTable("users", {
 	avatarUrl: varchar("avatarUrl", { length: 255 }),
 	userPassword: varchar("userPassword", { length: 255 }).notNull(),
 	refreshToken: varchar("refreshToken", { length: 255 }),
-	spaceRepetition: json("spaceRepetition").$default(() => JSON.stringify([])),
+	spaceRepetition: json("spaceRepetition").$default(() => []),
 	activityScheduleCount: int("ActivityScheduleCount").default(4),
 	otp: varchar("otp", { length: 4 }),
 	isVerified: boolean("isVerified").notNull().default(0),
 	otpExpiry: varchar("otpExpiry", { length: 100 }),
-	tasks: json("tasks").$default(() => JSON.stringify([])),
+	tasks: json("tasks").$default(() => []),
 },
 	(table) => {
 		return {

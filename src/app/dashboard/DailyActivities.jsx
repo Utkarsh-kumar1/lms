@@ -108,6 +108,7 @@ function DailyActivities({ userData }) {
           placeholder="Add New Activity"
           className="flex-1 p-2 border border-gray-300 rounded-lg"
           name="newActivity"
+          required
         />
         <button
           type="submit"

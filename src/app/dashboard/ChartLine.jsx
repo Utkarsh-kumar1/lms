@@ -1,23 +1,7 @@
 import { ResponsiveLine } from "@nivo/line";
 import React, { useEffect, useState } from "react";
 
-export default function ChartLine() {
-  const [data, setData] = useState(null);
-
-  useEffect(() => {
-    const fetchData = async () => {
-      try {
-        const response = await fetch("/api/chartLine");
-        const result = await response.json();
-
-        setData(result.data);
-      } catch (error) {
-        
-      }
-    };
-
-    fetchData();
-  }, []);
+export default function ChartLine({data}) {
 
   return (
     <div>

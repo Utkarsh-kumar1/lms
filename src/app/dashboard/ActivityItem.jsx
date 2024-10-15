@@ -37,7 +37,7 @@ export const ActivityItem = ({ activity }) => {
     return () => {
       clearTimeout(handler);
     };
-  }, [isCompleted]);
+  }, [isCompleted, activity.id, activity.isCompleted, router]);
 
   const handleDelete = async () => {
     // Call the server action to delete the activity

@@ -63,8 +63,9 @@ export async function POST(request) {
 
         // send new otp to email
         try {
-            await sendUserVeficationMail(user.firstName + " " + user.lastName, user.email, newOtp);
+            await sendUserVeficationMail(userData.firstName + " " + userData.lastName, userData.email, newOtp);
         } catch (error) {
+
             return Response.json(ApiResponse.error(500, "Error while sending Mail"), { status: 500 });
         }
 
@@ -93,7 +94,7 @@ export async function POST(request) {
                 path: '/',
             });
 
-            return Response.json(ApiResponse.success(200, { username: user.username, email: user.email }, "OTP Resent successfully"), { status: 200 });
+            return Response.json(ApiResponse.success(200, { username: userData.username, email: userData.email }, "OTP Resent successfully"), { status: 200 });
         } catch (error) {
             return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 });
         }

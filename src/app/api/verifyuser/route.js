@@ -18,6 +18,7 @@ export async function PATCH(request) {
     //get jwt token from user and check it
     const cookieStore = cookies()
     const token = cookieStore.get('token')
+
     let decodedToken;
     try {
         decodedToken = jwt.verify(token.value, process.env.JWT_SECRET);
@@ -34,14 +35,17 @@ export async function PATCH(request) {
     //check for otp expiry
     try {
         const data = await db.query.users.findFirst({
-            where: (user, { eq }) => eq(user.id, decodedToken.id)
+            where: (user, { eq }) => eq(user.id, decodedToken.userId)
+
         })
+
         if (data.isVerified == true) {
             return Response.json(ApiResponse.error(400, "User is already Verified"), { status: 400 })
         }
+
         //check for otp in token and otp in request should be same
         if (decodedToken.userOtp !== OTP) {
-            return Response.json(ApiResponse.error(400, "OTP is invalid Regenerate OTP"), { status: 400 })
+            return Response.json(ApiResponse.error(400, "OTP is invalid"), { status: 400 })
         }
 
         if (!data) {
@@ -50,7 +54,7 @@ export async function PATCH(request) {
         const otpExpiry = new Date(data.otpExpiry);
         const currentDate = new Date();
 
-        if (currentDate.getTime() > otpExpiry.getTime()) {
+        if (currentDate.getTime() >= otpExpiry.getTime()) {
             return Response.json(ApiResponse.error(400, "Otp expired || timed out"), { status: 400 })
         }
 
@@ -61,7 +65,7 @@ export async function PATCH(request) {
         //if otp expiry and otp are true the marked user verified in db
         try {
 
-            await db.update(users).set({ isVerified: true, otp: null }).where(eq(users.id, decodedToken.id))
+            await db.update(users).set({ isVerified: true, otp: null }).where(eq(users.id, decodedToken.userId))
             try {
                 const updateduser = await db.query.users.findFirst({
                     where: (user, { eq }) => eq(user.id, decodedToken.id)
@@ -72,10 +76,12 @@ export async function PATCH(request) {
             }
 
         } catch (error) {
+
             return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
         }
 
     } catch (error) {
+
         return Response.json(ApiResponse.error(400, error.sqlMessage), { status: 400 })
     }
 

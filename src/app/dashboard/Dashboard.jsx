@@ -11,7 +11,7 @@ export default function Dashboard({ userData }) {
         <div className="text-lg font-bold text-gray-800 mt-4 mx-auto text-center">
           Weekly Activities and Revision Chart
         </div>
-        <ChartLine className="h-[30rem]" />
+        <ChartLine className="h-[30rem]" data={userData.chartLineData} />
       </div>
       <div className="bg-white shadow-md rounded-lg p-3 sm:p-6">
         <DailyActivities userData={userData} />

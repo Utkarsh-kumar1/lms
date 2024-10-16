@@ -88,9 +88,7 @@ export const ActivityItem = ({ activity }) => {
         </span>
         <Switch
           disabled={
-            isProcessing ||
-            new Date().toDateString() !==
-              new Date(activity.startDate).toDateString()
+            isProcessing
           }
           checked={isCompleted}
           onCheckedChange={(status) => {

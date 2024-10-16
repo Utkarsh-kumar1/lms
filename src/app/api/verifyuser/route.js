@@ -20,6 +20,9 @@ export async function PATCH(request) {
     const token = cookieStore.get('token')
 
     let decodedToken;
+    if (!token) {
+        return Response.json(ApiResponse.error(400, "Something went wrong || clear cookies and try again "), { status: 400 });
+        }
     try {
         decodedToken = jwt.verify(token.value, process.env.JWT_SECRET);
     } catch (error) {
@@ -68,7 +71,7 @@ export async function PATCH(request) {
             await db.update(users).set({ isVerified: true, otp: null }).where(eq(users.id, decodedToken.userId))
             try {
                 const updateduser = await db.query.users.findFirst({
-                    where: (user, { eq }) => eq(user.id, decodedToken.id)
+                    where: (user, { eq }) => eq(user.id, decodedToken.userId)
                 })
                 return Response.json(ApiResponse.success(200, updateduser, "User verified successfully"), { status: 200 })
             } catch (error) {

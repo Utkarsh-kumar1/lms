@@ -95,7 +95,6 @@ export async function POST(request) {
             name: 'token',
             value: token,
             httpOnly: true,
-            secure: process.env.NODE_ENV === 'production',  // only send over HTTPS
             sameSite: 'strict',  // prevent CSRF
             path: '/',
         });

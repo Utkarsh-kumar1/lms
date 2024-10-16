@@ -88,7 +88,8 @@ export const ActivityItem = ({ activity }) => {
         </span>
         <Switch
           disabled={
-            isProcessing
+            isProcessing ||
+            (new Date() - new Date(activity.startDate)) / (1000 * 60 * 60 * 24) > 7
           }
           checked={isCompleted}
           onCheckedChange={(status) => {

@@ -19,7 +19,7 @@ import {
 import DataRow from "./DataRow";
 import FileUploadModal from "./FileUploadModal";
 import clsx from "clsx";
-function Topics({ topic, topicIndex, courseId, subjectId }) {
+function Topics({ topic, topicIndex, courseId, subjectId, subtopics }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFileViewOpen, setIsFileViewOpen] = useState(false);
 
@@ -32,7 +32,7 @@ function Topics({ topic, topicIndex, courseId, subjectId }) {
     >
       <AccordionItem value={`item-${topicIndex}`} className="border rounded-lg">
         <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out shadow-md flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-300">
-          <span>{topic.topicName}</span>
+          <span>{topic.topicIndex + ". " + topic.topicName}</span>
 
           <div className="flex items-center gap-4 ml-auto mr-4">
             <FilePlus2
@@ -108,7 +108,7 @@ function Topics({ topic, topicIndex, courseId, subjectId }) {
 
             <TableBody>
               {/* Render each subtopic using DataRow */}
-              {topic.subtopics?.map((subtopic, subIndex) => (
+              {subtopics?.map((subtopic, subIndex) => (
                 <DataRow
                   key={subIndex}
                   subtopic={subtopic}

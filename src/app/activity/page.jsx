@@ -3,9 +3,9 @@ import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import Topics from "./Topics";
 import { db } from "@/db/drizzle";
-import CreateNewActivities from "./CreateNewActivities";
 import { activity, course, subject, subtopics, topics } from "@/db/schema";
-import { and, eq, not, sql } from "drizzle-orm";
+import { and, eq, isNull, not, or, sql } from "drizzle-orm";
+import { raw } from "mysql2";
 
 async function getAllCourses(userId) {
   try {
@@ -24,8 +24,6 @@ async function getAllCourses(userId) {
           not(eq(course.isCompleted, true))
         )
       );
-    console.log(courses);
-    // console.log("logged");
     return courses;
   } catch (error) {
     console.error("Error fetching courses:", error);
@@ -34,7 +32,13 @@ async function getAllCourses(userId) {
 }
 
 // Function to get topics by course ID with pagination
-const getTopicsByCourse = async (courseId, sessionNo, limit = 1, offset = 0) => {
+const getTopicsByCourse = async (
+  courseId,
+  courseName,
+  sessionNo,
+  limit = 1,
+  offset = 0
+) => {
   try {
     const data = await db
       .select({
@@ -46,7 +50,7 @@ const getTopicsByCourse = async (courseId, sessionNo, limit = 1, offset = 0) => 
         subTopicIndex: subtopics.subTopicIndex,
       })
       .from(topics)
-      .leftJoin(subtopics, eq(subtopics.topic, topics.id)) 
+      .leftJoin(subtopics, eq(subtopics.topic, topics.id))
       .leftJoin(
         activity,
         and(
@@ -54,17 +58,26 @@ const getTopicsByCourse = async (courseId, sessionNo, limit = 1, offset = 0) => 
           eq(activity.session, sessionNo)
         )
       )
-      .where(and(
-        eq(topics.course, courseId),
-        not(eq(topics.isCompleted, true)),
-        not(eq(subtopics.isCompleted, true)),
-                sql`activity.id IS NULL`
-      ))
+      .where(
+        and(
+          eq(topics.course, courseId),
+          not(eq(topics.isCompleted, true)),
+          not(eq(subtopics.isCompleted, true)),
+          sql`activity.id IS NULL`
+        )
+      )
       .orderBy(topics.topicIndex, subtopics.subTopicIndex)
       .limit(limit)
       .offset(offset);
 
-    return data;
+    const dataWithAllFields = data.map((d) => ({
+      courseId: courseId,
+      courseName: courseName,
+      courseSession: sessionNo,
+      ...d,
+    }));
+
+    return dataWithAllFields;
   } catch (error) {
     console.error("Error fetching topics and subtopics:", error);
   }
@@ -76,12 +89,16 @@ const fetchCoursesAndTopics = async (userId) => {
     const courses = await getAllCourses(userId);
     const coursesWithTopics = await Promise.all(
       courses.map(async (course) => {
-        const topicsData = await getTopicsByCourse(course.courseId, course.session);
-        return { ...course, subtopics: topicsData };
+        const topicsData = await getTopicsByCourse(
+          course.courseId,
+          course.courseName,
+          course.session
+        );
+        return topicsData;
       })
     );
-    console.log(coursesWithTopics);
-    return coursesWithTopics;
+
+    return coursesWithTopics.flat();
   } catch (error) {
     // setError('Failed to fetch data');
   }
@@ -90,11 +107,35 @@ const fetchCoursesAndTopics = async (userId) => {
 async function fetchActivity(id) {
   const coursesAndTopicsToSchedule = await fetchCoursesAndTopics(id);
 
-  const data = await db.query.activityView.findMany({
-    where: (activityview, { eq }) => eq(activityview.userId, id),
-  });
-
-  return data;
+  const data = await db
+    .select({
+      courseId: course.id,
+      courseName: course.courseName,
+      topicId: topics.id,
+      topicName: topics.topicName,
+      topicIndex: topics.topicIndex,
+      subtopicId: subtopics.id,
+      subtopicName: subtopics.subtopicName,
+      subTopicIndex: subtopics.subTopicIndex,
+      activityId: activity.id,
+      activityStart: activity.start,
+      activityEnd: activity.end,
+    })
+    .from(course)
+    .innerJoin(topics, eq(topics.course, course.id))
+    .innerJoin(subtopics, eq(subtopics.topic, topics.id))
+    .innerJoin(activity, eq(activity.subTopic, subtopics.id))
+    .where(
+      and(
+        or(
+          eq(raw("Date(activity.start)"), raw("CURDATE()")),
+          isNull(activity.end)
+        ),
+        eq(activity.owner, id)
+      )
+    )
+    .orderBy(course.created, topics.topicIndex, subtopics.subTopicIndex);
+  return [...data, ...coursesAndTopicsToSchedule];
 }
 
 export default async function ProtectedPage() {
@@ -105,7 +146,6 @@ export default async function ProtectedPage() {
     return null;
   }
 
-  const coursesAndTopicsToSchedule = await fetchCoursesAndTopics(session.id);
   const activity = await fetchActivity(session.id);
 
   if (!activity || activity.length === 0) {
@@ -116,29 +156,56 @@ export default async function ProtectedPage() {
 
   return (
     <div className="container mx-auto p-4 min-h-screen">
-      <CreateNewActivities data={coursesAndTopicsToSchedule} />
-      {activity?.map((course, courseIndex) => {
-        const topics = course.topics;
-        return (
-          <div
-            key={`course-${courseIndex}`}
-            className="mb-8 p-4 bg-white border border-gray-200 rounded-lg shadow-md"
-          >
-            <h2 className="text-3xl font-extrabold mb-4 text-blue-600">
-              {course.courseName}
-            </h2>
-            {topics?.map((topic, topicIndex) => (
-              <Topics
-                topic={topic}
-                topicIndex={topicIndex}
-                key={topicIndex}
-                subjectId={course.subjectId}
-                courseId={course.courseId}
-              />
-            ))}
-          </div>
-        );
-      })}
+      {
+        // Filter unique courses from the flat JSON data
+        activity
+          .filter(
+            (course, index, self) =>
+              self.findIndex((c) => c.courseId === course.courseId) === index
+          )
+          .map((course, courseIndex) => {
+            // Filter topics related to the current course
+            const topics = activity.filter(
+              (activity) => activity.courseId === course.courseId
+            );
+
+            return (
+              <div
+                key={`course-${courseIndex}`}
+                className="mb-8 p-4 bg-white border border-gray-200 rounded-lg shadow-md"
+              >
+                <h2 className="text-3xl font-extrabold mb-4 text-blue-600">
+                  {course.courseName}
+                </h2>
+                {topics
+                  .filter(
+                    (topic, index, self) =>
+                      self.findIndex((t) => t.topicId === topic.topicId) ===
+                      index
+                  )
+                  .map((topic, topicIndex) => {
+                    // Filter subtopics for the current topic
+                    const subtopics = activity.filter(
+                      (activity) =>
+                        activity.courseId === course.courseId &&
+                        activity.topicId === topic.topicId
+                    );
+
+                    return (
+                      <Topics
+                        key={`topic-${topicIndex}`}
+                        topic={topic}
+                        topicIndex={topicIndex}
+                        subjectId={course.subjectId}
+                        courseId={course.courseId}
+                        subtopics={subtopics} // Pass filtered subtopics
+                      />
+                    );
+                  })}
+              </div>
+            );
+          })
+      }
     </div>
   );
 }

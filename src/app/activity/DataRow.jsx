@@ -38,13 +38,6 @@ export default function DataRow({ subtopic, subIndex }) {
 
     const { error, success } = await CreateActivity(subtopic.subtopicId, subtopic.courseSession);
 
-    // if (success) {
-    //   // router.refresh();
-    // }
-    // else {
-    //   // console.log(error);
-    // }
-
   }
 
   useEffect(() => {

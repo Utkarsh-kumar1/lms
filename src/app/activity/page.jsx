@@ -152,7 +152,6 @@ async function fetchActivity(id) {
       )
     )
     .orderBy(course.created, topics.topicIndex, subtopics.subTopicIndex);
-  // console.log(...data, ...coursesAndTopicsToSchedule);
   return [...data, ...coursesAndTopicsToSchedule];
 }
 
@@ -165,7 +164,6 @@ export default async function ProtectedPage() {
   }
 
   const activity = await fetchActivity(session.id);
-  console.log(activity);
 
   if (!activity || activity.length === 0) {
     return (

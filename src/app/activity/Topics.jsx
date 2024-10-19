@@ -22,10 +22,6 @@ import clsx from "clsx";
 function Topics({topicIndex, topics }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFileViewOpen, setIsFileViewOpen] = useState(false);
-
-  console.log("Subject" ,topics[0].subjectId);
-  console.log("Coures", topics[0].courseId);
-  console.log("Topics", topics[0].topicId);
   
 
   return (

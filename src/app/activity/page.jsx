@@ -128,7 +128,7 @@ async function fetchActivity(id) {
     .where(
       and(
         or(
-          eq(raw("Date(activity.start)"), raw("CURDATE()")),
+          eq(raw("Date(activity.end)"), raw("CURDATE()")),
           isNull(activity.end)
         ),
         eq(activity.owner, id)

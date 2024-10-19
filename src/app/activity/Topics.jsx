@@ -1,6 +1,6 @@
 "use client"; // Ensure the component runs on the client side
 
-import React, { useState } from "react";
+import React, { useEffect, useState } from "react";
 import { FilePenLine, FilePlus2, NotebookPen } from "lucide-react"; // Import the FilePlus2 icon from lucide-react
 import {
   Table,
@@ -19,10 +19,23 @@ import {
 import DataRow from "./DataRow";
 import FileUploadModal from "./FileUploadModal";
 import clsx from "clsx";
-function Topics({topicIndex, topics }) {
+import axios from "axios";
+function Topics({ topicIndex, topics }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFileViewOpen, setIsFileViewOpen] = useState(false);
-  
+  const [notes, setNotes] = useState(null);
+
+  useEffect(() => {
+    const fetchNotes = async() => {
+      const {
+        data: { data },
+      } = await axios.get(`/api/notesInActivity?topic=${topics[0].topicId}`)
+      setNotes(data);
+    };
+    fetchNotes();
+
+    
+  }, []);
 
   return (
     <Accordion
@@ -61,19 +74,12 @@ function Topics({topicIndex, topics }) {
               : " hidden max-h-0 opacity-0"
           )}
         >
-          { topics?.filter(
-            (notes, index, self) =>
-              self.findIndex((t) => t.notesFilename != null) === index
-          ).length > 0 ? (
+          {notes?.length > 0 ? (
             <div className="mt-2 transition-max-height duration-700 ease-in-out w-full ">
               <p className="text-sm font-semibold">Notes:</p>
               <ul className=" text-sm text-gray-700 w-full">
-                {topics
-                  ?.filter(
-                    (notes, index, self) =>
-                      self.findIndex((t) => t.notesFilename != null) === index
-                  )
-                  .map((notes, idx) => (
+                {notes
+                  ?.map((notes, idx) => (
                     <li
                       key={idx}
                       className="max-w-full truncate"

@@ -132,16 +132,16 @@ async function fetchActivity(id) {
       activityId: activity.id,
       activityStart: activity.start,
       activityEnd: activity.end,
-      notesFilename: notes.fileName,
-      notesFilePath: notes.filePath,
-      notesCreatedAt: notes.createdAt,
+      // notesFilename: notes.fileName,
+      // notesFilePath: notes.filePath,
+      // notesCreatedAt: notes.createdAt,
     })
     .from(subject)
     .innerJoin(course, eq(course.subject, subject.id))
     .innerJoin(topics, eq(topics.course, course.id))
-    .leftJoin(notes, eq(notes.topic, topics.id))
     .innerJoin(subtopics, eq(subtopics.topic, topics.id))
     .innerJoin(activity, eq(activity.subTopic, subtopics.id))
+    // .rightJoin(notes, eq(notes.topic, topics.id))
     .where(
       and(
         or(
@@ -164,6 +164,9 @@ export default async function ProtectedPage() {
   }
 
   const activity = await fetchActivity(session.id);
+  // console.log("activity");
+  // console.log(activity);
+  // console.log("activity");
 
   if (!activity || activity.length === 0) {
     return (

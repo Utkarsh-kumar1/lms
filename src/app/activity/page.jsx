@@ -3,7 +3,14 @@ import { redirect } from "next/navigation";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import Topics from "./Topics";
 import { db } from "@/db/drizzle";
-import { activity, course, subject, subtopics, topics } from "@/db/schema";
+import {
+  activity,
+  course,
+  notes,
+  subject,
+  subtopics,
+  topics,
+} from "@/db/schema";
 import { and, eq, isNull, not, or, sql } from "drizzle-orm";
 import { raw } from "mysql2";
 
@@ -11,6 +18,7 @@ async function getAllCourses(userId) {
   try {
     const courses = await db
       .select({
+        subjectId: subject.id,
         courseId: course.id,
         courseName: course.courseName,
         session: course.session,
@@ -33,6 +41,7 @@ async function getAllCourses(userId) {
 
 // Function to get topics by course ID with pagination
 const getTopicsByCourse = async (
+  subjectId,
   courseId,
   courseName,
   sessionNo,
@@ -71,6 +80,7 @@ const getTopicsByCourse = async (
       .offset(offset);
 
     const dataWithAllFields = data.map((d) => ({
+      subjectId: subjectId,
       courseId: courseId,
       courseName: courseName,
       courseSession: sessionNo,
@@ -90,6 +100,7 @@ const fetchCoursesAndTopics = async (userId) => {
     const coursesWithTopics = await Promise.all(
       courses.map(async (course) => {
         const topicsData = await getTopicsByCourse(
+          course.subjectId,
           course.courseId,
           course.courseName,
           course.session
@@ -109,6 +120,7 @@ async function fetchActivity(id) {
 
   const data = await db
     .select({
+      subjectId: subject.id,
       courseId: course.id,
       courseName: course.courseName,
       topicId: topics.id,
@@ -120,9 +132,14 @@ async function fetchActivity(id) {
       activityId: activity.id,
       activityStart: activity.start,
       activityEnd: activity.end,
+      notesFilename: notes.fileName,
+      notesFilePath: notes.filePath,
+      notesCreatedAt: notes.createdAt,
     })
-    .from(course)
+    .from(subject)
+    .innerJoin(course, eq(course.subject, subject.id))
     .innerJoin(topics, eq(topics.course, course.id))
+    .leftJoin(notes, eq(notes.topic, topics.id))
     .innerJoin(subtopics, eq(subtopics.topic, topics.id))
     .innerJoin(activity, eq(activity.subTopic, subtopics.id))
     .where(
@@ -185,7 +202,7 @@ export default async function ProtectedPage() {
                   )
                   .map((topic, topicIndex) => {
                     // Filter subtopics for the current topic
-                    const subtopics = activity.filter(
+                    const topics = activity.filter(
                       (activity) =>
                         activity.courseId === course.courseId &&
                         activity.topicId === topic.topicId
@@ -194,11 +211,10 @@ export default async function ProtectedPage() {
                     return (
                       <Topics
                         key={`topic-${topicIndex}`}
-                        topic={topic}
                         topicIndex={topicIndex}
-                        subjectId={course.subjectId}
-                        courseId={course.courseId}
-                        subtopics={subtopics} // Pass filtered subtopics
+                        // subjectId={course.subjectId}
+                        // courseId={course.courseId}
+                        topics={topics} // Pass filtered subtopics
                       />
                     );
                   })}

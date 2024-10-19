@@ -19,9 +19,14 @@ import {
 import DataRow from "./DataRow";
 import FileUploadModal from "./FileUploadModal";
 import clsx from "clsx";
-function Topics({ topic, topicIndex, courseId, subjectId, subtopics }) {
+function Topics({topicIndex, topics }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFileViewOpen, setIsFileViewOpen] = useState(false);
+
+  console.log("Subject" ,topics[0].subjectId);
+  console.log("Coures", topics[0].courseId);
+  console.log("Topics", topics[0].topicId);
+  
 
   return (
     <Accordion
@@ -32,7 +37,7 @@ function Topics({ topic, topicIndex, courseId, subjectId, subtopics }) {
     >
       <AccordionItem value={`item-${topicIndex}`} className="border rounded-lg">
         <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out shadow-md flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-300">
-          <span>{topic.topicIndex + ". " + topic.topicName}</span>
+          <span>{topics[0].topicIndex + ". " + topics[0].topicName}</span>
 
           <div className="flex items-center gap-4 ml-auto mr-4">
             <FilePlus2
@@ -60,32 +65,40 @@ function Topics({ topic, topicIndex, courseId, subjectId, subtopics }) {
               : " hidden max-h-0 opacity-0"
           )}
         >
-          {topic?.notes?.length > 0 ? (
+          { topics?.filter(
+            (notes, index, self) =>
+              self.findIndex((t) => t.notesFilename != null) === index
+          ).length > 0 ? (
             <div className="mt-2 transition-max-height duration-700 ease-in-out w-full ">
               <p className="text-sm font-semibold">Notes:</p>
               <ul className=" text-sm text-gray-700 w-full">
-                {topic.notes.map((note, idx) => (
-                  <li
-                    key={idx}
-                    className="max-w-full truncate"
-                    title={note.fileName}
-                  >
-                    <a
-                      href={`api/files/${note.filePath}`}
-                      target="_blank"
-                      className="text-blue-600 underline"
-                      rel="noopener noreferrer"
+                {topics
+                  ?.filter(
+                    (notes, index, self) =>
+                      self.findIndex((t) => t.notesFilename != null) === index
+                  )
+                  .map((notes, idx) => (
+                    <li
+                      key={idx}
+                      className="max-w-full truncate"
+                      title={notes.notesFilename}
                     >
-                      {note.fileName}
-                    </a>
-                    <p className="flex flex-col w-full text-wrap ml-3">
-                      <span className="font-bold"> Uploaded At : </span>
-                      {new Date(note.createdAt)
-                        .toString()
-                        .replace("GMT+0530 (India Standard Time)", "")}
-                    </p>
-                  </li>
-                ))}
+                      <a
+                        href={`api/files/${notes.notesFilePath}`}
+                        target="_blank"
+                        className="text-blue-600 underline"
+                        rel="noopener noreferrer"
+                      >
+                        {notes.notesFilename}
+                      </a>
+                      <p className="flex flex-col w-full text-wrap ml-3">
+                        <span className="font-bold"> Uploaded At : </span>
+                        {new Date(notes.notesCreatedAt)
+                          .toString()
+                          .replace("GMT+0530 (India Standard Time)", "")}
+                      </p>
+                    </li>
+                  ))}
               </ul>
             </div>
           ) : (
@@ -108,7 +121,7 @@ function Topics({ topic, topicIndex, courseId, subjectId, subtopics }) {
 
             <TableBody>
               {/* Render each subtopic using DataRow */}
-              {subtopics?.map((subtopic, subIndex) => (
+              {topics?.map((subtopic, subIndex) => (
                 <DataRow
                   key={subIndex}
                   subtopic={subtopic}
@@ -125,9 +138,9 @@ function Topics({ topic, topicIndex, courseId, subjectId, subtopics }) {
       <FileUploadModal
         isOpen={isModalOpen}
         setIsOpen={setIsModalOpen}
-        courseId={courseId}
-        subjectId={subjectId}
-        topicId={topic.topicId}
+        courseId={topics[0].courseId}
+        subjectId={topics[0].subjectId}
+        topicId={topics[0].topicId}
       />
     </Accordion>
   );

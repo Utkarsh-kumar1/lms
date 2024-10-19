@@ -13,7 +13,7 @@ export const revisionView = mysqlTable("RevisionView", {
 });
 
 export const activity = mysqlTable("activity", {
-	id: char("id", { length: 36 }).notNull(),
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
 	owner: char("owner", { length: 36 }).notNull().references(() => users.id, { onUpdate: "cascade", onDelete: "restrict" }),
 	subTopic: char("subTopic", { length: 36 }).notNull().references(() => subtopics.id, { onUpdate: "cascade", onDelete: "restrict" }),
 	start: timestamp("start", { mode: 'string' }).defaultNow().notNull(),
@@ -39,6 +39,7 @@ export const activityView = mysqlTable("activityView", {
 
 export const course = mysqlTable("course", {
 	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
+	created: timestamp("created", { mode: 'string' }).defaultNow().notNull(),
 	courseName: varchar("courseName", { length: 255 }).notNull(),
 	subject: char("subject", { length: 36 }).references(() => subject.id, { onUpdate: "cascade" }).notNull(),
 	isCompleted: boolean("isCompleted").default(false).notNull(),

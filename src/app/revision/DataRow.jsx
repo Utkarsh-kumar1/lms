@@ -1,6 +1,6 @@
 "use client";
 
-import React, { useEffect, useState } from "react";
+import React, { useState } from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
 import axios from "axios";
@@ -39,45 +39,28 @@ function formatDate(inputDate) {
 
 export default function DataRow({ subtopic }) {
   const [isUpdating, setIsUpdating] = useState(false);
-  const [isCompleted, setIsCompleted] = useState(!!subtopic.end);
-  const [endDate, setEndDate] = useState(subtopic.end);
+  const [isCompleted, setIsCompleted] = useState(!!subtopic.revisions[0]?.end);
+  const [endDate, setEndDate] = useState(subtopic.revisions[0]?.end);
   const router = useRouter();
-
-  useEffect(() => {
-    
-    const handler = setTimeout(() => {
-      if (isCompleted !== !!subtopic.end) {
-        setIsUpdating(true);
-        axios
-          .patch("/api/updateRevision", {
-            status: isCompleted,
-            subtopicId: subtopic.id,
-            revisionId: subtopic.revisionId,
-          })
-          .then((result) => {
-            setIsUpdating(false);
-            router.refresh(); // Or trigger state update to re-render
-          })
-          .catch((err) => {
-            setIsCompleted(!!subtopic.end);
-            setEndDate(isCompleted ? new Date() : null);
-            setIsUpdating(false);
-          });
-      }
-    }, 2000);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [isCompleted, subtopic.end, subtopic.id, subtopic.revisionId, router]);
 
   const handleChange = async (status) => {
     if (!isUpdating) {
+      setIsUpdating(true);
       setIsCompleted(status);
       if (status) {
         setEndDate(subtopic.end || new Date());
       } else {
         setEndDate(null);
+      }
+
+      try {
+        await updateActivity(subtopic.id, subtopic.revisions[0].id, status);
+        setIsUpdating(false);
+        router.refresh(); // Or trigger state update to re-render
+      } catch (error) {
+        setIsCompleted(!!subtopic.end);
+        setEndDate(isCompleted ? new Date() : null);
+        setIsUpdating(false);
       }
     }
   };
@@ -89,16 +72,16 @@ export default function DataRow({ subtopic }) {
       } hover:bg-gray-200 transition duration-150 sm:text-sm`}
     >
       <TableCell className="p-2 text-[.7rem] sm:text-base">
-        {subtopic.subtopicName}
+        {subtopic.subTopicIndex + ". " + subtopic.subtopicName}
       </TableCell>
       <TableCell className="p-2 text-[.7rem] sm:text-base">
-        {formatDate(subtopic.start)}
+        {formatDate(subtopic.revisions[0]?.start)}
       </TableCell>
       <TableCell className="p-2 text-[.7rem] sm:text-base">
         {endDate ? formatDate(endDate) : "-"}
       </TableCell>
-      <TableCell className="p-2 text-[.7rem] sm:text-base">
-        {subtopic.revisionCounter}
+      <TableCell className="p-2 text-[.7rem] sm:text-base text-center">
+        {subtopic.revisions[0]?.revisionCounter}
       </TableCell>
       <TableCell className="p-2 text-[.7rem] sm:text-base">
         <Switch

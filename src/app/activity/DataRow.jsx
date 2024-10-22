@@ -60,7 +60,7 @@ export default function DataRow({ subtopic, subIndex }) {
             setIsUpdating(false);
           });
       }
-    }, 2000);
+    }, 1);
 
     return () => {
       clearTimeout(handler);

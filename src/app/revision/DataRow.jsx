@@ -64,7 +64,7 @@ export default function DataRow({ subtopic }) {
             setIsUpdating(false);
           });
       }
-    }, 2000);
+    }, 1);
 
     return () => {
       clearTimeout(handler);

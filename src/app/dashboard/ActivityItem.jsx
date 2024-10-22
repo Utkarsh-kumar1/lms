@@ -32,7 +32,7 @@ export const ActivityItem = ({ activity }) => {
             setIsCompleted(activity.isCompleted);
           });
       }
-    }, 1500);
+    }, 1);
 
     return () => {
       clearTimeout(handler);

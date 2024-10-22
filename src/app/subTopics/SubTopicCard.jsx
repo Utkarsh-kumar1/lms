@@ -52,7 +52,7 @@ export default function SubtopicCard({
             setDebouncedIsCompleted(subtopic.isCompleted); // Ensure it's updated to original value
           });
       }
-    }, 2000); // Debounce delay of 1.5 seconds
+    }, 1); // Debounce delay of 1.5 seconds
 
     // Cleanup timeout if the component unmounts or value changes before the delay
     return () => {

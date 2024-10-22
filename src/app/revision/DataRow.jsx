@@ -43,6 +43,35 @@ export default function DataRow({ subtopic }) {
   const [endDate, setEndDate] = useState(subtopic.revisions[0]?.end);
   const router = useRouter();
 
+  useEffect(() => {
+    
+    const handler = setTimeout(() => {
+      if (isCompleted !== !!subtopic.end) {
+        setIsUpdating(true);
+        axios
+          .patch("/api/updateRevision", {
+            status: isCompleted,
+            subtopicId: subtopic.id,
+            revisionId: subtopic.revisionId,
+          })
+          .then((result) => {
+            setIsUpdating(false);
+            router.refresh(); // Or trigger state update to re-render
+          })
+          .catch((err) => {
+            setIsCompleted(!!subtopic.end);
+            setEndDate(isCompleted ? new Date() : null);
+            setIsUpdating(false);
+          });
+      }
+    }, 1);
+
+    return () => {
+      clearTimeout(handler);
+    };
+  }, [isCompleted, subtopic.end, subtopic.id, subtopic.revisionId, router]);
+
+
   const handleChange = async (status) => {
     if (!isUpdating) {
       setIsUpdating(true);

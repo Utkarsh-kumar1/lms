@@ -6,7 +6,6 @@ import { db } from "@/db/drizzle";
 import {
   activity,
   course,
-  notes,
   subject,
   subtopics,
   topics,
@@ -14,6 +13,7 @@ import {
 import { and, eq, isNull, not, or, sql } from "drizzle-orm";
 import { raw } from "mysql2";
 
+// 1. Get all active and not completed courses for user
 async function getAllCourses(userId) {
   try {
     const courses = await db
@@ -39,7 +39,7 @@ async function getAllCourses(userId) {
   }
 }
 
-// Function to get topics by course ID with pagination
+// 2. Get subtopics using courseId where the activity is not yet generated
 const getTopicsByCourse = async (
   subjectId,
   courseId,
@@ -93,7 +93,7 @@ const getTopicsByCourse = async (
   }
 };
 
-// Fetch courses and topics
+// Get subtopics where activity is not yet created using functions 1 and 2 
 const fetchCoursesAndTopics = async (userId) => {
   try {
     const courses = await getAllCourses(userId);
@@ -115,6 +115,7 @@ const fetchCoursesAndTopics = async (userId) => {
   }
 };
 
+// Get all activities which is either not completed or generated today
 async function fetchActivity(id) {
   const coursesAndTopicsToSchedule = await fetchCoursesAndTopics(id);
 
@@ -131,17 +132,13 @@ async function fetchActivity(id) {
       subTopicIndex: subtopics.subTopicIndex,
       activityId: activity.id,
       activityStart: activity.start,
-      activityEnd: activity.end,
-      // notesFilename: notes.fileName,
-      // notesFilePath: notes.filePath,
-      // notesCreatedAt: notes.createdAt,
+      activityEnd: activity.end
     })
     .from(subject)
     .innerJoin(course, eq(course.subject, subject.id))
     .innerJoin(topics, eq(topics.course, course.id))
     .innerJoin(subtopics, eq(subtopics.topic, topics.id))
     .innerJoin(activity, eq(activity.subTopic, subtopics.id))
-    // .rightJoin(notes, eq(notes.topic, topics.id))
     .where(
       and(
         or(
@@ -164,9 +161,6 @@ export default async function ProtectedPage() {
   }
 
   const activity = await fetchActivity(session.id);
-  // console.log("activity");
-  // console.log(activity);
-  // console.log("activity");
 
   if (!activity || activity.length === 0) {
     return (
@@ -175,7 +169,9 @@ export default async function ProtectedPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 min-h-screen">
+    <div className="container mx-auto p-4 min-h-screen"
+      
+    >
       {
         // Filter unique courses from the flat JSON data
         activity
@@ -215,8 +211,6 @@ export default async function ProtectedPage() {
                       <Topics
                         key={`topic-${topicIndex}`}
                         topicIndex={topicIndex}
-                        // subjectId={course.subjectId}
-                        // courseId={course.courseId}
                         topics={topics} // Pass filtered subtopics
                       />
                     );

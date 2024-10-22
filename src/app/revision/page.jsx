@@ -5,6 +5,8 @@ import { authOptions } from "../api/auth/[...nextauth]/options";
 import { db } from "@/db/drizzle";
 import { LoaderCircle } from "lucide-react";
 import dynamic from "next/dynamic";
+import { course, revision, subtopics } from "@/db/schema";
+import { eq } from "drizzle-orm";
 
 const Topics = dynamic(() => import("./Topics"), {
   ssr: false,
@@ -17,13 +19,65 @@ const Topics = dynamic(() => import("./Topics"), {
   ),
 });
 
-async function fetchActivity(id) {
+async function fetchRevision(id) {
   try {
-    const data = await db.query.revisionView.findMany({
-      where: (revision, { eq }) => eq(revision.userId, id),
+    const revisionData = await db.query.subject.findMany({
+      with: {
+        courses: {
+          with: {
+            topics: {
+              where: (topic, { exists }) =>
+                exists(
+                  db
+                    .select()
+                    .from(subtopics)
+                    .where(eq(subtopics.topic, topic.id))
+                ),
+              with: {
+                notes: true,
+                subtopics: {
+                  orderBy: (subtopic, { asc }) => [asc(subtopic.subTopicIndex)],
+                  where: (st, { exists, eq, or, isNull, and, sql }) =>
+                    exists(
+                      db
+                        .select()
+                        .from(revision)
+                        .where(
+                          and(
+                            eq(revision.subtopic, st.id),
+                            or(
+                              isNull(revision.end),
+                              sql`DATE(${revision.start}) = CURDATE()`,
+                              sql`DATE(${revision.end}) = CURDATE()`
+                            )
+                          )
+                        )
+                    ),
+                  with: {
+                    revisions: {
+                      where: (revision, { or, isNull, sql }) =>
+                        or(
+                          isNull(revision.end),
+                          sql`DATE(${revision.start}) = CURDATE()`,
+                          sql`DATE(${revision.end}) = CURDATE()`
+                        ),
+                    },
+                  },
+                },
+              },
+              orderBy: (topic, { asc }) => [asc(topic.topicIndex)],
+            },
+          },
+        },
+      },
+      where: (subject, { exists, and, eq }) =>
+        and(
+          eq(subject.owner, id),
+          exists(db.select().from(course).where(eq(course.subject, subject.id)))
+        ),
     });
 
-    return data;
+    return revisionData;
   } catch (error) {
     throw new Error("Error while fetching the Revison Data");
   }
@@ -36,29 +90,25 @@ export default async function ProtectedPage() {
     redirect("/sign-in");
   }
   try {
-    const activity = await fetchActivity(session.id);
+    const revision = await fetchRevision(session.id);
 
-    if (!activity || activity.length <= 0) {
+    if (!revision || revision.length <= 0) {
       return (
-        <p className="text-center text-gray-500">No activity data available.</p>
+        <p className="text-center text-gray-500">No revision data available.</p>
       );
     }
 
-    const data = activity.filter((data) => data.topics !== null);
-    if (data.length == 0)
+    const data = revision
+      .flatMap((data) => data.courses)
+      .map((course) => ({
+        ...course,
+        topics: course.topics.filter((topic) => topic.subtopics.length > 0),
+      }))
+      .filter((course) => course.topics.length > 0);
+
+    if (data.length <= 0)
       return (
-        <>
-          <p className="text-center text-gray-500">
-            No activity data available.
-          </p>
-          <br />
-          <button
-            type="button"
-            className="px-4 py-2 rounded-md transition-colors duration-300 shadow-sm hover:shadow-md bg-blue-500 font-bold text-xl"
-          >
-            Generate For Revision
-          </button>
-        </>
+        <p className="text-center text-gray-500">No Revision data available.</p>
       );
     return (
       <div className="container mx-auto p-4 min-h-screen">

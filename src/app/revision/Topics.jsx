@@ -18,7 +18,7 @@ import React, { useState } from "react";
 import { NotebookPen } from "lucide-react";
 import ViewNotes from "./ViewNotes";
 
- function Topics({ topic, topicIndex }) {
+function Topics({ topic, topicIndex }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
 
   return (
@@ -36,8 +36,8 @@ import ViewNotes from "./ViewNotes";
           {/* Styled Accordion Trigger */}
           <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out flex justify-between items-center">
             {/* Topic Name */}
-            <span className=" text-sm sm:text-lg font-semibold text-wrap">
-              {topic.topicName}
+            <span className=" text-sm sm:text-lg font-semibold text-wrap text-left">
+              {topic.topicIndex + ". " + topic.topicName}
             </span>
 
             {/* View Notes button with icon */}

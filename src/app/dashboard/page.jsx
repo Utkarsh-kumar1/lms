@@ -10,14 +10,14 @@ async function fetchChartLineData(id) {
     with: {
       activities: {
         where: (activities, { between, sql }) =>
-          between(activities.end, sql`NOW() - INTERVAL 6 DAY`, sql`NOW()`),
+          between(activities.end, sql`NOW() - INTERVAL 7 DAY`, sql`NOW()`),
         columns: {
           end: true,
         },
       },
       revisions: {
         where: (revisions, { between, sql }) =>
-          between(revisions.end, sql`NOW() - INTERVAL 6 DAY`, sql`NOW()`),
+          between(revisions.end, sql`NOW() - INTERVAL 7 DAY`, sql`NOW()`),
         columns: {
           end: true,
         },
@@ -27,7 +27,7 @@ async function fetchChartLineData(id) {
           and(
             between(
               dailyActivitiesScheduleds.startDate,
-              sql`NOW() - INTERVAL 6 DAY`,
+              sql`NOW() - INTERVAL 7 DAY`,
               sql`NOW()`
             ),
             eq(dailyActivitiesScheduleds.isCompleted, true)

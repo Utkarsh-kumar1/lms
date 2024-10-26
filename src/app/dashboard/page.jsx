@@ -10,14 +10,22 @@ async function fetchChartLineData(id) {
     with: {
       activities: {
         where: (activities, { between, sql }) =>
-          between(activities.end, sql`NOW() - INTERVAL 7 DAY`, sql`NOW()`),
+          between(
+            sql`DATE(${activities.end})`,
+            sql`DATE(NOW() - INTERVAL 6 DAY)`,
+            sql`DATE(NOW())`
+          ),
         columns: {
           end: true,
         },
       },
       revisions: {
         where: (revisions, { between, sql }) =>
-          between(revisions.end, sql`NOW() - INTERVAL 7 DAY`, sql`NOW()`),
+          between(
+            sql`DATE(${revisions.end})`,
+            sql`DATE(NOW() - INTERVAL 6 DAY)`,
+            sql`DATE(NOW())`
+          ),
         columns: {
           end: true,
         },
@@ -26,9 +34,9 @@ async function fetchChartLineData(id) {
         where: (dailyActivitiesScheduleds, { between, sql, and, eq }) =>
           and(
             between(
-              dailyActivitiesScheduleds.startDate,
-              sql`NOW() - INTERVAL 7 DAY`,
-              sql`NOW()`
+              sql`DATE(${dailyActivitiesScheduleds.startDate})`,
+              sql`DATE(NOW() - INTERVAL 6 DAY)`,
+              sql`DATE(NOW())`
             ),
             eq(dailyActivitiesScheduleds.isCompleted, true)
           ),
@@ -39,6 +47,7 @@ async function fetchChartLineData(id) {
     },
     where: (user, { eq }) => eq(user.id, id),
   });
+
 
   // Helper function to get the name of the day
   const getDayName = (date) =>
@@ -55,6 +64,7 @@ async function fetchChartLineData(id) {
         date,
       });
     }
+
     return days;
   };
 
@@ -92,6 +102,7 @@ async function fetchChartLineData(id) {
     x: dayName,
     y: dailyActivitiesScheduledsCounts[dayName] || 0,
   }));
+
 
   // Format the final response for Nivo
   return [
@@ -135,7 +146,7 @@ async function fetchData(id) {
 
     return userData;
   } catch (error) {
-
+    
     throw new Error("Error while fetching Data");
   }
 }

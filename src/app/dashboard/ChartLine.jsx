@@ -1,9 +1,17 @@
 import { ResponsiveLine } from "@nivo/line";
-import React, { useEffect, useState } from "react";
+import React from "react";
 
-export default function ChartLine({data}) {
+export default function ChartLine({ data }) {
+  // Check if all y-values are zero
+  const allZero = data.every((series) =>
+    series.data.every((point) => point.y === 0)
+  );
+
+  // Set the minimum Y-axis value based on whether all y-values are zero
+  const maxYValue = allZero ? 4 : "auto";
 
   return (
+    
     <div>
       {data ? (
         <div className="w-full h-[30rem]">
@@ -17,7 +25,7 @@ export default function ChartLine({data}) {
             yScale={{
               type: "linear",
               min: "auto",
-              max: "auto",
+              max: maxYValue,
               stacked: false,
               reverse: false,
             }}

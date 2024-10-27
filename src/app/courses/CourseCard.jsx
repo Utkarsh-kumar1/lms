@@ -152,7 +152,7 @@ const CourseCard = ({ course, subjectId }) => {
                   title={note.fileName}
                 >
                   <a
-                    href={`api/files/${note.filePath}`}
+                    href={`/api/files/${note.filePath}`}
                     target="_blank"
                     className="text-blue-600 underline"
                     rel="noopener noreferrer"

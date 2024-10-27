@@ -20,19 +20,21 @@ export async function POST(req) {
         const topicId = formData.get('topicId');
         const courseId = formData.get('courseId');
         const subjectId = formData.get('subjectId')
+        console.log(formData );
+        
         if (!file) {
             return NextResponse.json(ApiResponse.error(400, 'No file Found'), { status: 400 });
         }
 
-        if (topicId && !subjectId && !courseId) {
+        if (topicId && !courseId && !subjectId) {
 
             return NextResponse.json(ApiResponse.error(400, 'topicId , subjectId and courseId is required'), { status: 400 });
         }
-        else if (subjectId && !courseId) {
+        else if (courseId && !subjectId ) {
 
             return NextResponse.json(ApiResponse.error(400, 'topicId , subjectId and courseId is required'), { status: 400 });
         }
-        else if (!courseId) {
+        else if (!subjectId) {
 
             return NextResponse.json(ApiResponse.error(400, 'topicId , subjectId and courseId is required'), { status: 400 });
         }

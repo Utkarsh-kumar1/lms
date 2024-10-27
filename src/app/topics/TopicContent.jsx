@@ -35,7 +35,7 @@ export default function TopicContent({ subjects = [] }) {
       <div className="flex justify-between items-center mb-8">
         <div>
           <h1 className="text-3xl font-bold text-gray-800 mb-2">
-            Subjects & Topics
+            Courses & Topics
           </h1>
           <p className="text-gray-600">Explore your courses, and topics .</p>
         </div>

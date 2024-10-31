@@ -1,4 +1,4 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, char, varchar, json, index, foreignKey, primaryKey, timestamp, int, tinyint, bigint, unique, longtext, boolean, check } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, char, varchar, json, index, foreignKey, primaryKey, timestamp, int, tinyint, bigint, unique, longtext, boolean, check, uniqueIndex } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 import { v4 as uuidv4 } from "uuid";
 
@@ -51,6 +51,9 @@ export const course = mysqlTable("course", {
 		return {
 			course: index("course").on(table.subject),
 			courseId: primaryKey({ columns: [table.id], name: "course_id" }),
+			uniqueCourse: uniqueIndex("Unique_subject_courseName").on(table.subject, table.courseName)
+
+
 		}
 	});
 
@@ -149,6 +152,7 @@ export const subject = mysqlTable("subject", {
 		return {
 			owner: index("owner").on(table.owner),
 			subjectId: primaryKey({ columns: [table.id], name: "subject_id" }),
+			uniqueSubject : uniqueIndex("unique_user_subject").on(table.owner , table.subjectName)
 		}
 	});
 
@@ -163,6 +167,8 @@ export const subtopics = mysqlTable("subtopics", {
 		return {
 			topic: index("topic").on(table.topic),
 			subtopicsId: primaryKey({ columns: [table.id], name: "subtopics_id" }),
+			uniqueSubtopic: uniqueIndex("unique_topic_subtopic").on(table.topic, table.subtopicName)
+
 		}
 	});
 
@@ -190,6 +196,8 @@ export const topics = mysqlTable("topics", {
 		return {
 			subject: index("subject").on(table.course),
 			topicsId: primaryKey({ columns: [table.id], name: "topics_id" }),
+			uniqueTopic: uniqueIndex("unique_course_topic").on(topics.course, topics.topicName)
+
 		}
 	});
 

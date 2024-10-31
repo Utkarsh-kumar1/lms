@@ -68,22 +68,22 @@ export default function DataRow({ subtopic }) {
   return (
     <TableRow
       className={`${
-        endDate || isCompleted ? "bg-green-100" : "bg-red-100"
+        endDate || isCompleted ? "bg-green-100 dark:bg-green-900" : "bg-red-100 dark:bg-rose-500"
       } hover:bg-gray-200 transition duration-150 sm:text-sm`}
     >
-      <TableCell className="p-2 text-[.7rem] sm:text-base">
+      <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-gray-200">
         {subtopic.subTopicIndex + ". " + subtopic.subtopicName}
       </TableCell>
-      <TableCell className="p-2 text-[.7rem] sm:text-base">
+      <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-gray-200">
         {formatDate(subtopic.revisions[0]?.start)}
       </TableCell>
-      <TableCell className="p-2 text-[.7rem] sm:text-base">
+      <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-gray-200">
         {endDate ? formatDate(endDate) : "-"}
       </TableCell>
-      <TableCell className="p-2 text-[.7rem] sm:text-base text-center">
+      <TableCell className="p-2 text-[.7rem] sm:text-base text-center dark:text-gray-200">
         {subtopic.revisions[0]?.revisionCounter}
       </TableCell>
-      <TableCell className="p-2 text-[.7rem] sm:text-base">
+      <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-gray-200">
         <Switch
           className="bg-slate-50"
           disabled={isUpdating}

@@ -31,12 +31,12 @@ function Topics({ topic, topicIndex }) {
       >
         <AccordionItem
           value={`item-${topicIndex}`}
-          className="border rounded-lg"
+          className="border rounded-lg "
         >
           {/* Styled Accordion Trigger */}
-          <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out flex justify-between items-center">
+          <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out flex justify-between items-center decoration-black dark:bg-blue-700">
             {/* Topic Name */}
-            <span className=" text-sm sm:text-lg font-semibold text-wrap text-left">
+            <span className=" text-sm sm:text-lg font-semibold text-wrap text-left dark:text-black decoration-slate-600  ">
               {topic.topicIndex + ". " + topic.topicName}
             </span>
 
@@ -50,8 +50,8 @@ function Topics({ topic, topicIndex }) {
                 setIsModalOpen(!isModalOpen);
               }}
             >
-              <NotebookPen className="text-white" />
-              <p className="text-sm text-white">Notes</p>
+              <NotebookPen className="text-white dark:text-black" />
+              <p className="text-sm text-white dark:text-black">Notes</p>
             </div>
           </AccordionTrigger>
           {/* Modal for viewing notes */}
@@ -60,9 +60,9 @@ function Topics({ topic, topicIndex }) {
           )}
 
           {/* Accordion Content */}
-          <AccordionContent className="bg-gray-100 sm:p-4 rounded-b-lg p-0">
+          <AccordionContent className="bg-gray-100 sm:p-4 rounded-b-lg p-0 dark:bg-gray-600">
             <Table className="w-full">
-              <TableHeader>
+              <TableHeader className="dark:bg-gray-500">
                 <TableRow>
                   <TableHead className="font-bold text-[.7rem]">
                     SubTopic

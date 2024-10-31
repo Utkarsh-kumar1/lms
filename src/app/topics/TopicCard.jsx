@@ -144,8 +144,8 @@ export default function TopicCard({ topic, subjectId, courseId }) {
   };
 
   return (
-    <div className="bg-gray-50 p-4 rounded-md shadow-sm mb-4"
-    onDoubleClick={()=>router.push(`/topics/${topic.id}`)}>
+    <div className="bg-gray-50 p-4 rounded-md shadow-sm mb-4 cursor-pointer"
+    onDoubleClick={()=>router.push(`/topics/${topic.topicName}`)}>
       <div className="flex items-center justify-between">
         <h4 className="text-sm sm:text-lg font-semibold text-gray-700">
           {topic.topicIndex}. {topic.topicName}

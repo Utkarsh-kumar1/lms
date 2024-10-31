@@ -101,11 +101,11 @@ const SubjectCard = ({ subject }) => {
     <>
       <div
         className={clsx(
-          "p-4 mb-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[101%] flex flex-col sm:flex-row items-center gap-4 justify-between overflow-auto",
+          "p-4 mb-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[101%] flex flex-col sm:flex-row items-center gap-4 justify-between overflow-auto cursor-pointer",
           getColor()
         )}
         onDoubleClick={() => {
-          router.push(`/subjects/${subject.id}`);
+          router.push(`/subjects/${subject.subjectName}`);
         }}
       >
         <div className="flex w-full flex-col">

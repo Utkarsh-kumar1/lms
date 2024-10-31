@@ -89,7 +89,7 @@ export default function CourseContent({ subjects , isShowSubjectName = true }) {
     <div className="p-8 bg-gray-100 min-h-screen flex flex-col">
       {/* Header */}
       <div className="flex items-center justify-between">
-        <h1 className="text-3xl font-bold text-gray-800">Courses</h1>
+        <h1 className="text-3xl font-bold text-gray-800">Subjects &  Courses</h1>
         <button
           className="text-blue-500 hover:text-blue-700 transition"
           onClick={() => setIsAddingCourse(true)}

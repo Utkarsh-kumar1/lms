@@ -18,7 +18,6 @@ export async function AddCourse(subjectId, courseNames) {
         else if (courseNames.length <= 0) {
             return { error: "CourseNames is required " }
         }
-        console.log(subjectId, courseNames);
 
         const insertValues = courseNames.map((courseName) => ({ courseName, subject: subjectId }))
 
@@ -26,6 +25,11 @@ export async function AddCourse(subjectId, courseNames) {
 
 
     } catch (error) {
+        if (error.code == "ER_DUP_ENTRY") {
+            return {
+                error: "Subject Already exists"
+            }
+        }
         // Return a plain object with a serializable error message
         return {
             error: error.message || "Something Went Wrong"

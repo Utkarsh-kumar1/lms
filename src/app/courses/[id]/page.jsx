@@ -16,6 +16,8 @@ const TopicContent = dynamic(() => import("@/app/topics/TopicContent"), {
   ),
 });
 async function fetchSubject(owner, courseId) {
+  console.log(courseId);
+
   try {
     const subjects = await db.query.subject.findMany({
       with: {
@@ -25,18 +27,20 @@ async function fetchSubject(owner, courseId) {
               with: {
                 notes: true,
               },
-              orderBy  : (topic , {asc})=>[asc(topic.topicIndex)]
+              orderBy: (topic, { asc }) => [asc(topic.topicIndex)],
             },
-
           },
-          where : (course , {eq})=>eq(course.id , courseId)
+          where: (course, { eq }) => eq(course.courseName, courseId),
         },
       },
       where: (course, { eq }) => eq(course.owner, owner),
     });
 
-    return subjects.filter(subject=>subject.courses.length > 0 );
+    console.log(JSON.stringify(subjects, null, 2));
+
+    return subjects.filter((subject) => subject.courses.length > 0);
   } catch (error) {
+    console.log(error);
 
     throw new Error("Error while fetching Data");
   }
@@ -48,7 +52,10 @@ export default async function page({ params }) {
     return <div>Unauthorized Access</div>;
   }
   try {
-    const subjects = await fetchSubject(session.id, params.id);
+    const subjects = await fetchSubject(
+      session.id,
+      decodeURIComponent(params.id)
+    );
     if (subjects.length === 0) {
       return <div>No subjects Found</div>;
     }

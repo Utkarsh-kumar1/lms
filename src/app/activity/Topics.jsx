@@ -45,7 +45,7 @@ function Topics({ topicIndex, topics }) {
       className="mb-4"
     >
       <AccordionItem value={`item-${topicIndex}`} className="border rounded-lg">
-        <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out shadow-md flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-300">
+        <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out shadow-md flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-lg">
           <span>{topics[0].topicIndex + ". " + topics[0].topicName}</span>
 
           <div className="flex items-center gap-4 ml-auto mr-4">
@@ -78,29 +78,28 @@ function Topics({ topicIndex, topics }) {
             <div className="mt-2 transition-max-height duration-700 ease-in-out w-full ">
               <p className="text-sm font-semibold">Notes:</p>
               <ul className=" text-sm text-gray-700 w-full">
-                {notes
-                  ?.map((notes, idx) => (
-                    <li
-                      key={idx}
-                      className="max-w-full truncate"
-                      title={notes.notesFilename}
+                {notes?.map((notes, idx) => (
+                  <li
+                    key={idx}
+                    className="max-w-full truncate"
+                    title={notes.notesFilename}
+                  >
+                    <a
+                      href={`api/files/${notes.notesFilePath}`}
+                      target="_blank"
+                      className="text-blue-600 underline"
+                      rel="noopener noreferrer"
                     >
-                      <a
-                        href={`api/files/${notes.notesFilePath}`}
-                        target="_blank"
-                        className="text-blue-600 underline"
-                        rel="noopener noreferrer"
-                      >
-                        {notes.notesFilename}
-                      </a>
-                      <p className="flex flex-col w-full text-wrap ml-3">
-                        <span className="font-bold"> Uploaded At : </span>
-                        {new Date(notes.notesCreatedAt)
-                          .toString()
-                          .replace("GMT+0530 (India Standard Time)", "")}
-                      </p>
-                    </li>
-                  ))}
+                      {notes.notesFilename}
+                    </a>
+                    <p className="flex flex-col w-full text-wrap ml-3">
+                      <span className="font-bold"> Uploaded At : </span>
+                      {new Date(notes.notesCreatedAt)
+                        .toString()
+                        .replace("GMT+0530 (India Standard Time)", "")}
+                    </p>
+                  </li>
+                ))}
               </ul>
             </div>
           ) : (
@@ -108,16 +107,22 @@ function Topics({ topicIndex, topics }) {
           )}
         </div>
 
-        <AccordionContent className="bg-gray-100 sm:p-4 p-2 rounded-b-lg">
+        <AccordionContent className="bg-gray-100 sm:p-4 p-2 rounded-b-lg dark:bg-gray-600 ">
           <Table className="w-full">
             <TableHeader>
-              <TableRow>
-                <TableHead className="font-bold text-[.7rem]">
+              <TableRow className="dark:text-white">
+                <TableHead className="font-bold text-[.7rem] dark:text-white ">
                   SubTopic
                 </TableHead>
-                <TableHead className="font-bold text-[.7rem]">Start</TableHead>
-                <TableHead className="font-bold text-[.7rem]">End</TableHead>
-                <TableHead className="font-bold text-[.7rem]">Action</TableHead>
+                <TableHead className="font-bold text-[.7rem] dark:text-white">
+                  Start
+                </TableHead>
+                <TableHead className="font-bold text-[.7rem] dark:text-white">
+                  End
+                </TableHead>
+                <TableHead className="font-bold text-[.7rem] dark:text-white">
+                  Action
+                </TableHead>
               </TableRow>
             </TableHeader>
 

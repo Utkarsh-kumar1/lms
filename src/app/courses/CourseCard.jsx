@@ -103,7 +103,7 @@ const CourseCard = ({ course, subjectId }) => {
       className="bg-gray-50 p-4 rounded-md shadow-sm mb-4 w-full cursor-pointer"
       onDoubleClick={(e) =>{
         e.preventDefault()
-         router.push(`/courses/${course.id}`)}}
+         router.push(`/courses/${course.courseName}`)}}
     >
       <div className="flex items-center justify-between">
         <h4 className={`text-sm sm:text-lg font-semibold ${isActive ? "text-gray-700 " : "text-gray-400" }`}>
@@ -152,7 +152,7 @@ const CourseCard = ({ course, subjectId }) => {
                   title={note.fileName}
                 >
                   <a
-                    href={`api/files/${note.filePath}`}
+                    href={`/api/files/${note.filePath}`}
                     target="_blank"
                     className="text-blue-600 underline"
                     rel="noopener noreferrer"

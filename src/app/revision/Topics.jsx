@@ -34,9 +34,9 @@ function Topics({ topic, topicIndex }) {
           className="border rounded-lg "
         >
           {/* Styled Accordion Trigger */}
-          <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out flex justify-between items-center decoration-black dark:bg-blue-700">
+          <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out flex justify-between items-center dark:bg-blue-700">
             {/* Topic Name */}
-            <span className=" text-sm sm:text-lg font-semibold text-wrap text-left dark:text-black decoration-slate-600  ">
+            <span className=" text-sm sm:text-lg font-semibold text-wrap text-left   ">
               {topic.topicIndex + ". " + topic.topicName}
             </span>
 
@@ -50,8 +50,8 @@ function Topics({ topic, topicIndex }) {
                 setIsModalOpen(!isModalOpen);
               }}
             >
-              <NotebookPen className="text-white dark:text-black" />
-              <p className="text-sm text-white dark:text-black">Notes</p>
+              <NotebookPen className="text-white" />
+              <p className="text-sm text-white ">Notes</p>
             </div>
           </AccordionTrigger>
           {/* Modal for viewing notes */}

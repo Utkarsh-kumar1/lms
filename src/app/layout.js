@@ -3,6 +3,10 @@ import "./globals.css";
 import AuthProvider from "@/context/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
+import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
+import { AppSidebar } from "@/components/AppSidebar";
+import { ThemeProvider } from "@/context/theme-provider";
+
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -13,18 +17,29 @@ export const metadata = {
 
 export default function RootLayout({ children }) {
   return (
-    <html lang="en">
+    <html lang="en" suppressHydrationWarning>
       <link rel="icon" href="/logo.jpeg" sizes="any" />
-      <body className={`${inter.className} h-screen overflow-x-hidden`}>
+      <body className={`${inter.className} h-screen overflow-x-hidden `}>
+        <ThemeProvider
+          attribute="class"
+          defaultTheme="system"
+          enableSystem
+          disableTransitionOnChange
+        >
         <AuthProvider>
-          <Header />
-          <div className="pt-16"> {/* Adjust pt-16 to match the height of your header */}
-            <div className="flex items-center flex-col h-full overflow-hidden ">
-              {children} 
-            </div>
-          </div>
+          <SidebarProvider defaultOpen={false} >
+            <AppSidebar />
+            <main className=" w-full bg-gray-100 ">
+
+              <Header/>
+              {children}
+            </main>
+          </SidebarProvider>
+          
+
           <Toaster />
         </AuthProvider>
+        </ThemeProvider>
       </body>
     </html>
   );

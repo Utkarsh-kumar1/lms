@@ -169,7 +169,7 @@ export default async function ProtectedPage() {
   }
 
   return (
-    <div className="container mx-auto p-4 min-h-screen"
+    <div className="container mx-auto p-4 min-h-screen dark:bg-gray-800"
       
     >
       {
@@ -188,7 +188,7 @@ export default async function ProtectedPage() {
             return (
               <div
                 key={`course-${courseIndex}`}
-                className="mb-8 p-4 bg-white border border-gray-200 rounded-lg shadow-md"
+                className="mb-8 p-4 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-slate-800"
               >
                 <h2 className="text-3xl font-extrabold mb-4 text-blue-600">
                   {course.courseName}

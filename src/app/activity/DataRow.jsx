@@ -72,6 +72,7 @@ export default function DataRow({ subtopic, subIndex }) {
     subtopic.revisionId,
     router,
     subtopic.activityId,
+    subtopic.subtopicId
   ]);
 
   const handleChange = async (status) => {
@@ -89,24 +90,26 @@ export default function DataRow({ subtopic, subIndex }) {
     <>
       <TableRow
         key={subIndex}
-        className={`${
-          endDate || isCompleted ? "bg-green-100" : "bg-red-100"
-        } hover:bg-gray-200 transition duration-150 sm:text-sm`}
+        className={` dark:text-white ${
+          endDate || isCompleted ? "bg-green-100 dark:bg-green-400" : "bg-red-100 dark:bg-red-300"
+        } hover:bg-gray-200 transition duration-150 sm:text-sm `}
       >
-        <TableCell className="p-2 text-[.7rem] sm:text-base">
+        <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-white">
           {subtopic.subTopicIndex + ". " + subtopic.subtopicName}
         </TableCell>
         <TableCell className="p-2 text-[.7rem] sm:text-base">
           {subtopic.activityStart ? (
             formatDate(subtopic.activityStart)
           ) : (
-              <button className="px-3 py-1 text-sm font-medium text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 active:bg-blue-700"
-              onClick={handleCreateActivity}>
+            <button
+              className="px-3 py-1 text-sm font-medium text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 active:bg-blue-700"
+              onClick={handleCreateActivity}
+            >
               Create
             </button>
           )}
         </TableCell>
-        <TableCell className="p-2 text-[.7rem] sm:text-base">
+        <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-white">
           {isCompleted ? formatDate(endDate) : "-"}
         </TableCell>
         <TableCell className="p-2 text-[.7rem] sm:text-base">

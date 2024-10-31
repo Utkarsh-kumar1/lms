@@ -1,4 +1,3 @@
-
 import React from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
@@ -20,7 +19,6 @@ const SubTopicContent = dynamic(
   }
 );
 
-
 async function fetchData(owner, topicId) {
   try {
     const subjects = await db.query.subject.findMany({
@@ -34,7 +32,7 @@ async function fetchData(owner, topicId) {
                 },
               },
               orderBy: (topic, { asc }) => [asc(topic.topicIndex)],
-              where: (topic, { eq }) => eq(topic.id, topicId),
+              where: (topic, { eq }) => eq(topic.topicName, topicId),
             },
           },
         },
@@ -51,16 +49,15 @@ async function fetchData(owner, topicId) {
   }
 }
 
-
 export default async function page({ params }) {
   const session = await getServerSession(authOptions);
   if (!session) {
     return <div>Unauthorized Access</div>;
   }
   try {
-    const subjects = await fetchData(session.id, params.id);
-    console.log(JSON.stringify(subjects , null , 2));
-    
+    const subjects = await fetchData(session.id, decodeURIComponent(params.id));
+
+
     if (subjects.length === 0) {
       return <div>No subjects Found</div>;
     }

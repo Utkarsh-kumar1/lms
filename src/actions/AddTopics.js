@@ -51,6 +51,11 @@ export async function AddTopics(topicNames, subjectId, courseId) {
 
 
     } catch (error) {
+        if (error.code == "ER_DUP_ENTRY") {
+            return {
+                error: "Subject Already exists"
+            }
+        }
         // Return a plain object with a serializable error message
         return {
             error: error.message || "SomethingWent Wrong"

@@ -52,7 +52,6 @@ export async function AddSubTopics(subtopicNames, subjectId, courseId, topicId) 
             return { error: "No Data found" }
         }
 
-        console.log(subject?.courses[0]?.topics[0]?.subtopics[0]?.subTopicIndex);
 
 
         let nextTopicIndex = (subject?.courses[0]?.topics[0]?.subtopics[0]?.subTopicIndex || 0) + 1;
@@ -75,6 +74,11 @@ export async function AddSubTopics(subtopicNames, subjectId, courseId, topicId) 
 
 
     } catch (error) {
+        if (error.code == "ER_DUP_ENTRY") {
+            return {
+                error: "Subject Already exists"
+            }
+        }
         // Return a plain object with a serializable error message
         console.log(error);
         

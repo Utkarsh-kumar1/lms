@@ -20,6 +20,13 @@ export async function AddNewSubjectAction(subjectNames) {
 
         await db.insert(subject).values(subjects)
     } catch (error) {
+        if (error.code == "ER_DUP_ENTRY")
+        {
+            return {
+                error:  "Subject Already exists"
+            } 
+        }
+        
         // Return a plain object with a serializable error message
         return {
             error: error.message || "SomethingWent Wrong"

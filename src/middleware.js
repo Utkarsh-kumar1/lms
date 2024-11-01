@@ -26,8 +26,6 @@ export async function middleware(req) {
         url.pathname.startsWith('/subjects') ||
         url.pathname.startsWith('/revision')
     )) {
-        console.log(url);
-        
         
         return NextResponse.redirect(new URL('/', req.url));
     }

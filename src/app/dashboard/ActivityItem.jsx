@@ -56,20 +56,22 @@ export const ActivityItem = ({ activity }) => {
   return (
     <div
       className={`flex justify-between items-center p-4 mb-3 rounded-lg shadow-sm transition-all duration-300 ${
-        isCompleted ? "bg-green-100" : "bg-white hover:shadow-lg"
+        isCompleted
+          ? "bg-green-100 dark:bg-green-900"
+          : "bg-white dark:bg-gray-700 hover:shadow-lg"
       }`}
     >
       {/* Task Name and Streak */}
       <div className="flex flex-col">
-        <span className="text-gray-800  text-sm font-bold sm:font-semibold sm:text-lg">
+        <span className="text-gray-800 dark:text-gray-200 text-sm font-bold sm:font-semibold sm:text-lg">
           {activity.task}
         </span>
-        <div className="flex items-center mt-1 text-sm text-gray-500">
+        <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
           <span className="mr-2 text-sm sm:text-lg">
             Streak: {activity.streak} {activity.isBestStreak && "🔥"}
           </span>
           {activity.isBestStreak && (
-            <span className="bg-yellow-300 text-yellow-900 px-2 py-1 rounded-full font-medium text-xs flex items-center">
+            <span className="bg-yellow-300 dark:bg-yellow-500 text-yellow-900 dark:text-yellow-100 px-2 py-1 rounded-full font-medium text-xs flex items-center">
               <Star className="w-4 h-4 mr-1" />
               Best Streak
             </span>
@@ -81,7 +83,9 @@ export const ActivityItem = ({ activity }) => {
       <div className="flex items-center gap-4">
         <span
           className={`text-sm font-semibold hidden sm:flex ${
-            isCompleted ? "text-green-600" : "text-red-500"
+            isCompleted
+              ? "text-green-600 dark:text-green-400"
+              : "text-red-500 dark:text-red-400"
           }`}
         >
           {isCompleted ? "Completed" : "Pending"}
@@ -89,14 +93,18 @@ export const ActivityItem = ({ activity }) => {
         <Switch
           disabled={
             isProcessing ||
-            (new Date() - new Date(activity.startDate)) / (1000 * 60 * 60 * 24) > 7
+            (new Date() - new Date(activity.startDate)) /
+              (1000 * 60 * 60 * 24) >
+              7
           }
           checked={isCompleted}
           onCheckedChange={(status) => {
             setIsCompleted(status);
           }} // Toggle completion status
           className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out ${
-            activity.isCompleted ? "bg-green-500" : "bg-gray-300"
+            isCompleted
+              ? "bg-green-500 dark:bg-green-600"
+              : "bg-gray-300 dark:bg-gray-600"
           }`}
         />
         {/* Delete Button */}
@@ -104,9 +112,9 @@ export const ActivityItem = ({ activity }) => {
           new Date(activity.startDate).toDateString() && (
           <button
             onClick={() => setIsModalOpen(true)}
-            className=" text-white rounded"
+            className="text-white rounded"
           >
-            <Trash2 className="w-5 h-5 " color="red" />
+            <Trash2 className="w-5 h-5" color="red" />
           </button>
         )}
       </div>
@@ -114,24 +122,28 @@ export const ActivityItem = ({ activity }) => {
       {/* Modal for Confirmation */}
       {isModalOpen && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white rounded-lg p-6">
-            <h2 className="text-lg font-semibold">Confirm Deletion</h2>
-            <p>Are you sure you want to delete this activity?</p>
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              Confirm Deletion
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300">
+              Are you sure you want to delete this activity?
+            </p>
             {errors.deleteError && (
-              <p className="text-red-400 w-full text-center">
+              <p className="text-red-400 dark:text-red-300 w-full text-center">
                 {errors.deleteError}
               </p>
             )}
             <div className="flex justify-end mt-4">
               <button
                 onClick={() => setIsModalOpen(false)}
-                className="mr-2 bg-gray-300 px-4 py-2 rounded"
+                className="mr-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded"
               >
                 Cancel
               </button>
               <button
                 onClick={handleDelete}
-                className="bg-red-500 text-white px-4 py-2 rounded"
+                className="bg-red-500 dark:bg-red-600 text-white px-4 py-2 rounded"
               >
                 Delete
               </button>

@@ -15,7 +15,7 @@ import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { FiUserPlus } from "react-icons/fi";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import {
   HomeIcon,
   LayoutDashboardIcon,
@@ -41,6 +41,7 @@ import Image from "next/image";
 
 export function AppSidebar() {
   const { data, status } = useSession();
+  const router = useRouter()
   const pathname = usePathname();
   const {
     state,
@@ -115,6 +116,7 @@ export function AppSidebar() {
     },
   ];
 
+  
   return (
     <Sidebar
       className="bg-slate-800 text-gray-200 flex flex-col overflow-hidden dark:bg-gray-900 dark:text-gray-200"
@@ -154,31 +156,40 @@ export function AppSidebar() {
         <SidebarMenu>
           {NAV_OPTIONS.filter((option) => option.isActive).map((option) => (
             <SidebarMenuItem key={option.name} title={option.name}>
-              <SidebarMenuButton asChild>
-                <Link
+              <SidebarMenuButton
+                onClick={() =>{
+                  if(isMobile || open){
+                    console.log(open);
+                    
+                    toggleSidebar()
+                  }
+                   router.push(option.url)}}
+                className={cn(
+                  "flex items-center px-3 py-2 rounded transition-colors duration-200",
+                  pathname.startsWith(option.url)
+                    ? "bg-gray-800 text-white font-medium dark:bg-gray-700"
+                    : "hover:bg-gray-500 text-black dark:hover:bg-gray-600 dark:text-gray-200"
+                )}
+              >
+                {/* <Link
                   href={option.url}
-                  onClick={() => {
-                    if (open) {
-                      setOpen(false);
-                    }
-                  }}
                   className={cn(
                     "flex items-center px-3 py-2 rounded transition-colors duration-200",
                     pathname.startsWith(option.url)
                       ? "bg-gray-800 text-white font-medium dark:bg-gray-700"
                       : "hover:bg-gray-500 text-black dark:hover:bg-gray-600 dark:text-gray-200"
                   )}
-                >
-                  <option.icon
-                    className={cn(
-                      "mr-3 w-5 h-5",
-                      pathname.startsWith(option.url)
-                        ? "text-white dark:text-gray-200"
-                        : "text-black dark:text-gray-300"
-                    )}
-                  />
-                  <span>{option.name}</span>
-                </Link>
+                > */}
+                <option.icon
+                  className={cn(
+                    "mr-3 w-5 h-5",
+                    pathname.startsWith(option.url)
+                      ? "text-white dark:text-gray-200"
+                      : "text-black dark:text-gray-300"
+                  )}
+                />
+                <span>{option.name}</span>
+                {/* </Link> */}
               </SidebarMenuButton>
             </SidebarMenuItem>
           ))}

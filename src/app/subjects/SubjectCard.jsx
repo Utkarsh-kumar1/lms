@@ -16,12 +16,14 @@ const SubjectCard = ({ subject }) => {
   const [isFileViewOpen, setIsFileViewOpen] = useState(false);
   const router = useRouter();
 
-  const getColor = () => {
-    if (subject.isCompleted)
-      return "bg-gradient-to-r from-green-100 to-green-300";
+const getColor = () => {
+  if (subject.isCompleted) {
+    return "bg-gradient-to-r from-green-100 to-green-300 dark:from-green-700 dark:to-green-900";
+  }
 
-    return "bg-gradient-to-r from-gray-100 to-gray-300";
-  };
+  return "bg-gradient-to-r from-gray-100 to-gray-300 dark:from-gray-700 dark:to-gray-900";
+};
+
 
   const handleEditClick = (e) => {
     e.stopPropagation();
@@ -101,7 +103,7 @@ const SubjectCard = ({ subject }) => {
     <>
       <div
         className={clsx(
-          "p-4 mb-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[101%] flex flex-col sm:flex-row items-center gap-4 justify-between overflow-auto cursor-pointer",
+          "p-4 mb-4 rounded-lg shadow-lg hover:shadow-xl transition-all duration-200 transform hover:scale-[101%] flex flex-col sm:flex-row items-center gap-4 justify-between overflow-auto cursor-pointer ",
           getColor()
         )}
         onDoubleClick={() => {
@@ -110,13 +112,13 @@ const SubjectCard = ({ subject }) => {
       >
         <div className="flex w-full flex-col">
           <div className="w-full sm:w-6/12 sm:mr-auto">
-            <p className="text-lg font-semibold text-gray-800 text-wrap truncate">
+            <p className="text-lg font-semibold text-gray-800 dark:text-gray-200 text-wrap truncate">
               {subject.subjectName}
             </p>
-            <p className="text-sm text-gray-600">
+            <p className="text-sm text-gray-600 dark:text-gray-400">
               Status: {subject.isCompleted ? "Completed" : "Not Completed"}
             </p>
-          </div>
+          </div>  
 
           <div className="flex items-center justify-end gap-2 w-full ">
             {subject?.notes?.length > 0 && (
@@ -141,16 +143,18 @@ const SubjectCard = ({ subject }) => {
           {/* Notes section */}
           <div
             className={clsx(
-              "rounded-md bg-gray-300 p-4 mt-3 transition-max-height duration-700 ease-in-out w-full overflow-hidden",
+              "rounded-md bg-gray-300 dark:bg-gray-800 p-4 mt-3 transition-max-height duration-700 ease-in-out w-full overflow-hidden",
               isFileViewOpen
-                ? " flex max-h-96 opacity-100"
-                : " hidden max-h-0 opacity-0"
+                ? "flex max-h-96 opacity-100"
+                : "hidden max-h-0 opacity-0"
             )}
           >
             {subject?.notes?.length > 0 && (
-              <div className="mt-2 transition-max-height duration-700 ease-in-out w-full ">
-                <p className="text-sm font-semibold">Notes:</p>
-                <ul className=" text-sm text-gray-700 w-full">
+              <div className="mt-2 transition-max-height duration-700 ease-in-out w-full">
+                <p className="text-sm font-semibold dark:text-gray-300">
+                  Notes:
+                </p>
+                <ul className="text-sm text-gray-700 dark:text-gray-400 w-full">
                   {subject.notes.map((note, idx) => (
                     <li
                       key={idx}
@@ -160,13 +164,16 @@ const SubjectCard = ({ subject }) => {
                       <a
                         href={`api/files/${note.filePath}`}
                         target="_blank"
-                        className="text-blue-600 underline"
+                        className="text-blue-600 dark:text-blue-400 underline"
                         rel="noopener noreferrer"
                       >
                         {note.fileName}
                       </a>
                       <p className="flex flex-col w-full text-wrap ml-3">
-                        <span className="font-bold"> Uploaded At : </span>
+                        <span className="font-bold dark:text-gray-300">
+                          {" "}
+                          Uploaded At :{" "}
+                        </span>
                         {new Date(note.createdAt)
                           .toString()
                           .replace("GMT+0530 (India Standard Time)", "")}

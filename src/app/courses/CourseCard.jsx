@@ -100,16 +100,23 @@ const CourseCard = ({ course, subjectId }) => {
 
   return (
     <div
-      className="bg-gray-50 p-4 rounded-md shadow-sm mb-4 w-full cursor-pointer"
-      onDoubleClick={(e) =>{
-        e.preventDefault()
-         router.push(`/courses/${course.courseName}`)}}
+      className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md shadow-sm mb-4 w-full cursor-pointer"
+      onDoubleClick={(e) => {
+        e.preventDefault();
+        router.push(`/courses/${course.courseName}`);
+      }}
     >
       <div className="flex items-center justify-between">
-        <h4 className={`text-sm sm:text-lg font-semibold ${isActive ? "text-gray-700 " : "text-gray-400" }`}>
+        <h4
+          className={`text-sm sm:text-lg font-semibold ${
+            isActive
+              ? "text-gray-700 dark:text-gray-300"
+              : "text-gray-400 dark:text-gray-600"
+          }`}
+        >
           {course.courseName}
         </h4>
-        <div className="flex items-center space-x-2 sm:gap-2 ">
+        <div className="flex items-center space-x-2 sm:gap-2">
           {course?.notes?.length > 0 && (
             <button
               onClick={() => setIsFileViewOpen((prev) => !prev)}
@@ -120,14 +127,14 @@ const CourseCard = ({ course, subjectId }) => {
           )}
           <button
             onClick={() => setIsEditing(true)}
-            className="text-indigo-600 hover:text-indigo-800 transition"
+            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-500 transition"
           >
             <Pencil size={20} />
           </button>
           {course.isCompleted ? (
             <BsCheckCircleFill className="text-green-500" size={20} />
           ) : (
-            <BsCircle className="text-gray-400" size={20} />
+            <BsCircle className="text-gray-400 dark:text-gray-500" size={20} />
           )}
         </div>
       </div>
@@ -135,16 +142,16 @@ const CourseCard = ({ course, subjectId }) => {
       {/* File Viewer */}
       <div
         className={clsx(
-          "rounded-md bg-gray-300 p-4 mt-3 transition-max-height duration-700 ease-in-out w-full overflow-hidden",
+          "rounded-md bg-gray-300 dark:bg-gray-700 p-4 mt-3 transition-max-height duration-700 ease-in-out w-full overflow-hidden",
           isFileViewOpen
-            ? " flex max-h-96 opacity-100"
-            : " hidden max-h-0 opacity-0"
+            ? "flex max-h-96 opacity-100"
+            : "hidden max-h-0 opacity-0"
         )}
       >
         {course?.notes?.length > 0 && (
           <div className="mt-2 transition-max-height duration-700 ease-in-out w-full">
             <p className="text-sm font-semibold">Notes:</p>
-            <ul className="text-sm text-gray-700 w-full">
+            <ul className="text-sm text-gray-700 dark:text-gray-300 w-full">
               {course.notes.map((note, idx) => (
                 <li
                   key={idx}
@@ -154,7 +161,7 @@ const CourseCard = ({ course, subjectId }) => {
                   <a
                     href={`/api/files/${note.filePath}`}
                     target="_blank"
-                    className="text-blue-600 underline"
+                    className="text-blue-600 underline dark:text-blue-400"
                     rel="noopener noreferrer"
                   >
                     {note.fileName}
@@ -178,9 +185,9 @@ const CourseCard = ({ course, subjectId }) => {
           className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2"
           onDoubleClick={(e) => e.stopPropagation()}
         >
-          <div className="bg-white p-6 rounded-lg shadow-lg relative max-w-lg w-full">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg relative max-w-lg w-full">
             <button
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+              className="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300"
               onClick={() => {
                 if (!isProcessing) {
                   setIsEditing(false);
@@ -190,17 +197,19 @@ const CourseCard = ({ course, subjectId }) => {
               <X size={24} />
             </button>
 
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Edit Course
             </h3>
 
             <div className="mb-4">
-              <label className="block text-gray-600 mb-1">Course Name</label>
+              <label className="block text-gray-600 dark:text-gray-400 mb-1">
+                Course Name
+              </label>
               <input
                 type="text"
                 value={newCourseName}
                 onChange={(e) => setNewCourseName(e.target.value)}
-                className="w-full border border-gray-300 rounded-md p-2"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 dark:bg-gray-700 dark:text-gray-200"
               />
             </div>
 
@@ -213,11 +222,13 @@ const CourseCard = ({ course, subjectId }) => {
                   onChange={handleFileChange}
                   className="hidden"
                 />
-                <span>Upload File</span>
+                <span className="text-gray-700 dark:text-gray-300">
+                  Upload File
+                </span>
               </label>
               {file && (
                 <p
-                  className="text-sm text-gray-500 max-w-[12rem] sm:w-fit overflow-hidden truncate"
+                  className="text-sm text-gray-500 dark:text-gray-400 max-w-[12rem] sm:w-fit overflow-hidden truncate"
                   title={file.name}
                 >
                   {file.name}
@@ -225,7 +236,7 @@ const CourseCard = ({ course, subjectId }) => {
               )}
             </div>
             <div className="mb-4">
-              <label className="inline-flex items-center">
+              <label className="inline-flex items-center text-gray-600 dark:text-gray-400">
                 <input
                   type="checkbox"
                   checked={isActive}
@@ -239,7 +250,7 @@ const CourseCard = ({ course, subjectId }) => {
               </label>
             </div>
             <div className="mb-4">
-              <label className="inline-flex items-center">
+              <label className="inline-flex items-center text-gray-600 dark:text-gray-400">
                 <input
                   type="checkbox"
                   checked={wantRevision}
@@ -287,9 +298,11 @@ const CourseCard = ({ course, subjectId }) => {
       {/* Delete Confirmation Modal */}
       {isDeleteModalOpen && (
         <div className="fixed inset-0 flex justify-center items-center bg-gray-700 bg-opacity-75 z-50">
-          <div className="bg-white p-6 rounded-lg shadow-xl w-full max-w-md">
-            <p className="text-lg font-semibold mb-4">Delete Course</p>
-            <p>
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl w-full max-w-md">
+            <p className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+              Delete Course
+            </p>
+            <p className="text-gray-600 dark:text-gray-400">
               Are you sure you want to delete this course? You will lose all
               data related to it.
             </p>

@@ -164,12 +164,12 @@ export default async function ProtectedPage() {
 
   if (!activity || activity.length === 0) {
     return (
-      <p className="text-center text-gray-500">No activity data available.</p>
+      <p className="text-center text-gray-500 dark:bg-gray-400 dark:text-white">No activity data available.</p>
     );
   }
 
   return (
-    <div className="container mx-auto p-4 min-h-screen dark:bg-gray-800"
+    <div className="container mx-auto p-4 dark:bg-gray-800"
       
     >
       {

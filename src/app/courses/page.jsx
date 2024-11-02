@@ -40,7 +40,8 @@ export default async function page() {
 
   try {
     const subjects = await fetchSubject(session.id);
-    return <CourseContent subjects={subjects} />;
+    return<div className="w-full h-full"><CourseContent subjects={subjects} /></div>
+     ;
    
   } catch (error) {
     return <div> {error.message} </div>;

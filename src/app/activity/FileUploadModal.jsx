@@ -66,10 +66,10 @@ export default function FileUploadModal({
 
   if (isOpen)
     return (
-      <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2">
-        <div className="bg-white p-6 rounded-lg shadow-lg relative max-w-lg w-full">
+      <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2 dark:bg-opacity-50">
+        <div className="bg-white p-6 rounded-lg shadow-lg relative max-w-lg w-full dark:bg-gray-800">
           <button
-            className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+            className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-200"
             onClick={() => {
               if (!isProcessing) {
                 setIsOpen(false);
@@ -79,13 +79,13 @@ export default function FileUploadModal({
             <IoClose size={24} />
           </button>
 
-          <h3 className="text-xl font-semibold text-gray-800 mb-4">
+          <h3 className="text-xl font-semibold text-gray-800 mb-4 dark:text-gray-100">
             Upload File
           </h3>
 
           {/* File Upload */}
           <div className="flex items-center justify-between mb-4">
-            <label className="flex items-center gap-2">
+            <label className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
               <FilePlus2 size={20} />
               <input
                 type="file"
@@ -97,7 +97,7 @@ export default function FileUploadModal({
             </label>
             {file && (
               <p
-                className="text-sm text-gray-500 max-w-[12rem] sm:w-fit overflow-hidden truncate"
+                className="text-sm text-gray-500 max-w-[12rem] sm:w-fit overflow-hidden truncate dark:text-gray-400"
                 title={file.name}
               >
                 {file.name}
@@ -106,12 +106,12 @@ export default function FileUploadModal({
           </div>
 
           {errors.fileError && (
-            <p className="text-red-600 w-full text-center">
+            <p className="text-red-600 w-full text-center dark:text-red-400">
               {errors.fileError}
             </p>
           )}
           {errors.savingError && (
-            <p className="text-red-600 w-full text-center">
+            <p className="text-red-600 w-full text-center dark:text-red-400">
               {errors.savingError}
             </p>
           )}
@@ -119,14 +119,14 @@ export default function FileUploadModal({
           {/* Save and Cancel Buttons */}
           <div className="flex justify-end space-x-4">
             <button
-              className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md disabled:cursor-progress"
+              className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md disabled:cursor-progress dark:bg-red-600 dark:hover:bg-red-700"
               onClick={() => setIsOpen(false)}
               disabled={isProcessing}
             >
               Cancel
             </button>
             <button
-              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md disabled:cursor-progress"
+              className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md disabled:cursor-progress dark:bg-indigo-500 dark:hover:bg-indigo-600"
               onClick={handleSaveClick}
               disabled={isProcessing}
             >

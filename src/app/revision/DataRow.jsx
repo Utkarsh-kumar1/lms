@@ -68,7 +68,9 @@ export default function DataRow({ subtopic }) {
   return (
     <TableRow
       className={`${
-        endDate || isCompleted ? "bg-green-100 dark:bg-green-900" : "bg-red-100 dark:bg-rose-500"
+        endDate || isCompleted
+          ? "bg-green-100 dark:bg-green-900"
+          : "bg-red-100 dark:bg-red-300"
       } hover:bg-gray-200 transition duration-150 sm:text-sm`}
     >
       <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-gray-200">

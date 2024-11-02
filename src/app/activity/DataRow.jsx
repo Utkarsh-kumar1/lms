@@ -91,7 +91,9 @@ export default function DataRow({ subtopic, subIndex }) {
       <TableRow
         key={subIndex}
         className={` dark:text-white ${
-          endDate || isCompleted ? "bg-green-100 dark:bg-green-400" : "bg-red-100 dark:bg-red-300"
+          endDate || isCompleted
+            ? "bg-green-100 dark:bg-green-900"
+            : "bg-red-100 dark:bg-red-300"
         } hover:bg-gray-200 transition duration-150 sm:text-sm `}
       >
         <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-white">

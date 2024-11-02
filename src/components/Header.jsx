@@ -20,9 +20,9 @@ function Header() {
   const paths = decodeURI(pathname).split("/");
 
   return (
-    <header className="h-12 sticky top-0 bg-white/30 backdrop-blur-md flex items-center justify-between px-4 shadow-sm z-50 dark:bg-gray-900 gap-3">
+    <header className="min-h-12 sticky top-0 bg-white/30 backdrop-blur-md flex items-center justify-between px-4 shadow-sm z-50 dark:bg-gray-900 gap-3">
       {/* Sidebar Trigger */}
-      <div className="mr-4">
+      <div>
         {isMobile && (
           <SidebarTrigger className="text-black hover:text-gray-600 transition duration-200 dark:text-white dark:hover:text-gray-400" />
         )}

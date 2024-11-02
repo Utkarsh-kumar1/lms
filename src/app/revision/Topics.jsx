@@ -34,9 +34,9 @@ function Topics({ topic, topicIndex }) {
           className="border rounded-lg "
         >
           {/* Styled Accordion Trigger */}
-          <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out flex justify-between items-center ">
+          <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out flex justify-between items-center dark:bg-darkBlue ">
             {/* Topic Name */}
-            <span className=" text-wrap text-left   ">
+            <span className=" text-wrap text-left    ">
               {topic.topicIndex + ". " + topic.topicName}
             </span>
 
@@ -68,10 +68,9 @@ function Topics({ topic, topicIndex }) {
                     SubTopic
                   </TableHead>
                   <TableHead className="font-bold text-[.7rem]">
-                    Start
+                    Created At
                   </TableHead>
-                  <TableHead className="font-bold text-[.7rem]">End</TableHead>
-                  <TableHead className="font-bold text-[.7rem]">
+                  <TableHead className="font-bold text-[.7rem] text-center">
                     Revision Counter
                   </TableHead>
                   <TableHead className="font-bold text-[.7rem]">

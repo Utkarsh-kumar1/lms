@@ -115,7 +115,7 @@ function Topics({ topicIndex, topics }) {
                   SubTopic
                 </TableHead>
                 <TableHead className="font-bold text-[.7rem] dark:text-white">
-                  Start
+                  Created At
                 </TableHead>
                 <TableHead className="font-bold text-[.7rem] dark:text-white">
                   Action

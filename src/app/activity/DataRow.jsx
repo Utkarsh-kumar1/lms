@@ -85,7 +85,7 @@ export default function DataRow({ subtopic, subIndex }) {
         </TableCell>
         <TableCell className="p-2 text-[.7rem] sm:text-base ">
           {isUpdating ? (
-            <Loader2Icon className=" animate-spin " />
+            <Loader2Icon className=" animate-spin h-7 " />
           ) : (
             <Switch
               className="bg-slate-50"

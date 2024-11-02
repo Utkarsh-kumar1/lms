@@ -120,7 +120,7 @@ export default async function ProtectedPage() {
               key={`course-${courseIndex}`}
               className="mb-8 p-4 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800  "
             >
-              <h2 className="text-3xl font-extrabold mb-4 text-blue-600   ">
+              <h2 className="text-3xl font-extrabold mb-4 text-blue-600 dark:text-darkBlueText  ">
                 {course.courseName}
               </h2>
               {topics?.map((topic, topicIndex) => (

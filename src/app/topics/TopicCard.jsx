@@ -144,10 +144,12 @@ export default function TopicCard({ topic, subjectId, courseId }) {
   };
 
   return (
-    <div className="bg-gray-50 p-4 rounded-md shadow-sm mb-4 cursor-pointer"
-    onDoubleClick={()=>router.push(`/topics/${topic.topicName}`)}>
+    <div
+      className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md shadow-sm mb-4 cursor-pointer"
+      onDoubleClick={() => router.push(`/topics/${topic.topicName}`)}
+    >
       <div className="flex items-center justify-between">
-        <h4 className="text-sm sm:text-lg font-semibold text-gray-700">
+        <h4 className="text-sm sm:text-lg font-semibold text-gray-700 dark:text-gray-300">
           {topic.topicIndex}. {topic.topicName}
         </h4>
 
@@ -160,7 +162,6 @@ export default function TopicCard({ topic, subjectId, courseId }) {
               <NotebookPen />
             </button>
           )}
-          {/* Completion Status Toggle */}
           <button
             onClick={toggleCompletionStatus}
             aria-label="Toggle Completion Status"
@@ -168,13 +169,15 @@ export default function TopicCard({ topic, subjectId, courseId }) {
             {isCompleted ? (
               <BsCheckCircleFill className="text-green-500" size={20} />
             ) : (
-              <BsCircle className="text-gray-400" size={20} />
+              <BsCircle
+                className="text-gray-400 dark:text-gray-500"
+                size={20}
+              />
             )}
           </button>
-          {/* Edit Button */}
           <button
             onClick={() => setIsEditing(true)}
-            className="text-indigo-600 hover:text-indigo-800 transition"
+            className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition"
           >
             <BsPencilSquare size={20} />
           </button>
@@ -183,16 +186,18 @@ export default function TopicCard({ topic, subjectId, courseId }) {
 
       <div
         className={clsx(
-          "rounded-md bg-gray-300 p-4 mt-3 transition-max-height duration-700 ease-in-out w-full overflow-hidden",
+          "rounded-md bg-gray-300 dark:bg-gray-800 p-4 mt-3 transition-max-height duration-700 ease-in-out w-full overflow-hidden dark:shadow-2xl ",
           isFileViewOpen
-            ? " flex max-h-96 opacity-100"
-            : " hidden max-h-0 opacity-0"
+            ? "flex max-h-96 opacity-100"
+            : "hidden max-h-0 opacity-0"
         )}
       >
         {topic?.notes?.length > 0 && (
-          <div className="mt-2 transition-max-height duration-700 ease-in-out w-full ">
-            <p className="text-sm font-semibold">Notes:</p>
-            <ul className=" text-sm text-gray-700 w-full">
+          <div className="mt-2 transition-max-height duration-700 ease-in-out w-full">
+            <p className="text-sm font-semibold text-gray-700 dark:text-gray-300">
+              Notes:
+            </p>
+            <ul className="text-sm text-gray-700 dark:text-gray-300 w-full">
               {topic.notes.map((note, idx) => (
                 <li
                   key={idx}
@@ -202,13 +207,13 @@ export default function TopicCard({ topic, subjectId, courseId }) {
                   <a
                     href={`api/files/${note.filePath}`}
                     target="_blank"
-                    className="text-blue-600 underline"
+                    className="text-blue-600 dark:text-blue-400 underline"
                     rel="noopener noreferrer"
                   >
                     {note.fileName}
                   </a>
-                  <p className="flex flex-col w-full text-wrap ml-3">
-                    <span className="font-bold"> Uploaded At : </span>
+                  <p className="flex flex-col w-full text-wrap ml-3 dark:text-gray-400">
+                    <span className="font-bold">Uploaded At:</span>
                     {new Date(note.createdAt)
                       .toString()
                       .replace("GMT+0530 (India Standard Time)", "")}
@@ -220,12 +225,11 @@ export default function TopicCard({ topic, subjectId, courseId }) {
         )}
       </div>
 
-      {/* Modal for Editing Topic */}
       {isEditing && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2">
-          <div className="bg-white p-6 rounded-lg shadow-lg relative max-w-lg w-full">
+        <div className="fixed inset-0 bg-black bg-opacity-30 dark:bg-opacity-60 flex items-center justify-center z-50 p-2">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg relative max-w-lg w-full">
             <button
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+              className="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-200"
               onClick={() => {
                 if (!isProcessing) {
                   setIsEditing(false);
@@ -235,24 +239,24 @@ export default function TopicCard({ topic, subjectId, courseId }) {
               <IoClose size={24} />
             </button>
 
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Edit Topic
             </h3>
 
-            {/* Topic Name */}
             <div className="mb-4">
-              <label className="block text-gray-600 mb-1">Topic Name</label>
+              <label className="block text-gray-600 dark:text-gray-300 mb-1">
+                Topic Name
+              </label>
               <input
                 type="text"
                 value={newtopicName}
                 onChange={(e) => setnewtopicName(e.target.value)}
-                className="w-full border border-gray-300 rounded-md p-2"
+                className="w-full border border-gray-300 dark:border-gray-600 rounded-md p-2 bg-white dark:bg-gray-700 text-gray-900 dark:text-gray-100"
               />
             </div>
 
-            {/* File Upload */}
             <div className="flex items-center justify-between mb-4">
-              <label className="flex items-center gap-2">
+              <label className="flex items-center gap-2 text-gray-700 dark:text-gray-300">
                 <FilePlus2 size={20} />
                 <input
                   type="file"
@@ -264,7 +268,7 @@ export default function TopicCard({ topic, subjectId, courseId }) {
               </label>
               {file && (
                 <p
-                  className="text-sm text-gray-500 max-w-[12rem] sm:w-fit overflow-hidden truncate"
+                  className="text-sm text-gray-500 dark:text-gray-400 max-w-[12rem] sm:w-fit overflow-hidden truncate"
                   title={file.name}
                 >
                   {file.name}
@@ -272,9 +276,8 @@ export default function TopicCard({ topic, subjectId, courseId }) {
               )}
             </div>
 
-            {/* Mark as Completed */}
             <div className="mb-4">
-              <label className="inline-flex items-center">
+              <label className="inline-flex items-center text-gray-700 dark:text-gray-300">
                 <input
                   type="checkbox"
                   checked={isCompleted}
@@ -286,27 +289,26 @@ export default function TopicCard({ topic, subjectId, courseId }) {
             </div>
 
             {errors.fileError && (
-              <p className="text-red-600 w-full text-center">
+              <p className="text-red-600 dark:text-red-500 w-full text-center">
                 {errors.fileError}
               </p>
             )}
             {errors.savingError && (
-              <p className="text-red-600 w-full text-center">
+              <p className="text-red-600 dark:text-red-500 w-full text-center">
                 {errors.savingError}
               </p>
             )}
 
-            {/* Save and Cancel Buttons */}
             <div className="flex justify-end space-x-4">
               <button
-                className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md disabled:cursor-progress"
+                className="bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 px-4 py-2 rounded-md text-white disabled:cursor-progress"
                 onClick={() => setIsDeleteModalOpen(true)}
                 disabled={isProcessing}
               >
                 Delete
               </button>
               <button
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md disabled:cursor-progress"
+                className="bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 text-white px-4 py-2 rounded-md disabled:cursor-progress"
                 onClick={handleSaveClick}
                 disabled={isProcessing}
               >
@@ -318,16 +320,18 @@ export default function TopicCard({ topic, subjectId, courseId }) {
       )}
 
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 flex justify-center items-center bg-gray-700 bg-opacity-75 z-50 transition-opacity">
-          <div className="bg-white p-6 rounded-lg shadow-xl transform transition-all w-full max-w-sm">
-            <p className="text-lg font-semibold mb-4">Delete Course </p>
-            <p>
-              Are you sure you want to delete this Course ? , You will lost all
-              the data related to this Course ?
+        <div className="fixed inset-0 flex justify-center items-center bg-gray-700 bg-opacity-75 dark:bg-opacity-90 z-50 transition-opacity">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl transform transition-all w-full max-w-sm">
+            <p className="text-lg font-semibold mb-4 text-gray-800 dark:text-gray-200">
+              Delete Course
+            </p>
+            <p className="text-gray-700 dark:text-gray-300">
+              Are you sure you want to delete this Course? You will lose all
+              data related to this Course.
             </p>
 
             {errors.deletionError && (
-              <p className="text-red-600 w-full text-center">
+              <p className="text-red-600 dark:text-red-500 w-full text-center">
                 {errors.deletionError}
               </p>
             )}
@@ -336,14 +340,14 @@ export default function TopicCard({ topic, subjectId, courseId }) {
                 onClick={() => {
                   setIsDeleteModalOpen(false);
                 }}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 disabled:cursor-progress"
+                className="px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-500 transition duration-200 disabled:cursor-progress"
                 disabled={isProcessing}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteClick}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 disabled:cursor-progress"
+                className="px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-400 transition duration-200 disabled:cursor-progress"
                 disabled={isProcessing}
               >
                 Delete

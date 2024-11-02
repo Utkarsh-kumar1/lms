@@ -111,14 +111,14 @@ export default async function ProtectedPage() {
         <p className="text-center text-gray-500">No Revision data available.</p>
       );
     return (
-      <div className="container mx-auto p-4 min-h-screen dark:bg-gray-800">
+      <div className="container mx-auto p-4  dark:bg-gray-800">
         {data?.map((course, courseIndex) => {
           const topics = course.topics;
           if (course.topics == null) return null;
           return (
             <div
               key={`course-${courseIndex}`}
-              className="mb-8 p-4 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-700  "
+              className="mb-8 p-4 bg-white border border-gray-200 rounded-lg shadow-md dark:bg-gray-800  "
             >
               <h2 className="text-3xl font-extrabold mb-4 text-blue-600   ">
                 {course.courseName}

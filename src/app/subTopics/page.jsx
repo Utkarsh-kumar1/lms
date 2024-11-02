@@ -55,7 +55,12 @@ export default async function page() {
       return <SubTopicContent subjects={subjects} />;
       
   } catch (error) {
-    return <div className=" text-red-600 font-bold"> {error.message} </div>;
+    return (
+      <div className="text-red-600 dark:text-red-400 font-bold">
+        {error.message}
+      </div>
+    );
+
   }
 
 }

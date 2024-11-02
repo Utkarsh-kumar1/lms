@@ -18,23 +18,22 @@ const TopicContent = dynamic(() => import("./TopicContent"), {
 async function fetchTopics(id) {
   try {
     const subjects = await db.query.subject.findMany({
-      with : {
-        courses : {
-          with : {
-            topics :{
-              with :{
-                notes : true
+      with: {
+        courses: {
+          with: {
+            topics: {
+              with: {
+                notes: true,
               },
-              orderBy : (topics , {asc})=>[asc(topics.topicIndex)]
-            }
-          }
-        }
+              orderBy: (topics, { asc }) => [asc(topics.topicIndex)],
+            },
+          },
+        },
       },
-      where : (subject , {eq})=>eq(subject.owner , id)
-    })
+      where: (subject, { eq }) => eq(subject.owner, id),
+    });
     return subjects;
   } catch (error) {
-    
     throw new Error("Error while fetching Topics");
   }
 }
@@ -43,12 +42,8 @@ export default async function page() {
   const session = await getServerSession(authOptions);
   try {
     const subjects = await fetchTopics(session.id);
-      return (
-        <>
-          <TopicContent subjects={subjects} />
-        </>
-      );
+    return <TopicContent subjects={subjects} />;
   } catch (error) {
-    return <div className=" text-red-600 font-bold"> {error.message} </div>;
+    return <div className=" text-red-600 font-bold dark:bg-gray-800 "> {error.message} </div>;
   }
 }

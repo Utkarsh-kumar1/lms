@@ -8,5 +8,9 @@ export const metadata = {
 };
 
 export default function SignUp({ children }) {
-  return <>{children}</>;
+  return (
+    <div className=" w-full h-full flex items-center justify-center dark:bg-gray-800">
+      {children}
+    </div>
+  );
 }

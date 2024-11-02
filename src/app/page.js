@@ -4,7 +4,7 @@ import React from 'react'
 
 function page() {
   return (
-    <div>Welcome Sir</div>
+    <div className='flex items-center justify-center w-full h-full'>Welcome Sir</div>
   )
 }
 

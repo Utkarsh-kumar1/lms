@@ -19,7 +19,7 @@ export default function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <link rel="icon" href="/logo.jpeg" sizes="any" />
-      <body className={`${inter.className} h-screen overflow-x-hidden `}>
+      <body className={`${inter.className}  overflow-x-hidden `}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"
@@ -29,10 +29,12 @@ export default function RootLayout({ children }) {
         <AuthProvider>
           <SidebarProvider defaultOpen={false} >
             <AppSidebar />
-            <main className=" w-full bg-gray-100 ">
+              <main className=" w-full min-h-screen flex flex-col   bg-gray-100  dark:bg-gray-800">
 
               <Header/>
-              {children}
+              
+                  {children}
+              
             </main>
           </SidebarProvider>
           

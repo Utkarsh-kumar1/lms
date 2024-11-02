@@ -158,9 +158,9 @@ export default async function Page() {
     const userData = await fetchData(session.id);
 
     return (
-      <div className="w-full ">
+      
         <Dashboard userData={userData} />
-      </div>
+      
     );
   } catch (error) {
     return <div className=" text-green-600 font-bold"> {error.message} </div>;

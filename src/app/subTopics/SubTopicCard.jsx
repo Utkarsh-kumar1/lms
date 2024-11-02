@@ -124,9 +124,9 @@ export default function SubtopicCard({
   };
 
   return (
-    <div className="bg-gray-50 p-4 rounded-md shadow-sm mb-4">
+    <div className="bg-gray-50 dark:bg-gray-900 p-4 rounded-md shadow-sm mb-4">
       <div className="flex items-center justify-between">
-        <h4 className="text-sm sm:text-lg font-semibold text-gray-600">
+        <h4 className="text-sm sm:text-lg font-semibold text-gray-600 dark:text-gray-200">
           {subtopic.subTopicIndex}. {subtopic.subtopicName}
         </h4>
 
@@ -139,13 +139,16 @@ export default function SubtopicCard({
             {isCompleted ? (
               <BsCheckCircleFill className="text-green-500" size={20} />
             ) : (
-              <BsCircle className="text-gray-400" size={20} />
+              <BsCircle
+                className="text-gray-400 dark:text-gray-500"
+                size={20}
+              />
             )}
           </button>
           {/* Edit Button */}
           <button
             onClick={() => setIsEditing(true)}
-            className="text-indigo-600 hover:text-indigo-800 transition"
+            className="text-indigo-600 hover:text-indigo-800 dark:text-indigo-400 dark:hover:text-indigo-500 transition"
           >
             <BsPencilSquare size={20} />
           </button>
@@ -155,9 +158,9 @@ export default function SubtopicCard({
       {/* Modal for Editing subtopic */}
       {isEditing && (
         <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2">
-          <div className="bg-white p-6 rounded-lg shadow-lg relative max-w-lg w-full">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-lg relative max-w-lg w-full">
             <button
-              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800"
+              className="absolute top-4 right-4 text-gray-500 hover:text-gray-800 dark:text-gray-400 dark:hover:text-gray-300"
               onClick={() => {
                 if (!isProcessing) {
                   setIsEditing(false);
@@ -167,7 +170,7 @@ export default function SubtopicCard({
               <IoClose size={24} />
             </button>
 
-            <h3 className="text-xl font-semibold text-gray-800 mb-4">
+            <h3 className="text-xl font-semibold text-gray-800 dark:text-gray-200 mb-4">
               Edit subtopic
             </h3>
 
@@ -177,13 +180,13 @@ export default function SubtopicCard({
                 type="text"
                 value={newsubtopicName}
                 onChange={(e) => setnewsubtopicName(e.target.value)}
-                className="w-full border border-gray-300 rounded-md p-2 text-wrap h-auto text-sm sm:text-lg"
+                className="w-full border border-gray-300 dark:border-gray-700 dark:bg-gray-900 dark:text-gray-100 rounded-md p-2 text-wrap h-auto text-sm sm:text-lg"
               />
             </div>
 
             {/* Mark as Completed */}
             <div className="mb-4">
-              <label className="inline-flex items-center">
+              <label className="inline-flex items-center text-gray-600 dark:text-gray-300">
                 <input
                   type="checkbox"
                   checked={isCompleted}
@@ -195,7 +198,7 @@ export default function SubtopicCard({
             </div>
 
             {errors.savingError && (
-              <p className="text-red-600 w-full text-center">
+              <p className="text-red-600 dark:text-red-400 w-full text-center">
                 {errors.savingError}
               </p>
             )}
@@ -203,14 +206,14 @@ export default function SubtopicCard({
             {/* Save and Cancel Buttons */}
             <div className="flex justify-end space-x-4">
               <button
-                className="bg-red-500 hover:bg-red-600 px-4 py-2 rounded-md disabled:cursor-progress"
+                className="bg-red-500 dark:bg-red-600 hover:bg-red-600 dark:hover:bg-red-700 px-4 py-2 rounded-md disabled:cursor-progress text-white"
                 onClick={() => setIsDeleteModalOpen(true)}
                 disabled={isProcessing}
               >
                 Delete
               </button>
               <button
-                className="bg-indigo-600 hover:bg-indigo-700 text-white px-4 py-2 rounded-md disabled:cursor-progress"
+                className="bg-indigo-600 dark:bg-indigo-700 hover:bg-indigo-700 dark:hover:bg-indigo-800 text-white px-4 py-2 rounded-md disabled:cursor-progress"
                 onClick={handleSaveClick}
                 disabled={isProcessing}
               >
@@ -222,32 +225,32 @@ export default function SubtopicCard({
       )}
 
       {isDeleteModalOpen && (
-        <div className="fixed inset-0 flex justify-center items-center bg-gray-700 bg-opacity-75 z-50 transition-opacity">
-          <div className="bg-white p-6 rounded-lg shadow-xl transform transition-all w-full max-w-sm">
-            <p className="text-lg font-semibold mb-4">Delete Course </p>
-            <p>
-              Are you sure you want to delete this Course ? , You will lost all
-              the data related to this Course ?
+        <div className="fixed inset-0 flex justify-center items-center bg-gray-700 dark:bg-gray-900 bg-opacity-75 z-50 transition-opacity">
+          <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl transform transition-all w-full max-w-sm">
+            <p className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
+              Delete Course
+            </p>
+            <p className="text-gray-700 dark:text-gray-400">
+              Are you sure you want to delete this Course? You will lose all
+              data related to this Course.
             </p>
 
             {errors.deletionError && (
-              <p className="text-red-600 w-full text-center">
+              <p className="text-red-600 dark:text-red-400 w-full text-center">
                 {errors.deletionError}
               </p>
             )}
             <div className="flex justify-around mt-4">
               <button
-                onClick={() => {
-                  setIsDeleteModalOpen(false);
-                }}
-                className="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition duration-200 disabled:cursor-progress"
+                onClick={() => setIsDeleteModalOpen(false)}
+                className="px-4 py-2 bg-red-600 dark:bg-red-700 text-white rounded-lg hover:bg-red-700 dark:hover:bg-red-800 transition duration-200 disabled:cursor-progress"
                 disabled={isProcessing}
               >
                 Cancel
               </button>
               <button
                 onClick={handleDeleteClick}
-                className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200 disabled:cursor-progress"
+                className="px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-800 transition duration-200 disabled:cursor-progress"
                 disabled={isProcessing}
               >
                 Delete

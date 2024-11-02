@@ -80,7 +80,7 @@ function DailyActivities({ userData }) {
 
   return (
     <>
-      <div className="text-xl font-bold text-gray-800 mb-4 text-center">
+      <div className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 text-center">
         Daily Activities
       </div>
       {/* Add New Activity */}
@@ -106,13 +106,13 @@ function DailyActivities({ userData }) {
         <input
           type="text"
           placeholder="Add New Activity"
-          className="flex-1 p-2 border border-gray-300 rounded-lg"
+          className="flex-1 p-2 border border-gray-300 dark:border-gray-600 rounded-lg bg-white dark:bg-gray-800 text-gray-800 dark:text-gray-200"
           name="newActivity"
           required
         />
         <button
           type="submit"
-          className="bg-blue-500 text-white p-2 ml-2 rounded-lg hover:bg-blue-600"
+          className="bg-blue-500 dark:bg-blue-600 text-white p-2 ml-2 rounded-lg hover:bg-blue-600 dark:hover:bg-blue-700"
         >
           <Plus className="w-5 h-5" />
         </button>
@@ -121,20 +121,22 @@ function DailyActivities({ userData }) {
       <div className="flex justify-between items-center mb-4">
         <button
           onClick={handleShowPrevious}
-          className="text-white bg-gray-500 px-4 py-2 rounded-lg hover:bg-gray-600"
+          className="text-white bg-gray-500 dark:bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700"
         >
           Show Previous
         </button>
         <button
           onClick={handleShowToday}
-          className="text-white bg-gray-500 px-4 py-2 rounded-lg hover:bg-gray-600"
+          className="text-white bg-gray-500 dark:bg-gray-600 px-4 py-2 rounded-lg hover:bg-gray-600 dark:hover:bg-gray-700"
         >
           Today
         </button>
       </div>
       {/* Display Activities */}
-      <p className="font-bold mb-4">{formattedDate}</p>
-      <div className="overflow-auto max-h-[400px] border border-gray-200 rounded-lg p-1 sm:p-4 bg-gray-50  ">
+      <p className="font-bold mb-4 text-gray-800 dark:text-gray-200">
+        {formattedDate}
+      </p>
+      <div className="overflow-auto max-h-[400px] border border-gray-200 dark:border-gray-700 rounded-lg p-1 sm:p-4 bg-gray-50 dark:bg-gray-800">
         {!showPrevious ? (
           optimisticActivities?.map((activity) => (
             <ActivityItem key={activity.id} activity={activity} />
@@ -142,12 +144,14 @@ function DailyActivities({ userData }) {
         ) : (
           <>
             {isLoading ? (
-              <div className="flex flex-col items-center justify-center gap-4 p-6 bg-gray-100 rounded-lg shadow-md min-h-[350px]">
+              <div className="flex flex-col items-center justify-center gap-4 p-6 bg-gray-100 dark:bg-gray-700 rounded-lg shadow-md min-h-[350px]">
                 <LoaderCircle
-                  className="animate-spin text-blue-600"
+                  className="animate-spin text-blue-600 dark:text-blue-400"
                   size={36}
                 />
-                <p>Loading previous day activities...</p>
+                <p className="text-gray-800 dark:text-gray-200">
+                  Loading previous day activities...
+                </p>
               </div>
             ) : (
               previousDayActivities?.map((activity) => (

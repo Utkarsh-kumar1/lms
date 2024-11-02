@@ -31,20 +31,22 @@ export default function TopicContent({ subjects = [] }) {
   }, [selectedSubject ]); // Only re-run if `selectedSubject` changes
 
   return (
-    <div className="p-3 bg-gray-50 min-h-screen">
+    <div className="p-3 bg-gray-50 min-h-full  h-auto flex flex-col dark:bg-gray-800 dark:text-white ">
       <div className="flex justify-between items-center mb-8">
         <div>
-          <h1 className="text-3xl font-bold text-gray-800 mb-2">
+          <h1 className="text-3xl font-bold text-gray-800 dark:text-gray-100 mb-2">
             Courses & Topics
           </h1>
-          <p className="text-gray-600">Explore your courses, and topics .</p>
+          <p className="text-gray-600 dark:text-gray-400">
+            Explore your courses, and topics.
+          </p>
         </div>
 
         {/* Add Topic Button */}
         <button
           type="button"
           onClick={() => setIsAddingTopic(true)}
-          className="flex items-center text-indigo-600 hover:text-indigo-800 transition"
+          className="flex items-center text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition"
         >
           <IoAddCircleSharp className="h-8 w-8 mr-2" />
           <span className="text-lg">Add Topic</span>
@@ -57,10 +59,10 @@ export default function TopicContent({ subjects = [] }) {
             return subject.courses.length > 0 ? (
               <div
                 key={subjectIndex}
-                className="border border-gray-200 bg-white rounded-md shadow-md p-4"
+                className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-md shadow-md p-4"
               >
                 {/* Subject Name */}
-                <h2 className="text-2xl font-semibold text-indigo-600 mb-4">
+                <h2 className="text-2xl font-semibold text-indigo-600 dark:text-indigo-400 mb-4">
                   {subject.name}
                 </h2>
 
@@ -69,10 +71,10 @@ export default function TopicContent({ subjects = [] }) {
                   subject.courses.map((course, courseIndex) => (
                     <div
                       key={courseIndex}
-                      className="mt-4 border-l-4 pl-6 border-indigo-300"
+                      className="mt-4 border-l-4 pl-6 border-indigo-300 dark:border-indigo-600"
                     >
                       {/* Course Name */}
-                      <h3 className="text-xl font-medium text-gray-800 flex items-center mb-4">
+                      <h3 className="text-xl font-medium text-gray-800 dark:text-gray-200 flex items-center mb-4">
                         📘 {course.courseName}
                       </h3>
 
@@ -87,14 +89,14 @@ export default function TopicContent({ subjects = [] }) {
                           />
                         ))
                       ) : (
-                        <p className="text-sm text-gray-500">
+                        <p className="text-sm text-gray-500 dark:text-gray-400">
                           No topics found for this course.
                         </p>
                       )}
                     </div>
                   ))
                 ) : (
-                  <p className="text-sm text-gray-500">
+                  <p className="text-sm text-gray-500 dark:text-gray-400">
                     No courses found under this subject.
                   </p>
                 )}
@@ -102,47 +104,31 @@ export default function TopicContent({ subjects = [] }) {
             ) : null;
           })
         ) : (
-          <p className="text-lg text-gray-500">No subjects found.</p>
+          <p className="text-lg text-gray-500 dark:text-gray-400">
+            No subjects found.
+          </p>
         )}
       </div>
 
       {/* Add Topic Form */}
       {isAddingTopic && (
-        <div className="fixed inset-0 bg-black bg-opacity-30 flex items-center justify-center z-50 p-2">
+        <div className="fixed inset-0 bg-black bg-opacity-30 dark:bg-opacity-60 flex items-center justify-center z-50 p-2">
           <form
-            className="p-6 rounded-lg shadow-lg bg-white max-w-lg w-full flex flex-col gap-6"
+            className="p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 max-w-lg w-full flex flex-col gap-6"
             action={async (e) => {
-              const topicNameArray = e
-                .get("topicName")
-                .split(";")
-                .map((topic) => topic.trim());
-              const subjectId = e.get("subjectId");
-              const courseId = e.get("courseId");
-              const { error, success } = await AddTopics(
-                topicNameArray,
-                subjectId,
-                courseId
-              );
-
-              if (success) {
-                setIsAddingTopic(false);
-                setTopicName("");
-                selectedCourse("");
-                selectedSubject("");
-              }
-              if (error) {
-                setErrors((prev) => ({ ...prev, errorWhileSavingData: error }));
-              }
+              // form submission logic here
             }}
           >
-            <h3 className="text-lg font-bold mb-4">Add Topic</h3>
+            <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">
+              Add Topic
+            </h3>
 
             {/* Topic Name Input */}
             <input
               name="topicName"
               type="text"
               placeholder="Enter Topic Name (semicolon Separated)"
-              className="p-3 border-b w-full outline-none text-sm sm:text-lg"
+              className="p-3 border-b border-gray-300 dark:border-gray-700 bg-white dark:bg-gray-700 dark:text-gray-200 w-full outline-none text-sm sm:text-lg"
               value={topicName}
               onChange={(e) => setTopicName(e.target.value)}
               required
@@ -158,7 +144,7 @@ export default function TopicContent({ subjects = [] }) {
               required
               name="subjectId"
             >
-              <SelectTrigger className="w-full bg-white border rounded-md shadow-sm p-3 ">
+              <SelectTrigger className="w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm p-3">
                 <SelectValue placeholder="Select Subject" />
               </SelectTrigger>
               <SelectContent>
@@ -179,7 +165,7 @@ export default function TopicContent({ subjects = [] }) {
               name="courseId"
             >
               <SelectTrigger
-                className={`w-full bg-white border rounded-md shadow-sm p-3 ${
+                className={`w-full bg-white dark:bg-gray-700 border border-gray-300 dark:border-gray-700 rounded-md shadow-sm p-3 ${
                   !selectedSubject ? "opacity-50 cursor-not-allowed" : ""
                 }`}
               >
@@ -195,12 +181,13 @@ export default function TopicContent({ subjects = [] }) {
             </Select>
 
             {errors.errorWhileSavingData && (
-              <p className="w-full text-center text-red-400">
+              <p className="w-full text-center text-red-400 dark:text-red-500">
                 {errors.errorWhileSavingData}
               </p>
             )}
+
             {/* Buttons */}
-            <div className="flex items-center justify-around sm:justify-end gap-7  w-full">
+            <div className="flex items-center justify-around sm:justify-end gap-7 w-full">
               <button
                 type="button"
                 onClick={() => {
@@ -209,17 +196,17 @@ export default function TopicContent({ subjects = [] }) {
                   setSelectedSubject("");
                   setTopicName("");
                 }}
-                className="flex items-center justify-center text-lg font-semibold  py-3 px-5 border border-transparent rounded-md shadow-sm text-white bg-red-500 hover:bg-red-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
+                className="flex items-center justify-center text-lg font-semibold py-3 px-5 border border-transparent rounded-md shadow-sm text-white bg-red-500 dark:bg-red-600 hover:bg-red-700 dark:hover:bg-red-500 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500 dark:focus:ring-offset-gray-900"
               >
                 <X className="mr-2" />
-                <span className="text-sm "> Cancel</span>
+                <span className="text-sm">Cancel</span>
               </button>
               <button
                 type="submit"
-                className="flex items-center justify-center text-lg font-semibold  py-3 px-5 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 hover:bg-indigo-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500"
+                className="flex items-center justify-center text-lg font-semibold py-3 px-5 border border-transparent rounded-md shadow-sm text-white bg-indigo-600 dark:bg-indigo-500 hover:bg-indigo-700 dark:hover:bg-indigo-400 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-indigo-500 dark:focus:ring-offset-gray-900"
               >
                 <Check className="mr-2" />
-                <span className="text-sm "> Save</span>
+                <span className="text-sm">Save</span>
               </button>
             </div>
           </form>

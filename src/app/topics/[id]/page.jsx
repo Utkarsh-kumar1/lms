@@ -52,22 +52,31 @@ async function fetchData(owner, topicId) {
 export default async function page({ params }) {
   const session = await getServerSession(authOptions);
   if (!session) {
-    return <div>Unauthorized Access</div>;
+    return (
+      <div className="text-gray-800 dark:text-gray-200">
+        Unauthorized Access
+      </div>
+    );
   }
+
   try {
     const subjects = await fetchData(session.id, decodeURIComponent(params.id));
 
-
     if (subjects.length === 0) {
-      return <div>No subjects Found</div>;
+      return (
+        <div className="text-gray-800 dark:text-gray-200">
+          No subjects Found
+        </div>
+      );
     }
 
     return <SubTopicContent subjects={subjects} />;
   } catch (error) {
     return (
-      <div>
-        {error.message ? error.message : "Error while Fetching the data"}{" "}
+      <div className="text-gray-800 dark:text-gray-200">
+        {error.message ? error.message : "Error while Fetching the data"}
       </div>
     );
   }
 }
+

@@ -5,6 +5,7 @@ import { Switch } from "@/components/ui/switch";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { CreateActivity } from "@/actions/CreateActivity";
+import { Loader, Loader2Icon, LoaderCircle, LucideLoaderCircle } from "lucide-react";
 
 function formatDate(inputDate) {
   const dateObj = new Date(inputDate);
@@ -31,59 +32,32 @@ function formatDate(inputDate) {
 export default function DataRow({ subtopic, subIndex }) {
   const [isUpdating, setIsUpdating] = useState(false);
   const [isCompleted, setIsCompleted] = useState(!!subtopic.activityEnd);
-  const [endDate, setEndDate] = useState(subtopic.activityEnd);
   const router = useRouter();
 
-  const handleCreateActivity  = async ()  => {
+  const handleCreateActivity = async () => {
+    const { error, success } = await CreateActivity(
+      subtopic.subtopicId,
+      subtopic.courseSession
+    );
+  };
 
-    const { error, success } = await CreateActivity(subtopic.subtopicId, subtopic.courseSession);
-
-  }
-
-  useEffect(() => {
-    const handler = setTimeout(() => {
-      if (isCompleted !== !!subtopic.activityEnd) {
-        setIsUpdating(true);
-        axios
-          .patch("/api/updateActivity", {
-            status: isCompleted,
-            activityId: subtopic.activityId,
-            subtopicId: subtopic.subtopicId,
-          })
-          .then((result) => {
-            setIsUpdating(false);
-            router.refresh(); // Or trigger state update to re-render
-          })
-          .catch((err) => {
-            setIsCompleted(!!subtopic.activityEnd);
-            setEndDate(subtopic.activityEnd);
-            setIsUpdating(false);
-          });
-      }
-    }, 1);
-
-    return () => {
-      clearTimeout(handler);
-    };
-  }, [
-    isCompleted,
-    subtopic.activityEnd,
-    subtopic.id,
-    subtopic.revisionId,
-    router,
-    subtopic.activityId,
-    subtopic.subtopicId
-  ]);
-
-  const handleChange = async (status) => {
-    if (!isUpdating) {
-      setIsCompleted(status);
-      if (status) {
-        setEndDate(subtopic.activityEnd || new Date());
-      } else {
-        setEndDate(null);
-      }
-    }
+  const handleChange = (status) => {
+    setIsUpdating(true);
+    axios
+      .patch("/api/updateActivity", {
+        status: status,
+        activityId: subtopic.activityId,
+        subtopicId: subtopic.subtopicId,
+      })
+      .then((result) => {
+        setIsUpdating(false);
+        setIsCompleted(status)
+        router.refresh(); // Or trigger state update to re-render
+      })
+      .catch((err) => {
+        setIsCompleted(!!subtopic.activityEnd);
+        setIsUpdating(false);
+      });
   };
 
   return (
@@ -91,10 +65,8 @@ export default function DataRow({ subtopic, subIndex }) {
       <TableRow
         key={subIndex}
         className={` dark:text-white ${
-          endDate || isCompleted
-            ? "bg-green-100 dark:bg-green-900"
-            : "bg-red-100 dark:bg-red-300"
-        } hover:bg-gray-200 transition duration-150 sm:text-sm `}
+          isCompleted ? "bg-green-100 dark:bg-green-900" : "bg-gray-500"
+        }  transition duration-150 sm:text-sm `}
       >
         <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-white">
           {subtopic.subTopicIndex + ". " + subtopic.subtopicName}
@@ -111,16 +83,17 @@ export default function DataRow({ subtopic, subIndex }) {
             </button>
           )}
         </TableCell>
-        <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-white">
-          {isCompleted ? formatDate(endDate) : "-"}
-        </TableCell>
-        <TableCell className="p-2 text-[.7rem] sm:text-base">
-          <Switch
-            className="bg-slate-50"
-            disabled={isUpdating || subtopic.activityStart == null}
-            onCheckedChange={handleChange}
-            checked={isCompleted}
-          />
+        <TableCell className="p-2 text-[.7rem] sm:text-base ">
+          {isUpdating ? (
+            <Loader2Icon className=" animate-spin " />
+          ) : (
+            <Switch
+              className="bg-slate-50"
+              disabled={isUpdating || subtopic.activityStart == null}
+              onCheckedChange={handleChange}
+              checked={isCompleted}
+            />
+          )}
         </TableCell>
       </TableRow>
     </>

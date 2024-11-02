@@ -45,7 +45,7 @@ function Topics({ topicIndex, topics }) {
       className="mb-4"
     >
       <AccordionItem value={`item-${topicIndex}`} className="border rounded-lg">
-        <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out shadow-md flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-lg">
+        <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out shadow-md flex justify-between items-center focus:outline-none focus:ring-2 focus:ring-blue-300 rounded-lg dark:bg-darkBlue">
           <span>{topics[0].topicIndex + ". " + topics[0].topicName}</span>
 
           <div className="flex items-center gap-4 ml-auto mr-4">
@@ -116,9 +116,6 @@ function Topics({ topicIndex, topics }) {
                 </TableHead>
                 <TableHead className="font-bold text-[.7rem] dark:text-white">
                   Start
-                </TableHead>
-                <TableHead className="font-bold text-[.7rem] dark:text-white">
-                  End
                 </TableHead>
                 <TableHead className="font-bold text-[.7rem] dark:text-white">
                   Action

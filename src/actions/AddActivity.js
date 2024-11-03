@@ -16,7 +16,6 @@ export async function AddActivity(activityName) {
         if (!activityName) {
             return { error: "activityName Id is required " }
         }
-        console.log(activityName);
 
         const user = await db.query.users.findFirst({
             columns: {

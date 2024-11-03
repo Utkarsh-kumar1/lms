@@ -16,7 +16,6 @@ export async function AddNewSubjectAction(subjectNames) {
             return { owner: token.id, subjectName }
         })
 
-        console.log(subjects)
 
         await db.insert(subject).values(subjects)
     } catch (error) {

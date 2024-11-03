@@ -22,7 +22,6 @@ import { toast } from "@/components/ui/use-toast";
 export default function SignUpForm({ setIsOtpSended, FormData, setFormData }) {
   const [isLogging, setIsLogging] = useState(false);
 
-  // console.log(onSubmit);
   const form = useForm({
     resolver: zodResolver(SignupSchema),
     defaultValues: FormData,

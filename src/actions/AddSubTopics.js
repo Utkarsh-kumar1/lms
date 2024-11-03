@@ -24,7 +24,6 @@ export async function AddSubTopics(subtopicNames, subjectId, courseId, topicId) 
         else if (subtopicNames.length <= 0) {
             return { error: "CourseNames is required " }
         }
-        console.log(subjectId, subtopicNames, courseId, topicId);
 
         const subject = await db.query.subject.findFirst({
             with: {
@@ -55,7 +54,6 @@ export async function AddSubTopics(subtopicNames, subjectId, courseId, topicId) 
 
 
         let nextTopicIndex = (subject?.courses[0]?.topics[0]?.subtopics[0]?.subTopicIndex || 0) + 1;
-        console.log(nextTopicIndex);
 
         const insertValues = subtopicNames
             .map(
@@ -80,7 +78,7 @@ export async function AddSubTopics(subtopicNames, subjectId, courseId, topicId) 
             }
         }
         // Return a plain object with a serializable error message
-        console.log(error);
+     
         
         return {
             error: error.message || "SomethingWent Wrong"

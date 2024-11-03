@@ -66,7 +66,6 @@ const getColor = () => {
         setFile(null);
       })
       .catch((err) => {
-        console.error(err);
 
         setErrors((prev) => ({
           ...prev,

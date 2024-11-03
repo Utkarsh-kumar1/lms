@@ -20,7 +20,7 @@ export async function POST(req) {
         const topicId = formData.get('topicId');
         const courseId = formData.get('courseId');
         const subjectId = formData.get('subjectId')
-        console.log(formData );
+   
         
         if (!file) {
             return NextResponse.json(ApiResponse.error(400, 'No file Found'), { status: 400 });

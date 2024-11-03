@@ -111,7 +111,6 @@ export default function SubtopicCard({
           setIsEditing(false);
         })
         .catch((err) => {
-          console.error(err);
           setErrors((prev) => ({
             ...prev,
             savingError: "Error while saving data. Please try again.",

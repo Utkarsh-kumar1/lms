@@ -72,7 +72,7 @@ export async function DeleteSubTopic(subtopicId) {
         }
 
     } catch (error) {
-        console.log();
+   
         
         return { error: "Error while Deleting" }
     }

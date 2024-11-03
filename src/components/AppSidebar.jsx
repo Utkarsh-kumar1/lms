@@ -159,7 +159,6 @@ export function AppSidebar() {
               <SidebarMenuButton
                 onClick={() =>{
                   if(isMobile || open){
-                    console.log(open);
                     
                     toggleSidebar()
                   }

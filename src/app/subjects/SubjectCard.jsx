@@ -66,7 +66,6 @@ const getColor = () => {
         setFile(null);
       })
       .catch((err) => {
-        console.error(err);
 
         setErrors((prev) => ({
           ...prev,
@@ -107,7 +106,7 @@ const getColor = () => {
           getColor()
         )}
         onDoubleClick={() => {
-          router.push(`/subjects/${subject.subjectName}`);
+          router.push(`/subjects/${subject.id}`);
         }}
       >
         <div className="flex w-full flex-col">

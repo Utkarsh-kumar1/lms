@@ -4,7 +4,7 @@ import { Pie, PieChart, Label, Cell, Tooltip } from "recharts";
 
 const PieChartComponent = ({ data, title }) => {
   const totalItems = data.reduce((acc, item) => acc + item.value, 0);
-  console.log(title , data  );
+  
   
   if(!data[0].value && !data[1].value)
   {

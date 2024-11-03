@@ -1,4 +1,4 @@
-"use client"
+"use client";
 import { DeleteTopic } from "@/actions/DeleteTopic";
 import axios from "axios";
 import clsx from "clsx";
@@ -30,7 +30,7 @@ export default function TopicCard({ topic, subjectId, courseId }) {
     const handler = setTimeout(() => {
       if (debouncedIsCompleted !== topic.isCompleted) {
         // Perform the network call after the debounce delay
-        setIsProcessing(true)
+        setIsProcessing(true);
         axios
           .patch("/api/updateTopic", {
             id: topic.id,
@@ -40,15 +40,14 @@ export default function TopicCard({ topic, subjectId, courseId }) {
           })
           .then(() => {
             router.refresh();
-            setIsProcessing(false)
+            setIsProcessing(false);
           })
           .catch((err) => {
-            console.error(err);
-            // setErrors((prev) => ({
-            //   ...prev,
-            //   savingError: "Error while saving completion status.",
-            // }));
-            setIsProcessing(false)
+            setErrors((prev) => ({
+              ...prev,
+              savingError: "Error while saving completion status.",
+            }));
+            setIsProcessing(false);
           });
       }
     }, 1); // Debounce delay of 1.5 seconds
@@ -57,7 +56,14 @@ export default function TopicCard({ topic, subjectId, courseId }) {
     return () => {
       clearTimeout(handler);
     };
-  }, [debouncedIsCompleted, courseId, subjectId, topic.id, router , topic.isCompleted]);
+  }, [
+    debouncedIsCompleted,
+    courseId,
+    subjectId,
+    topic.id,
+    router,
+    topic.isCompleted,
+  ]);
 
   const toggleCompletionStatus = () => {
     // Toggle the completion status immediately for the UI
@@ -122,7 +128,6 @@ export default function TopicCard({ topic, subjectId, courseId }) {
         setIsEditing(false);
       })
       .catch((err) => {
-        console.error(err);
         setErrors((prev) => ({
           ...prev,
           savingError: "Error while saving data. Please try again.",
@@ -146,7 +151,7 @@ export default function TopicCard({ topic, subjectId, courseId }) {
   return (
     <div
       className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md shadow-sm mb-4 cursor-pointer"
-      onDoubleClick={() => router.push(`/topics/${topic.topicName}`)}
+      onDoubleClick={() => router.push(`/topics/${topic.id}`)}
     >
       <div className="flex items-center justify-between">
         <h4 className="text-sm sm:text-lg font-semibold text-gray-700 dark:text-gray-300">

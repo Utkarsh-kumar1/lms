@@ -41,7 +41,7 @@ export default function FileUploadModal({
             setIsOpen(false);
           })
           .catch((err) => {
-            console.error(err);
+            
             setErrors((prev) => ({
               ...prev,
               savingError: "Error while saving data. Please try again.",

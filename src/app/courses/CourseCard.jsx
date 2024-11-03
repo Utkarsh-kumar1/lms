@@ -77,7 +77,6 @@ const CourseCard = ({ course, subjectId }) => {
         setIsEditing(false);
       })
       .catch((err) => {
-        console.error(err);
         setErrors((prev) => ({
           ...prev,
           savingError: "Error while saving data. Please try again.",
@@ -103,7 +102,7 @@ const CourseCard = ({ course, subjectId }) => {
       className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md shadow-sm mb-4 w-full cursor-pointer"
       onDoubleClick={(e) => {
         e.preventDefault();
-        router.push(`/courses/${course.courseName}`);
+        router.push(`/courses/${course.id}`);
       }}
     >
       <div className="flex items-center justify-between">

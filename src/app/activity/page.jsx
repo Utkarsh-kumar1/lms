@@ -34,7 +34,7 @@ async function getAllCourses(userId) {
       );
     return courses;
   } catch (error) {
-    console.error("Error fetching courses:", error);
+   
     throw error;
   }
 }
@@ -89,7 +89,7 @@ const getTopicsByCourse = async (
 
     return dataWithAllFields;
   } catch (error) {
-    console.error("Error fetching topics and subtopics:", error);
+   
   }
 };
 

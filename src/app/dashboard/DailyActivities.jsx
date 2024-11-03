@@ -1,6 +1,6 @@
 "use client";
 import React, { useRef, useState, useEffect } from "react";
-import { LoaderCircle, Plus} from "lucide-react";
+import { LoaderCircle, Plus } from "lucide-react";
 import axios from "axios";
 import { AddActivity } from "@/actions/AddActivity";
 import { useOptimistic } from "react";
@@ -52,7 +52,6 @@ function DailyActivities({ userData }) {
         setPreviousDayActivities(data);
         setIsLoading(false);
       } catch (error) {
-        console.error("Error fetching previous day activities:", error);
         setIsLoading(false);
       }
     };

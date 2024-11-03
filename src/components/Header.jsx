@@ -30,7 +30,7 @@ function Header() {
 
       {/* Breadcrumb Navigation */}
       <nav className="flex items-center gap-1 mr-auto overflow-hidden">
-        {paths.map((path, index) => (
+        {paths.filter((value , index )=>index < 2).map((path, index) => (
           <span className="flex items-center" key={index}>
             <span
               title={path}

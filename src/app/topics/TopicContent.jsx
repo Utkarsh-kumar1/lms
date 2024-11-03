@@ -28,7 +28,7 @@ export default function TopicContent({ subjects = [] }) {
     } else {
       setFilteredCourses([]); // Clear courses when subject is deselected
     }
-  }, [selectedSubject ]); // Only re-run if `selectedSubject` changes
+  }, [selectedSubject]); // Only re-run if `selectedSubject` changes
 
   return (
     <div className="p-3 bg-gray-50 min-h-full  h-auto flex flex-col dark:bg-gray-800 dark:text-white ">
@@ -116,7 +116,27 @@ export default function TopicContent({ subjects = [] }) {
           <form
             className="p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 max-w-lg w-full flex flex-col gap-6"
             action={async (e) => {
-              // form submission logic here
+              const topicNameArray = e
+                .get("topicName")
+                .split(";")
+                .map((topic) => topic.trim());
+              const subjectId = e.get("subjectId");
+              const courseId = e.get("courseId");
+              const { error, success } = await AddTopics(
+                topicNameArray,
+                subjectId,
+                courseId
+              );
+
+              if (success) {
+                setIsAddingTopic(false);
+                setTopicName("");
+                selectedCourse("");
+                selectedSubject("");
+              }
+              if (error) {
+                setErrors((prev) => ({ ...prev, errorWhileSavingData: error }));
+              }
             }}
           >
             <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">

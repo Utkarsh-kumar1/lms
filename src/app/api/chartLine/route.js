@@ -116,7 +116,6 @@ export async function GET(req) {
         return Response.json(ApiResponse.success(200, response, "Data fetched successfully"), { status: 200 });
 
     } catch (error) {
-        console.error(error);
         return Response.json(ApiResponse.error(500, "Error while fetching the data"), { status: 500 });
     }
 }

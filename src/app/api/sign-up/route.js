@@ -105,7 +105,6 @@ export async function POST(request) {
 
 
     } catch (error) {
-        console.error("Database insert error:", error);
         return Response.json(ApiResponse.error(500, "Internal Server Error"), { status: 500 });
     }
 

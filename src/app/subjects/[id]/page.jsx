@@ -36,7 +36,7 @@ async function fetchSubject(owner, subjectId) {
         },
       },
       where: (subject, { eq, and }) =>
-        and(eq(subject.subjectName, subjectId), eq(subject.owner, owner)),
+        and(eq(subject.id, subjectId), eq(subject.owner, owner)),
     });
 
     return subjects;
@@ -51,10 +51,7 @@ export default async function page({ params }) {
     return <div>Unauthorized Access</div>;
   }
   try {
-    const subjects = await fetchSubject(
-      session.id,
-      decodeURIComponent(params.id)
-    );
+    const subjects = await fetchSubject(session.id, params.id);
     if (subjects.length === 0) {
       return <div>No subjects Found</div>;
     }

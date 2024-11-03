@@ -1,3 +1,4 @@
+
 import React from "react";
 import { getServerSession } from "next-auth";
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
@@ -19,6 +20,7 @@ const SubTopicContent = dynamic(
   }
 );
 
+
 async function fetchData(owner, topicId) {
   try {
     const subjects = await db.query.subject.findMany({
@@ -32,7 +34,7 @@ async function fetchData(owner, topicId) {
                 },
               },
               orderBy: (topic, { asc }) => [asc(topic.topicIndex)],
-              where: (topic, { eq }) => eq(topic.topicName, topicId),
+              where: (topic, { eq }) => eq(topic.id, topicId),
             },
           },
         },
@@ -48,6 +50,7 @@ async function fetchData(owner, topicId) {
     throw new Error("Error while fetching Data");
   }
 }
+
 
 export default async function page({ params }) {
   const session = await getServerSession(authOptions);

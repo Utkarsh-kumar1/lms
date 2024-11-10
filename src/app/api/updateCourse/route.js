@@ -25,7 +25,9 @@ export async function PATCH(req) {
             with: {
                 subjects: {
                     with: {
-                        courses: true
+                        courses: {
+                            where: (mycourse, {eq}) => eq(mycourse.id, id)
+                        }
                     },
                 }
             },
@@ -51,7 +53,8 @@ export async function PATCH(req) {
             }
 
 
-            if (courseData.courseName === courseName) {
+
+            if (courseData.isActive===isActive && courseData.wantRevision===wantRevision && courseData.courseName === courseName) {
                 return Response.json(ApiResponse.success("200", null, "Updated Successfully"), { status: 200 })
             }
             await db
@@ -66,11 +69,9 @@ export async function PATCH(req) {
 
 
 
-
         return Response.json({ status: 200, message: "Update successful" });
 
     } catch (error) {
-
 
 
         return Response.json(ApiResponse.error(500, "Error while updating Course "), { status: 500 })

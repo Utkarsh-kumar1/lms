@@ -79,7 +79,7 @@ export default function DataRow({ subtopic, subIndex }) {
               className="px-3 py-1 text-sm font-medium text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 active:bg-blue-700"
               onClick={handleCreateActivity}
             >
-              Create
+              Add
             </button>
           )}
         </TableCell>

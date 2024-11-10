@@ -2,6 +2,8 @@ import { getServerSession } from "next-auth";
 import Dashboard from "./Dashboard";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import { db } from "@/db/drizzle";
+import { sql } from "drizzle-orm";
+import { quotes } from "@/db/schema";
 
 async function fetchChartLineData(id) {
   // Fetch activities and revisions for the last 6 days
@@ -139,10 +141,16 @@ async function fetchData(id) {
       },
       where: (user, { eq }) => eq(user.id, id),
     });
+    
+    // Getting quote of the day
+    const getQuoteWithTodayColumn = db.select()
+      .from(quotes)
+      .where(sql`${quotes.today} = 1`);
+    
 
-    const result = await Promise.all([user, chartLineData]);
-
-    const userData = { ...result[0], chartLineData: result[1] };
+    const result = await Promise.all([user, chartLineData, getQuoteWithTodayColumn]);
+    
+    const userData = { ...result[0], chartLineData: result[1], quote: result[2] };
 
     return userData;
   } catch (error) {

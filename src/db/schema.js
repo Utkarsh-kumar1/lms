@@ -1,9 +1,17 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, char, varchar, json, index, foreignKey, primaryKey, timestamp, int, tinyint, bigint, unique, longtext, boolean, check, uniqueIndex } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, char, varchar, json, index, foreignKey, primaryKey, timestamp, int, tinyint, bigint, unique, longtext, boolean, check, uniqueIndex, text } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 import { v4 as uuidv4 } from "uuid";
 
 
 import { relations } from "drizzle-orm/relations";
+
+export const quotes = mysqlTable("quotes", {
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
+	quote: text("quote").notNull(),
+	author: varchar("author", { length: 255 }).notNull(),
+	tags: json("tags"),
+	today: boolean("today"),
+});
 
 export const revisionView = mysqlTable("RevisionView", {
 	userId: char("userId", { length: 36 }).notNull(),

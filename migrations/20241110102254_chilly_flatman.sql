@@ -1,0 +1,1 @@
+ALTER TABLE `quotes` ADD `today` boolean DEFAULT false;

@@ -68,7 +68,8 @@ export const ActivityItem = ({ activity }) => {
         </span>
         <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
           <span className="mr-2 text-sm sm:text-lg">
-            Streak: {activity.streak} {activity.isBestStreak && "🔥"}
+            Streak: {activity.streak} {activity.streak != 0 ? "🔥" : ""}
+           
           </span>
           {activity.isBestStreak && (
             <span className="bg-yellow-300 dark:bg-yellow-500 text-yellow-900 dark:text-yellow-100 px-2 py-1 rounded-full font-medium text-xs flex items-center">

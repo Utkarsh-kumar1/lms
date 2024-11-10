@@ -1,0 +1,1 @@
+ALTER TABLE `quotes` MODIFY COLUMN `today` boolean;

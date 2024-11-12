@@ -210,7 +210,7 @@ export default function TopicCard({ topic, subjectId, courseId }) {
                   title={note.fileName}
                 >
                   <a
-                    href={`api/files/${note.filePath}`}
+                    href={`/api/files/${note.filePath}`}
                     target="_blank"
                     className="text-blue-600 dark:text-blue-400 underline"
                     rel="noopener noreferrer"

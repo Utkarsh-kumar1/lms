@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { Trash2 } from "lucide-react";
+import { Crown, Music, RefreshCcw, RefreshCw, Trash2, User, Zap } from "lucide-react";
 import axios from "axios";
 import { Switch } from "@/components/ui/switch";
 import { Star } from "lucide-react";
@@ -71,6 +71,50 @@ export const ActivityItem = ({ activity }) => {
             Streak: {activity.streak} {activity.streak != 0 ? "🔥" : ""}
            
           </span>
+
+          {activity.streak > 0 && (activity.streak <= 7 ?
+            
+            (<span className="bg-green-200 dark:bg-green-400 text-green-800 dark:text-green-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
+          <Zap className="w-5 h-5 mr-2 text-green-600 dark:text-green-200" />
+          Spark Phase
+          <span className="ml-1 font-normal text-xs bg-green-300 text-green-900 dark:bg-green-500 dark:text-green-100 px-2 py-0.5 rounded-full">
+            Days 1–7</span>
+          </span>)
+            
+            : activity.streak <= 28 ?
+
+           (<span className="bg-blue-200 dark:bg-blue-400 text-blue-800 dark:text-blue-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
+          <RefreshCw className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-200" />
+          Momentum Phase
+          <span className="ml-1 font-normal text-xs bg-blue-300 text-blue-900 dark:bg-blue-500 dark:text-blue-100 px-2 py-0.5 rounded-full">Week 2–4</span>
+          </span>) :
+
+              activity.streak <= 90 ?
+          
+                (<span className="bg-purple-200 dark:bg-purple-400 text-purple-800 dark:text-purple-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
+          <Music className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-200" />
+          Rhythm Phase
+          <span className="ml-1 font-normal text-xs bg-purple-300 text-purple-900 dark:bg-purple-500 dark:text-purple-100 px-2 py-0.5 rounded-full">Month 2–3</span>
+                </span>)
+                :
+                activity.streak <= 180 ?
+          
+          (<span className="bg-yellow-200 dark:bg-yellow-400 text-yellow-800 dark:text-yellow-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
+          <User className="w-5 h-5 mr-2 text-yellow-600 dark:text-yellow-200" />
+          Identity Phase
+          <span className="ml-1 font-normal text-xs bg-yellow-300 text-yellow-900 dark:bg-yellow-500 dark:text-yellow-100 px-2 py-0.5 rounded-full">Month 4–6</span>
+                  </span>)
+                  :
+                  
+          
+          (<span className="bg-red-200 dark:bg-red-400 text-red-800 dark:text-red-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
+          <Crown className="w-5 h-5 mr-2 text-red-600 dark:text-red-200" />
+          Mastery Phase
+          <span className="ml-1 font-normal text-xs bg-red-300 text-red-900 dark:bg-red-500 dark:text-red-100 px-2 py-0.5 rounded-full">6+ Months</span>
+          </span>))}
+
+
+
           {activity.isBestStreak && (
             <span className="bg-yellow-300 dark:bg-yellow-500 text-yellow-900 dark:text-yellow-100 px-2 py-1 rounded-full font-medium text-xs flex items-center">
               <Star className="w-4 h-4 mr-1" />

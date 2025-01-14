@@ -73,6 +73,8 @@ export const dailyActivitiesScheduled = mysqlTable("dailyActivitiesScheduled", {
 	startDate: timestamp("startDate", { mode: 'string' }).defaultNow().notNull(),
 	task: varchar("task", { length: 50 }).notNull(),
 	isCompleted: tinyint("isCompleted").default(0).notNull(),
+	streak: int("streak"),
+	isBestStreak: tinyint("isBestStreak"),
 },
 	(table) => {
 		return {

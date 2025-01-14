@@ -22,7 +22,7 @@ function DailyActivities({ userData }) {
   });
 
   const [optimisticActivities, addOptimisticActivities] = useOptimistic(
-    userData.dailyActivitiesScheduledsView,
+    userData.dailyActivitiesScheduleds,
     (state, newActivity) => [...state, newActivity]
   );
 

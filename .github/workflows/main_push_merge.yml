@@ -13,6 +13,11 @@ jobs:
     - name: install ssh keys
       run: |
         install -m 600 -D /dev/null ~/.ssh/id_rsa
+        echo "Checking SSH key and permissions"
+        ls -la ~/.ssh
+        echo "Testing SSH connection"
+        ssh -T git@github.com
+
         echo "${{secrets.SSH_PRIVATE_KEY}}" > ~/.ssh/id_rsa
         ssh-keyscan -H ${{secrets.SSH_HOST}} > ~/.ssh/known_hosts
     - name: connect and pull

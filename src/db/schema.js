@@ -92,6 +92,17 @@ export const dailyActivitiesScheduledView = mysqlTable("dailyActivitiesScheduled
 	isBestStreak: int("isBestStreak"),
 });
 
+export const microPlanner = mysqlTable("microPlanner", {
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
+	owner: char("owner", { length: 36 }).notNull(),
+	created: timestamp("created", { mode: 'string' }).notNull(),
+	name: varchar("name", { length: 100 }).notNull(),
+	start: timestamp("start", { mode: 'string' }).notNull(),
+	end: timestamp("end", { mode: 'string' }).notNull(),
+	completed: timestamp("completed", { mode: 'string' }),
+	updated: timestamp("updated", { mode: 'string' }).notNull(),
+});
+
 export const eventLogs = mysqlTable("eventLogs", {
 	id: char("id", { length: 36 }).notNull(),
 	eventName: varchar("eventName", { length: 50 }).notNull(),

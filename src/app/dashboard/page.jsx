@@ -6,7 +6,7 @@ import { sql } from "drizzle-orm";
 import { quotes } from "@/db/schema";
 
 async function fetchChartLineData(id) {
-  // Fetch activities and revisions for the last 6 days
+  // Fetch activities and revisions for the last 6 days for chart data
   const result = await db.query.users.findFirst({
     columns: {},
     with: {
@@ -148,12 +148,16 @@ async function fetchData(id) {
       .from(quotes)
       .where(sql`${quotes.today} = 1`);
     
-
-    const result = await Promise.all([user, chartLineData, getQuoteWithTodayColumn]);
+    // Getting micro planner tasks
+    const getMicroPlannerTasks = db.query.microPlanner.findMany({
+      where: (microMonitorTasks, { eq }) => eq(microMonitorTasks.owner, id),
+    });
     
-    const userData = { ...result[0], chartLineData: result[1], quote: result[2] };
+    const result = await Promise.all([user, chartLineData, getQuoteWithTodayColumn, getMicroPlannerTasks]);
+    
+    const userData = { ...result[0], chartLineData: result[1], quote: result[2], microPlannerTasks: result[3] };
 
-    console.log(result[0]);
+    // console.log(userData);
 
     return userData;
   } catch (error) {

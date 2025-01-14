@@ -7,7 +7,6 @@ import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeProvider } from "@/context/theme-provider";
 
-
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
@@ -16,8 +15,9 @@ export const metadata = {
   head: (
     <>
       <style>
-@import url('https://fonts.googleapis.com/css2?family=Delius&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap');
-</style>
+        @import
+        url(&apos;https://fonts.googleapis.com/css2?family=Delius&family=Merriweather:ital,wght@0,300;0,400;0,700;0,900;1,300;1,400;1,700;1,900&display=swap&apos;);
+      </style>
     </>
   ),
 };
@@ -33,21 +33,18 @@ export default function RootLayout({ children }) {
           enableSystem
           disableTransitionOnChange
         >
-        <AuthProvider>
-          <SidebarProvider defaultOpen={false} >
-            <AppSidebar />
+          <AuthProvider>
+            <SidebarProvider defaultOpen={false}>
+              <AppSidebar />
               <main className=" w-full min-h-screen flex flex-col   bg-gray-100  dark:bg-gray-800">
+                <Header />
 
-              <Header/>
-              
-                  {children}
-              
-            </main>
-          </SidebarProvider>
-          
+                {children}
+              </main>
+            </SidebarProvider>
 
-          <Toaster />
-        </AuthProvider>
+            <Toaster />
+          </AuthProvider>
         </ThemeProvider>
       </body>
     </html>

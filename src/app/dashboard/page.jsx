@@ -131,13 +131,14 @@ async function fetchData(id) {
     const chartLineData = fetchChartLineData(id);
     const user = db.query.users.findFirst({
       with: {
-        dailyActivitiesScheduledsView: {
+        dailyActivitiesScheduleds: {
           where: (dailyActivitiesSchedules, { and, eq, sql }) =>
             eq(
               sql`Date(${dailyActivitiesSchedules.startDate})`,
               sql`CURRENT_DATE()`
             ),
         },
+
       },
       where: (user, { eq }) => eq(user.id, id),
     });
@@ -152,9 +153,11 @@ async function fetchData(id) {
     
     const userData = { ...result[0], chartLineData: result[1], quote: result[2] };
 
+    console.log(result[0]);
+
     return userData;
   } catch (error) {
-    
+    console.log(error);
     throw new Error("Error while fetching Data");
   }
 }

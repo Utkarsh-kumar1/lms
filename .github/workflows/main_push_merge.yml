@@ -17,7 +17,7 @@ jobs:
         ssh-keyscan -H -p ${{secrets.SSH_PORT}} ${{secrets.SSH_HOST}} > ~/.ssh/known_hosts
         
     - name: connect and pull
-      run: ssh -vvv -p ${{secrets.SSH_PORT}} ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} "cd ${{secrets.REPO_DIR}} && git checkout ${{secrets.MAIN_BRANCH}} && git pull && npm i && npm run build && pm2 restart all"
+      run: ssh -vv -p ${{secrets.SSH_PORT}} ${{secrets.SSH_USER}}@${{secrets.SSH_HOST}} "cd ${{secrets.REPO_DIR}} && git checkout ${{secrets.MAIN_BRANCH}} && git pull && npm i && npm run build && pm2 restart all"
     - name: cleanup
       run: rm -rf ~/.ssh
       

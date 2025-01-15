@@ -23,6 +23,8 @@ const MicroPlanner = ({ userData }) => {
   });
   const router = useRouter();
 
+  useEffect(() => { setData(userData) }, [userData]);
+
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -97,6 +99,7 @@ const MicroPlanner = ({ userData }) => {
     const calculatedEndTime = calculateEndTime();
 
     AddMicroPlanner(formData.name, calculatedStartTime, calculatedEndTime);
+    router.refresh();
   };
 
   const handleDelete = async () => {
@@ -105,7 +108,7 @@ const MicroPlanner = ({ userData }) => {
     const { success, error } = await DeleteMicroPlanner(isModalOpen);
     if (success) {
       setIsModalOpen("0");
-      router.refresh();
+      // router.refresh();
     } else if (error) {
       setErrors((prev) => ({
         ...prev,

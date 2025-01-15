@@ -23,10 +23,6 @@ const MicroPlanner = ({ userData }) => {
   });
   const router = useRouter();
 
-  useEffect(() => {
-    console.log("isModalOpen", isModalOpen);
-  }, [isModalOpen]);
-
   const handleInputChange = (e) => {
     const { name, value } = e.target;
     setFormData((prev) => ({
@@ -54,7 +50,6 @@ const MicroPlanner = ({ userData }) => {
     // Format as MySQL compatible string
     const mysqlFormat = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 
-    console.log("MySQL Format:", mysqlFormat);
     return mysqlFormat;
 
   };
@@ -80,7 +75,6 @@ const MicroPlanner = ({ userData }) => {
       // Format as MySQL compatible string
       const mysqlFormat = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 
-      console.log("MySQL Format:", mysqlFormat);
       return mysqlFormat;
       // return today.toISOString().slice(0, 16); // Return in 'YYYY-MM-DDTHH:MM' format
     }
@@ -101,7 +95,6 @@ const MicroPlanner = ({ userData }) => {
 
     const calculatedStartTime = calculateStartTime();
     const calculatedEndTime = calculateEndTime();
-    console.log(calculatedStartTime, calculatedEndTime);
 
     AddMicroPlanner(formData.name, calculatedStartTime, calculatedEndTime);
   };
@@ -139,7 +132,6 @@ const MicroPlanner = ({ userData }) => {
           item.id === id ? { ...item, completed: updatedTask.completed } : item
         );
         setData(updatedData);
-        console.log(result);
       })
       .catch((err) => {
         console.error("Error toggling completion status", err);

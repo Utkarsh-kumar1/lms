@@ -4,9 +4,14 @@ import { Switch } from "@/components/ui/switch";
 import axios from "axios";
 import { AddMicroPlanner } from "@/actions/AddMicroPlanner";
 import { useRouter } from "next/navigation";
+import { Trash2 } from "lucide-react";
+import { DeleteMicroPlanner } from "@/actions/DeleteMicroPlanner";
+import { time } from "drizzle-orm/mysql-core";
 
 const MicroPlanner = ({ userData }) => {
-    const [data, setData] = useState(userData);
+  const [data, setData] = useState(userData);
+  const [isModalOpen, setIsModalOpen] = useState("0"); // State for modal visibility
+  const [errors, setErrors] = useState({ deleteError: "" });
   const [formData, setFormData] = useState({
     name: "",
     start: new Date().toLocaleTimeString("en-US", {
@@ -16,7 +21,11 @@ const MicroPlanner = ({ userData }) => {
     }),
     totalTime: "15", // Default value in minutes
   });
-    const router = useRouter();
+  const router = useRouter();
+
+  useEffect(() => {
+    console.log("isModalOpen", isModalOpen);
+   }, [isModalOpen]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -26,17 +35,18 @@ const MicroPlanner = ({ userData }) => {
     }));
 
     // console.log(e.target.value);
-    };
-    
-    const calculateStartTime = () => {
-        const [hours, minutes] = formData.start.split(":").map(Number);
-        const today = new Date();
-        today.setHours(hours, minutes, 0, 0); // Set the time based on user input
-        const totalMinutes = parseInt(formData.totalTime, 10);
-        return today.toISOString().slice(0, 16); // Return in 'YYYY-MM-DDTHH:MM' format
-        
-        // return "";
-      };
+  };
+
+  const calculateStartTime = () => {
+    const [hours, minutes] = formData.start.split(":").map(Number);
+    const today = new Date();
+    today.setHours(hours, minutes, 0, 0); // Set the time based on user input
+    const totalMinutes = parseInt(formData.totalTime, 10);
+    console.log("hours", hours, "minutes", minutes, "time", today);
+    return today.toISOString().slice(0, 16); // Return in 'YYYY-MM-DDTHH:MM' format
+
+    // return "";
+  };
 
   const calculateEndTime = () => {
     const [hours, minutes] = formData.start.split(":").map(Number);
@@ -63,34 +73,29 @@ const MicroPlanner = ({ userData }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-      const calculatedStartTime = calculateStartTime();
+    const calculatedStartTime = calculateStartTime();
     const calculatedEndTime = calculateEndTime();
 
-    // const response = await fetch("/api/microPlanner", {
-    //   method: "POST",
-    //   headers: {
-    //     "Content-Type": "application/json",
-    //   },
-    //   body: JSON.stringify({ ...formData, end: calculatedEndTime }),
-      // });
-      
-      AddMicroPlanner(formData.name, calculatedStartTime, calculatedEndTime);
+    AddMicroPlanner(formData.name, calculatedStartTime, calculatedEndTime);
 
-
-    // if (response.ok) {
-    //   setFormData({
-    //     name: "",
-    //     start: "",
-    //     totalTime: "15",
-    //   });
-    //   const result = await response.json();
-    // //   setData(result);
-    // } else {
-    //   console.error("Error submitting form");
-    // }
   };
 
-    // This function updates database when a task is toggled as completed
+  const handleDelete = async () => {
+    // console.log("Delete button clicked", isModalOpen);
+    // Call the server action to delete the MicroPlanner
+    const { success, error } = await DeleteMicroPlanner(isModalOpen);
+    if (success) {
+      setIsModalOpen("0");
+      router.refresh();
+    } else if (error) {
+      setErrors((prev) => ({
+        ...prev,
+        deleteError: error || "Something Went Wrong",
+      }));
+    }
+  };
+
+  // This function updates database when a task is toggled as completed
   const toggleCompleted = async (id) => {
     const task = data.find((task) => task.id === id);
     const updatedTask = {
@@ -107,13 +112,12 @@ const MicroPlanner = ({ userData }) => {
         const updatedData = data.map((item) =>
           item.id === id ? { ...item, completed: updatedTask.completed } : item
         );
-          setData(updatedData);
-          console.log(result);
+        setData(updatedData);
+        console.log(result);
       })
       .catch((err) => {
         console.error("Error toggling completion status", err);
       });
-
   };
 
   return (
@@ -130,6 +134,8 @@ const MicroPlanner = ({ userData }) => {
             </label>
             <input
               type="text"
+              autoComplete="off"
+              
               name="name"
               value={formData.name}
               onChange={handleInputChange}
@@ -201,21 +207,62 @@ const MicroPlanner = ({ userData }) => {
           {data.map((item) => (
             <tr key={item.id} className="hover:bg-gray-100">
               <td className="px-4 py-2 border-b">{item.name}</td>
+              <td className="px-4 py-2 border-b">{item.id}</td>
               <td className="px-4 py-2 border-b">{formatTime(item.start)}</td>
               <td className="px-4 py-2 border-b">{formatTime(item.end)}</td>
               <td className="px-4 py-2 border-b">
                 <Switch
-                  checked={item.completed? true : false}
+                  checked={item.completed ? true : false}
                   onCheckedChange={(status) => toggleCompleted(item.id, status)}
                   className={`relative inline-flex h-6 w-11 items-center rounded-full transition-colors duration-200 ease-in-out ${
                     item.completed ? "bg-green-500" : "bg-gray-300"
                   }`}
                 />
               </td>
+              <td>
+                <button
+                  onClick={() => setIsModalOpen(item.id)}
+                  className="text-white rounded"
+                >
+                  <Trash2 className="w-5 h-5" color="red" />
+                </button>
+              </td>
             </tr>
           ))}
         </tbody>
       </table>
+      {isModalOpen != "0" && (
+        
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              Confirm Deletion
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300">
+              Are you sure you want to delete this plan? 
+            </p>
+            {errors.deleteError && (
+              <p className="text-red-400 dark:text-red-300 w-full text-center">
+                {errors.deleteError}
+              </p>
+            )}
+            <div className="flex justify-end mt-4">
+              <button
+                onClick={() => setIsModalOpen("0")}
+                className="mr-2 bg-gray-300 dark:bg-gray-700 text-gray-800 dark:text-gray-200 px-4 py-2 rounded"
+              >
+                Cancel
+              </button>
+              <button
+                onClick={handleDelete}
+                className="bg-red-500 dark:bg-red-600 text-white px-4 py-2 rounded"
+              >
+                Delete
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
     </div>
   );
 };

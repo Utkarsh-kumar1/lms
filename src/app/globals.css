@@ -84,3 +84,15 @@
   }
 }
 
+.home-svg {
+  background-image: url('../../public/home.svg');
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat;  
+}
+
+.delius-regular {
+  font-family: "Delius", serif;
+  font-weight: 400;
+  font-style: normal;
+}

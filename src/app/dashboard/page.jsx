@@ -2,8 +2,8 @@ import { getServerSession } from "next-auth";
 import Dashboard from "./Dashboard";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import { db } from "@/db/drizzle";
-import { sql } from "drizzle-orm";
-import { quotes } from "@/db/schema";
+import { or, sql } from "drizzle-orm";
+import { microPlanner, quotes } from "@/db/schema";
 
 async function fetchChartLineData(id) {
   // Fetch activities and revisions for the last 6 days for chart data
@@ -49,7 +49,6 @@ async function fetchChartLineData(id) {
     },
     where: (user, { eq }) => eq(user.id, id),
   });
-
 
   // Helper function to get the name of the day
   const getDayName = (date) =>
@@ -105,7 +104,6 @@ async function fetchChartLineData(id) {
     y: dailyActivitiesScheduledsCounts[dayName] || 0,
   }));
 
-
   // Format the final response for Nivo
   return [
     {
@@ -138,30 +136,45 @@ async function fetchData(id) {
               sql`CURRENT_DATE()`
             ),
         },
-
       },
       where: (user, { eq }) => eq(user.id, id),
     });
-    
+
     // Getting quote of the day
-    const getQuoteWithTodayColumn = db.select()
+    const getQuoteWithTodayColumn = db
+      .select()
       .from(quotes)
       .where(sql`${quotes.today} = 1`);
-    
-    // Getting micro planner tasks
+
+      // Getting micro planner tasks
+      // Get today's date in 'YYYY-MM-DD' format
+    const today = new Date().toISOString().slice(0, 10);  
     const getMicroPlannerTasks = db.query.microPlanner.findMany({
-      where: (microMonitorTasks, { eq }) => eq(microMonitorTasks.owner, id),
+      where: (microMonitorTasks, { or, and, eq }) =>
+        and(eq(microMonitorTasks.owner, id),
+          or(sql`Date(${microPlanner.created})`,sql`CURRENT_DATE()`, sql`Date(${microPlanner.start})`,sql`CURRENT_DATE()`, sql`Date(${microPlanner.end})`,sql`CURRENT_DATE()`, eq(microMonitorTasks.completed, null)),
+        )
     });
-    
-    const result = await Promise.all([user, chartLineData, getQuoteWithTodayColumn, getMicroPlannerTasks]);
-    
-    const userData = { ...result[0], chartLineData: result[1], quote: result[2], microPlannerTasks: result[3] };
+
+    const result = await Promise.all([
+      user,
+      chartLineData,
+      getQuoteWithTodayColumn,
+      getMicroPlannerTasks,
+    ]);
+
+    const userData = {
+      ...result[0],
+      chartLineData: result[1],
+      quote: result[2],
+      microPlannerTasks: result[3],
+    };
 
     // console.log(userData);
 
     return userData;
   } catch (error) {
-    console.log(error);
+    // console.log(error);
     throw new Error("Error while fetching Data");
   }
 }
@@ -172,11 +185,7 @@ export default async function Page() {
   try {
     const userData = await fetchData(session.id);
 
-    return (
-      
-        <Dashboard userData={userData} />
-      
-    );
+    return <Dashboard userData={userData} />;
   } catch (error) {
     return <div className=" text-green-600 font-bold"> {error.message} </div>;
   }

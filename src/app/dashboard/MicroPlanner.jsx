@@ -355,7 +355,7 @@ const MicroPlanner = ({ userData }) => {
       {/* Timeline Component */}
 <div className="flex flex-col items-start w-full px-4 py-8 overflow-x-auto overflow-y-hidden">
   {/* Timeline Chart */}
-  <div className="relative w-[200%] sm:w-[100%] h-40 min-w-full">
+  <div className="relative w-[200%] sm:w-[100%] h-56 min-w-full">
     {data.map((task, index) => {
       const totalDuration =
         new Date(data[data.length - 1]?.end) - new Date(data[0]?.start); // Total timeline duration

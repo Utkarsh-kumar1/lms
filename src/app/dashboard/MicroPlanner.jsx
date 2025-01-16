@@ -38,7 +38,6 @@ const MicroPlanner = ({ userData }) => {
       [name]: value,
     }));
 
-
     // console.log(e.target.value);
   };
 
@@ -353,19 +352,23 @@ const MicroPlanner = ({ userData }) => {
         </table>
       </div>
 
-  {/* Timeline Component */}
+      {/* Timeline Component */}
 <div className="flex flex-col items-start w-full px-4 py-8 overflow-x-auto overflow-y-hidden">
   {/* Timeline Chart */}
   <div className="relative w-[200%] sm:w-[100%] h-40 min-w-full">
     {data.map((task, index) => {
       const totalDuration =
-        new Date(data[data.length - 1].end) - new Date(data[0].start); // Total timeline duration
+        new Date(data[data.length - 1]?.end) - new Date(data[0]?.start); // Total timeline duration
       const taskStartOffset =
-        ((new Date(task.start) - new Date(data[0].start)) / totalDuration) * 95; // Start offset percentage
+        ((new Date(task.start) - new Date(data[0]?.start)) / totalDuration) * 95; // Start offset percentage
       const taskDuration =
         ((new Date(task.end) - new Date(task.start)) / totalDuration) * 95; // Task duration percentage
-      const taskColor = colors[index % colors.length]; // Cycle through colors for each task
-      const taskHeight = taskDuration * 4; // Dynamic height based on task duration
+
+      const taskHeight = Math.max(Math.min(taskDuration * 4, 150), 40); // Height between 40px and 150px
+
+      // Conditional colors based on task completion
+      const taskColor = task.completed ? "border-green-500" : "border-red-500"; // Rectangle background
+      const textColor = task.completed ? "text-green-500" : "text-red-500"; // Text color
 
       return (
         <div
@@ -374,12 +377,12 @@ const MicroPlanner = ({ userData }) => {
           style={{
             left: `${taskStartOffset}%`,
             width: `${taskDuration}%`,
-            bottom: 0, // Ensure the base is at the same level
+            bottom: 0,
           }}
         >
           {/* Task Name Centered on the Horizontal Line of the Rectangle */}
           <div
-            className={`z-50 bg-white dark:bg-[rgb(20,24,39,1)] absolute left-1/2 transform -translate-x-1/2 -translate-y-[50%] text-xs font-medium text-center ${taskColor.replace("bg", "text")} sm:text-sm text-clamp text-clamp:hover`} // Adjusted font size for small screens
+            className={`z-50 bg-white dark:bg-[rgb(20,24,39,1)] absolute left-1/2 transform -translate-x-1/2 -translate-y-[50%] text-xs font-medium text-center sm:text-sm ${textColor}`} // Adjusted font size for small screens
             style={{
               zIndex: 10,
             }}
@@ -389,24 +392,25 @@ const MicroPlanner = ({ userData }) => {
 
           {/* Task Rectangle with dynamic height */}
           <div
-            className={`relative border-2 sm:border-4 border-b-0 sm:border-b-0 rounded-t-lg  ${taskColor.replace("bg", "border")}`}
+            className={`relative border-2 sm:border-4 border-b-0 sm:border-b-0 rounded-t-lg ${taskColor}`}
             style={{
-              height: `${taskHeight}px`, // Set dynamic height based on task duration
+              height: `${taskHeight}px`, // Ensure height is within a visible range
             }}
           ></div>
 
           {/* Times on the Timeline Line */}
-          <div className="absolute flex justify-between w-full text-[9px] -bottom-6 sm:text-sm"> {/* Smaller text size for smaller screens */}
+          <div className="absolute flex justify-between w-full text-[9px] -bottom-6 sm:text-sm">
+            {" "}
+            {/* Smaller text size for smaller screens */}
             {/* Start Time */}
             <span
-              className={`absolute left-0 transform -translate-x-1/2 -rotate-45 ${taskColor.replace("bg", "text")}`}
+              className={`absolute left-0 transform -translate-x-1/2 -rotate-45 ${textColor}`}
             >
               {formatTime(task.start)}
             </span>
-
             {/* End Time */}
             <span
-              className={`absolute right-0 transform translate-x-1/2 -rotate-45 ${taskColor.replace("bg", "text")}`}
+              className={`absolute right-0 transform translate-x-1/2 -rotate-45 ${textColor}`}
             >
               {formatTime(task.end)}
             </span>
@@ -416,7 +420,6 @@ const MicroPlanner = ({ userData }) => {
     })}
   </div>
 </div>
-
 
 
       {isModalOpen != "0" && (

@@ -18,19 +18,26 @@ const MicroPlanner = ({ userData }) => {
       hour: "2-digit",
       minute: "2-digit",
       hour12: false,
+      timeZone: "Asia/Kolkata",
     }),
     totalTime: "15", // Default value in minutes
   });
   const router = useRouter();
 
-  useEffect(() => { setData(userData); console.log(userData) }, [userData]);
+  useEffect(() => {
+    setData(userData);
+  }, [userData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
+    if (name === "start") {
+      formatTime(value);
+    }
     setFormData((prev) => ({
       ...prev,
       [name]: value,
     }));
+
 
     // console.log(e.target.value);
   };
@@ -43,17 +50,25 @@ const MicroPlanner = ({ userData }) => {
     // Convert to IST and format for MySQL
     const options = { timeZone: "Asia/Kolkata", hour12: false };
     const year = today.toLocaleString("en-GB", { ...options, year: "numeric" });
-    const month = today.toLocaleString("en-GB", { ...options, month: "2-digit" });
+    const month = today.toLocaleString("en-GB", {
+      ...options,
+      month: "2-digit",
+    });
     const day = today.toLocaleString("en-GB", { ...options, day: "2-digit" });
     const hour = today.toLocaleString("en-GB", { ...options, hour: "2-digit" });
-    const minute = today.toLocaleString("en-GB", { ...options, minute: "2-digit" });
-    const second = today.toLocaleString("en-GB", { ...options, second: "2-digit" });
+    const minute = today.toLocaleString("en-GB", {
+      ...options,
+      minute: "2-digit",
+    });
+    const second = today.toLocaleString("en-GB", {
+      ...options,
+      second: "2-digit",
+    });
 
     // Format as MySQL compatible string
     const mysqlFormat = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
 
     return mysqlFormat;
-
   };
 
   const calculateEndTime = () => {
@@ -67,12 +82,27 @@ const MicroPlanner = ({ userData }) => {
 
       // Convert to IST and format for MySQL
       const options = { timeZone: "Asia/Kolkata", hour12: false };
-      const year = today.toLocaleString("en-GB", { ...options, year: "numeric" });
-      const month = today.toLocaleString("en-GB", { ...options, month: "2-digit" });
+      const year = today.toLocaleString("en-GB", {
+        ...options,
+        year: "numeric",
+      });
+      const month = today.toLocaleString("en-GB", {
+        ...options,
+        month: "2-digit",
+      });
       const day = today.toLocaleString("en-GB", { ...options, day: "2-digit" });
-      const hour = today.toLocaleString("en-GB", { ...options, hour: "2-digit" });
-      const minute = today.toLocaleString("en-GB", { ...options, minute: "2-digit" });
-      const second = today.toLocaleString("en-GB", { ...options, second: "2-digit" });
+      const hour = today.toLocaleString("en-GB", {
+        ...options,
+        hour: "2-digit",
+      });
+      const minute = today.toLocaleString("en-GB", {
+        ...options,
+        minute: "2-digit",
+      });
+      const second = today.toLocaleString("en-GB", {
+        ...options,
+        second: "2-digit",
+      });
 
       // Format as MySQL compatible string
       const mysqlFormat = `${year}-${month}-${day} ${hour}:${minute}:${second}`;
@@ -89,48 +119,47 @@ const MicroPlanner = ({ userData }) => {
       minute: "2-digit",
       hour12: true,
     };
-  
+
     const inputDate = new Date(time);
     const currentDate = new Date();
-  
+
     // Helper to check if a date is in the current week
     const isCurrentWeek = (date) => {
       const startOfWeek = new Date(currentDate);
       startOfWeek.setDate(currentDate.getDate() - currentDate.getDay()); // Start of the week (Sunday)
       startOfWeek.setHours(0, 0, 0, 0);
-  
+
       const endOfWeek = new Date(startOfWeek);
       endOfWeek.setDate(startOfWeek.getDate() + 6); // End of the week (Saturday)
       endOfWeek.setHours(23, 59, 59, 999);
-  
+
       return date >= startOfWeek && date <= endOfWeek;
     };
-  
+
     // Check if the date is today
     if (inputDate.toDateString() === currentDate.toDateString()) {
-      return `Today, ${inputDate.toLocaleString("en-US", options)}`;
+      return `${inputDate.toLocaleString("en-US", options)}`;
     }
-  
+
     // Check if the date is yesterday
     const yesterday = new Date();
     yesterday.setDate(currentDate.getDate() - 1);
     if (inputDate.toDateString() === yesterday.toDateString()) {
       return `Yesterday, ${inputDate.toLocaleString("en-US", options)}`;
     }
-  
+
     // Check if the date is in the current week
     if (isCurrentWeek(inputDate)) {
       return `${inputDate.toLocaleString("en-US", {
         weekday: "short",
       })}, ${inputDate.toLocaleString("en-US", options)}`;
     }
-  
+
     // Return full date in format (e.g., 12, Jan and time)
     return `${inputDate.getDate()}, ${inputDate.toLocaleString("en-US", {
       month: "short",
     })}, ${inputDate.toLocaleString("en-US", options)}`;
   };
-  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -139,6 +168,17 @@ const MicroPlanner = ({ userData }) => {
     const calculatedEndTime = calculateEndTime();
 
     AddMicroPlanner(formData.name, calculatedStartTime, calculatedEndTime);
+
+    setFormData({
+      name: "",
+      start: new Date().toLocaleTimeString("en-US", {
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: false,
+        timeZone: "Asia/Kolkata",
+      }),
+      totalTime: "15", // Default value in minutes
+    });
     router.refresh();
   };
 
@@ -181,12 +221,28 @@ const MicroPlanner = ({ userData }) => {
       });
   };
 
+  // Task color for line chart
+  const getTaskColor = (completed) => {
+    if (completed) return "bg-green-500"; // Completed tasks
+    if (!completed) return "bg-gray-500"; // Not completed
+    return "bg-yellow-500"; // Ongoing tasks
+  };
+  const colors = [
+    "bg-red-500",
+    "bg-green-500",
+    "bg-blue-500",
+    "bg-yellow-500",
+    "bg-purple-500",
+  ];
+
   return (
     <div className="container mx-auto p-2 sm:p-1">
+      {/* Heading */}
       <h1 className="text-1xl sm:text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">
         Planner
       </h1>
 
+      {/* Form for Planner task */}
       <div className="mb-6 sm:mb-8">
         <form onSubmit={handleSubmit} className="space-y-4">
           <div>
@@ -251,9 +307,7 @@ const MicroPlanner = ({ userData }) => {
         </form>
       </div>
 
-      <h2 className="text-lg sm:text-2xl font-semibold mb-4 text-gray-700">
-        Tasks for Today
-      </h2>
+      {/* All tasks data which was either created or ended or updated today or not completed */}
       <div className="overflow-auto max-h-[400px] border rounded">
         <table className="table-auto w-full border-collapse text-sm sm:text-base">
           <thead>
@@ -261,9 +315,7 @@ const MicroPlanner = ({ userData }) => {
               <th className="px-2 sm:px-4 py-2 text-left border-b">Name</th>
               <th className="px-2 sm:px-4 py-2 text-left border-b">Start</th>
               <th className="px-2 sm:px-4 py-2 text-left border-b">End</th>
-              <th className="px-2 sm:px-4 py-2 text-left border-b">
-                Status
-              </th>
+              <th className="px-2 sm:px-4 py-2 text-left border-b">Status</th>
             </tr>
           </thead>
           <tbody>
@@ -300,6 +352,72 @@ const MicroPlanner = ({ userData }) => {
           </tbody>
         </table>
       </div>
+
+  {/* Timeline Component */}
+<div className="flex flex-col items-start w-full px-4 py-8 overflow-x-auto overflow-y-hidden">
+  {/* Timeline Chart */}
+  <div className="relative w-[200%] sm:w-[100%] h-40 min-w-full">
+    {data.map((task, index) => {
+      const totalDuration =
+        new Date(data[data.length - 1].end) - new Date(data[0].start); // Total timeline duration
+      const taskStartOffset =
+        ((new Date(task.start) - new Date(data[0].start)) / totalDuration) * 95; // Start offset percentage
+      const taskDuration =
+        ((new Date(task.end) - new Date(task.start)) / totalDuration) * 95; // Task duration percentage
+      const taskColor = colors[index % colors.length]; // Cycle through colors for each task
+      const taskHeight = taskDuration * 4; // Dynamic height based on task duration
+
+      return (
+        <div
+          key={task.id}
+          className="absolute mb-20 ml-2 sm:ml-4" // Adjusted left margin for smaller screens
+          style={{
+            left: `${taskStartOffset}%`,
+            width: `${taskDuration}%`,
+            bottom: 0, // Ensure the base is at the same level
+          }}
+        >
+          {/* Task Name Centered on the Horizontal Line of the Rectangle */}
+          <div
+            className={`z-50 bg-white dark:bg-[rgb(20,24,39,1)] absolute left-1/2 transform -translate-x-1/2 -translate-y-[50%] text-xs font-medium text-center ${taskColor.replace("bg", "text")} sm:text-sm text-clamp text-clamp:hover`} // Adjusted font size for small screens
+            style={{
+              zIndex: 10,
+            }}
+          >
+            {task.name}
+          </div>
+
+          {/* Task Rectangle with dynamic height */}
+          <div
+            className={`relative border-2 sm:border-4 border-b-0 sm:border-b-0 rounded-t-lg  ${taskColor.replace("bg", "border")}`}
+            style={{
+              height: `${taskHeight}px`, // Set dynamic height based on task duration
+            }}
+          ></div>
+
+          {/* Times on the Timeline Line */}
+          <div className="absolute flex justify-between w-full text-[9px] -bottom-6 sm:text-sm"> {/* Smaller text size for smaller screens */}
+            {/* Start Time */}
+            <span
+              className={`absolute left-0 transform -translate-x-1/2 -rotate-45 ${taskColor.replace("bg", "text")}`}
+            >
+              {formatTime(task.start)}
+            </span>
+
+            {/* End Time */}
+            <span
+              className={`absolute right-0 transform translate-x-1/2 -rotate-45 ${taskColor.replace("bg", "text")}`}
+            >
+              {formatTime(task.end)}
+            </span>
+          </div>
+        </div>
+      );
+    })}
+  </div>
+</div>
+
+
 
       {isModalOpen != "0" && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">

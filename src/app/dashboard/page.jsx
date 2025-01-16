@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import Dashboard from "./Dashboard";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import { db } from "@/db/drizzle";
-import { or, sql } from "drizzle-orm";
+import { asc, or, sql } from "drizzle-orm";
 import { microPlanner, quotes } from "@/db/schema";
 
 async function fetchChartLineData(id) {
@@ -146,14 +146,21 @@ async function fetchData(id) {
       .from(quotes)
       .where(sql`${quotes.today} = 1`);
 
-      // Getting micro planner tasks
-      // Get today's date in 'YYYY-MM-DD' format
-    const today = new Date().toISOString().slice(0, 10);  
+    // Getting micro planner tasks
+    // Get today's date in 'YYYY-MM-DD' format
     const getMicroPlannerTasks = db.query.microPlanner.findMany({
-      where: (microMonitorTasks, { or, and, eq }) =>
-        and(eq(microMonitorTasks.owner, id),
-          or(sql`Date(${microPlanner.created})`,sql`CURRENT_DATE()`, sql`Date(${microPlanner.start})`,sql`CURRENT_DATE()`, sql`Date(${microPlanner.end})`,sql`CURRENT_DATE()`, eq(microMonitorTasks.completed, null)),
-        )
+      where: (microMonitorTasks, { or, and, eq, sql }) =>
+        and(
+          eq(microMonitorTasks.owner, id),
+          or(
+            eq(sql`DATE(${microMonitorTasks.created})`, sql`CURRENT_DATE()`),
+            eq(sql`DATE(${microMonitorTasks.start})`, sql`CURRENT_DATE()`),
+            eq(sql`DATE(${microMonitorTasks.end})`, sql`CURRENT_DATE()`),
+            eq(sql`DATE(${microMonitorTasks.completed})`, sql`CURRENT_DATE()`),
+            eq(microMonitorTasks.completed, null)
+          )
+        ),
+      orderBy: ( microMonitorTasks, { asc })=> asc(microMonitorTasks.start)
     });
 
     const result = await Promise.all([

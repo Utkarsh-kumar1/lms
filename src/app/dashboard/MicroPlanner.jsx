@@ -23,7 +23,7 @@ const MicroPlanner = ({ userData }) => {
   });
   const router = useRouter();
 
-  useEffect(() => { setData(userData) }, [userData]);
+  useEffect(() => { setData(userData); console.log(userData) }, [userData]);
 
   const handleInputChange = (e) => {
     const { name, value } = e.target;
@@ -89,8 +89,48 @@ const MicroPlanner = ({ userData }) => {
       minute: "2-digit",
       hour12: true,
     };
-    return new Date(time).toLocaleString("en-US", options);
+  
+    const inputDate = new Date(time);
+    const currentDate = new Date();
+  
+    // Helper to check if a date is in the current week
+    const isCurrentWeek = (date) => {
+      const startOfWeek = new Date(currentDate);
+      startOfWeek.setDate(currentDate.getDate() - currentDate.getDay()); // Start of the week (Sunday)
+      startOfWeek.setHours(0, 0, 0, 0);
+  
+      const endOfWeek = new Date(startOfWeek);
+      endOfWeek.setDate(startOfWeek.getDate() + 6); // End of the week (Saturday)
+      endOfWeek.setHours(23, 59, 59, 999);
+  
+      return date >= startOfWeek && date <= endOfWeek;
+    };
+  
+    // Check if the date is today
+    if (inputDate.toDateString() === currentDate.toDateString()) {
+      return `Today, ${inputDate.toLocaleString("en-US", options)}`;
+    }
+  
+    // Check if the date is yesterday
+    const yesterday = new Date();
+    yesterday.setDate(currentDate.getDate() - 1);
+    if (inputDate.toDateString() === yesterday.toDateString()) {
+      return `Yesterday, ${inputDate.toLocaleString("en-US", options)}`;
+    }
+  
+    // Check if the date is in the current week
+    if (isCurrentWeek(inputDate)) {
+      return `${inputDate.toLocaleString("en-US", {
+        weekday: "short",
+      })}, ${inputDate.toLocaleString("en-US", options)}`;
+    }
+  
+    // Return full date in format (e.g., 12, Jan and time)
+    return `${inputDate.getDate()}, ${inputDate.toLocaleString("en-US", {
+      month: "short",
+    })}, ${inputDate.toLocaleString("en-US", options)}`;
   };
+  
 
   const handleSubmit = async (e) => {
     e.preventDefault();
@@ -142,9 +182,9 @@ const MicroPlanner = ({ userData }) => {
   };
 
   return (
-    <div className="container mx-auto p-4 sm:p-6">
-      <h1 className="text-2xl sm:text-3xl font-bold text-center mb-4 sm:mb-6 text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">
-        Micro Planner
+    <div className="container mx-auto p-2 sm:p-1">
+      <h1 className="text-1xl sm:text-3xl font-bold text-center text-transparent bg-clip-text bg-gradient-to-r from-blue-500 to-indigo-600">
+        Planner
       </h1>
 
       <div className="mb-6 sm:mb-8">

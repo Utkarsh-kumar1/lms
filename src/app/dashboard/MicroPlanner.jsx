@@ -4,9 +4,10 @@ import { Switch } from "@/components/ui/switch";
 import axios from "axios";
 import { AddMicroPlanner } from "@/actions/AddMicroPlanner";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Edit, Edit2, Edit2Icon, Trash2 } from "lucide-react";
 import { DeleteMicroPlanner } from "@/actions/DeleteMicroPlanner";
 import { time } from "drizzle-orm/mysql-core";
+import { FiEdit, FiEdit2, FiEdit3 } from "react-icons/fi";
 
 const MicroPlanner = ({ userData }) => {
   const [data, setData] = useState(userData);
@@ -22,7 +23,15 @@ const MicroPlanner = ({ userData }) => {
     }),
     totalTime: "15", // Default value in minutes
   });
-  const router = useRouter();
+
+  const editingTask = (item) => {
+    
+    setFormData({
+      name: item.name,
+      start: item.start,
+      totalTime: item.totalTime,
+    })
+  };
 
   useEffect(() => {
     setData(userData);
@@ -178,7 +187,6 @@ const MicroPlanner = ({ userData }) => {
       }),
       totalTime: "15", // Default value in minutes
     });
-    router.refresh();
   };
 
   const handleDelete = async () => {
@@ -219,20 +227,6 @@ const MicroPlanner = ({ userData }) => {
         console.error("Error toggling completion status", err);
       });
   };
-
-  // Task color for line chart
-  const getTaskColor = (completed) => {
-    if (completed) return "bg-green-500"; // Completed tasks
-    if (!completed) return "bg-gray-500"; // Not completed
-    return "bg-yellow-500"; // Ongoing tasks
-  };
-  const colors = [
-    "bg-red-500",
-    "bg-green-500",
-    "bg-blue-500",
-    "bg-yellow-500",
-    "bg-purple-500",
-  ];
 
   return (
     <div className="container mx-auto p-2 sm:p-1">
@@ -320,7 +314,10 @@ const MicroPlanner = ({ userData }) => {
           <tbody>
             {data.map((item) => (
               <tr key={item.id} className="hover:bg-gray-100">
-                <td className="px-2 sm:px-4 py-2 border-b">{item.name}</td>
+                <td className=" flex items-center px-2 sm:px-4 py-2 border-b">
+                  {item.name}
+                  <FiEdit3 className="ml-1 cursor-pointer " onClick={() => editingTask(item)} />
+                </td>
                 <td className="px-2 sm:px-4 py-2 border-b">
                   {formatTime(item.start)}
                 </td>

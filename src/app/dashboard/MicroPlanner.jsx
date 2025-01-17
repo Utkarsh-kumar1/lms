@@ -4,9 +4,10 @@ import { Switch } from "@/components/ui/switch";
 import axios from "axios";
 import { AddMicroPlanner } from "@/actions/AddMicroPlanner";
 import { useRouter } from "next/navigation";
-import { Trash2 } from "lucide-react";
+import { Edit, Edit2, Edit2Icon, Trash2 } from "lucide-react";
 import { DeleteMicroPlanner } from "@/actions/DeleteMicroPlanner";
 import { time } from "drizzle-orm/mysql-core";
+import { FiEdit, FiEdit2, FiEdit3 } from "react-icons/fi";
 
 const MicroPlanner = ({ userData }) => {
   const [data, setData] = useState(userData);
@@ -22,7 +23,15 @@ const MicroPlanner = ({ userData }) => {
     }),
     totalTime: "15", // Default value in minutes
   });
-  const router = useRouter();
+
+  const editingTask = (item) => {
+    
+    setFormData({
+      name: item.name,
+      start: item.start,
+      totalTime: item.totalTime,
+    })
+  };
 
   useEffect(() => {
     setData(userData);
@@ -178,7 +187,6 @@ const MicroPlanner = ({ userData }) => {
       }),
       totalTime: "15", // Default value in minutes
     });
-    router.refresh();
   };
 
   const handleDelete = async () => {
@@ -219,20 +227,6 @@ const MicroPlanner = ({ userData }) => {
         console.error("Error toggling completion status", err);
       });
   };
-
-  // Task color for line chart
-  const getTaskColor = (completed) => {
-    if (completed) return "bg-green-500"; // Completed tasks
-    if (!completed) return "bg-gray-500"; // Not completed
-    return "bg-yellow-500"; // Ongoing tasks
-  };
-  const colors = [
-    "bg-red-500",
-    "bg-green-500",
-    "bg-blue-500",
-    "bg-yellow-500",
-    "bg-purple-500",
-  ];
 
   return (
     <div className="container mx-auto p-2 sm:p-1">
@@ -320,7 +314,10 @@ const MicroPlanner = ({ userData }) => {
           <tbody>
             {data.map((item) => (
               <tr key={item.id} className="hover:bg-gray-100">
-                <td className="px-2 sm:px-4 py-2 border-b">{item.name}</td>
+                <td className=" flex items-center px-2 sm:px-4 py-2 border-b">
+                  {item.name}
+                  <FiEdit3 className="ml-1 cursor-pointer " onClick={() => editingTask(item)} />
+                </td>
                 <td className="px-2 sm:px-4 py-2 border-b">
                   {formatTime(item.start)}
                 </td>
@@ -353,74 +350,80 @@ const MicroPlanner = ({ userData }) => {
       </div>
 
       {/* Timeline Component */}
-<div className="flex flex-col items-start w-full px-4 py-8 overflow-x-auto overflow-y-hidden">
-  {/* Timeline Chart */}
-  <div className="relative w-[200%] sm:w-[100%] h-56 min-w-full">
-    {data.map((task, index) => {
-      const totalDuration =
-        new Date(data[data.length - 1]?.end) - new Date(data[0]?.start); // Total timeline duration
-      const taskStartOffset =
-        ((new Date(task.start) - new Date(data[0]?.start)) / totalDuration) * 95; // Start offset percentage
-      const taskDuration =
-        ((new Date(task.end) - new Date(task.start)) / totalDuration) * 95; // Task duration percentage
+      <div className="flex flex-col items-start w-full px-4 py-8 overflow-x-auto overflow-y-hidden">
+        {/* Timeline Chart */}
+        <div className="relative w-[200%] sm:w-[100%] h-56 min-w-full">
+          {data.map((task, index) => {
+            const totalDuration =
+              new Date(data[data.length - 1]?.end) - new Date(data[0]?.start); // Total timeline duration
+            const taskStartOffset =
+              ((new Date(task.start) - new Date(data[0]?.start)) /
+                totalDuration) *
+              95; // Start offset percentage
+            const taskDuration =
+              ((new Date(task.end) - new Date(task.start)) / totalDuration) *
+              95; // Task duration percentage
 
-      const taskHeight = Math.max(Math.min(taskDuration * 4, 150), 40); // Height between 40px and 150px
+            const taskHeight = Math.max(Math.min(taskDuration * 4, 150), 40); // Height between 40px and 150px
 
-      // Conditional colors based on task completion
-      const taskColor = task.completed ? "border-green-500" : "border-red-500"; // Rectangle background
-      const textColor = task.completed ? "text-green-500" : "text-red-500"; // Text color
+            // Conditional colors based on task completion
+            const taskColor = task.completed
+              ? "border-green-500"
+              : "border-red-500"; // Rectangle background
+            const textColor = task.completed
+              ? "text-green-500"
+              : "text-red-500"; // Text color
 
-      return (
-        <div
-          key={task.id}
-          className="absolute mb-20 ml-2 sm:ml-4" // Adjusted left margin for smaller screens
-          style={{
-            left: `${taskStartOffset}%`,
-            width: `${taskDuration}%`,
-            bottom: 0,
-          }}
-        >
-          {/* Task Name Centered on the Horizontal Line of the Rectangle */}
-          <div
-            className={`z-50 bg-white dark:bg-[rgb(20,24,39,1)] absolute left-1/2 transform -translate-x-1/2 -translate-y-[50%] text-xs font-medium text-center sm:text-sm ${textColor}`} // Adjusted font size for small screens
-            style={{
-              zIndex: 10,
-            }}
-          >
-            {task.name}
-          </div>
+            return (
+              <div
+                key={task.id}
+                className="absolute mb-20 ml-2 sm:ml-4" // Adjusted left margin for smaller screens
+                style={{
+                  left: `${taskStartOffset}%`,
+                  width: `${taskDuration}%`,
+                  bottom: 0,
+                }}
+              >
+                {/* Task Name Centered on the Horizontal Line of the Rectangle */}
+                <div
+                  className={`z-50 bg-white dark:bg-[rgb(20,24,39,1)] absolute left-1/2 transform -translate-x-1/2 -translate-y-[50%] text-xs font-medium text-center sm:text-sm ${textColor}`} // Adjusted font size for small screens
+                  style={{
+                    zIndex: 10,
+                  }}
+                >
+                  {task.name}
+                </div>
 
-          {/* Task Rectangle with dynamic height */}
-          <div
-            className={`relative border-2 sm:border-4 border-b-0 sm:border-b-0 rounded-t-lg ${taskColor}`}
-            style={{
-              height: `${taskHeight}px`, // Ensure height is within a visible range
-            }}
-          ></div>
+                {/* Task Rectangle with dynamic height */}
+                <div
+                  className={`relative border-2 sm:border-4 border-b-0 sm:border-b-0 rounded-t-lg ${taskColor}`}
+                  style={{
+                    height: `${taskHeight}px`, // Ensure height is within a visible range
+                  }}
+                ></div>
 
-          {/* Times on the Timeline Line */}
-          <div className="absolute flex justify-between w-full text-[9px] -bottom-6 sm:text-sm">
-            {" "}
-            {/* Smaller text size for smaller screens */}
-            {/* Start Time */}
-            <span
-              className={`absolute left-0 transform -translate-x-1/2 -rotate-45 ${textColor}`}
-            >
-              {formatTime(task.start)}
-            </span>
-            {/* End Time */}
-            <span
-              className={`absolute right-0 transform translate-x-1/2 -rotate-45 ${textColor}`}
-            >
-              {formatTime(task.end)}
-            </span>
-          </div>
+                {/* Times on the Timeline Line */}
+                <div className="absolute flex justify-between w-full text-[9px] -bottom-6 sm:text-sm">
+                  {" "}
+                  {/* Smaller text size for smaller screens */}
+                  {/* Start Time */}
+                  <span
+                    className={`absolute left-0 transform -translate-x-1/2 -rotate-45 ${textColor}`}
+                  >
+                    {formatTime(task.start)}
+                  </span>
+                  {/* End Time */}
+                  <span
+                    className={`absolute right-0 transform translate-x-1/2 -rotate-45 ${textColor}`}
+                  >
+                    {formatTime(task.end)}
+                  </span>
+                </div>
+              </div>
+            );
+          })}
         </div>
-      );
-    })}
-  </div>
-</div>
-
+      </div>
 
       {isModalOpen != "0" && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">

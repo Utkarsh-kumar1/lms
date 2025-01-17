@@ -353,74 +353,87 @@ const MicroPlanner = ({ userData }) => {
       </div>
 
       {/* Timeline Component */}
-<div className="flex flex-col items-start w-full px-4 py-8 overflow-x-auto overflow-y-hidden">
-  {/* Timeline Chart */}
-  <div className="relative w-[200%] sm:w-[100%] h-56 min-w-full">
-    {data.map((task, index) => {
-      const totalDuration =
-        new Date(data[data.length - 1]?.end) - new Date(data[0]?.start); // Total timeline duration
-      const taskStartOffset =
-        ((new Date(task.start) - new Date(data[0]?.start)) / totalDuration) * 95; // Start offset percentage
-      const taskDuration =
-        ((new Date(task.end) - new Date(task.start)) / totalDuration) * 95; // Task duration percentage
+      <div className="flex flex-col items-start w-full px-4 py-8 overflow-x-auto">
+        {/* Timeline Chart */}
+        <div className="relative flex items-center space-x-4">
+          {data.length > 0 ? (
+            data.map((task, index) => {
+              // Conditional colors based on task completion
+              const taskColor = task.completed ? "bg-green-500" : "bg-red-500"; // Rectangle background
+            
 
-      const taskHeight = Math.max(Math.min(taskDuration * 4, 150), 40); // Height between 40px and 150px
+              // Calculate free time between tasks
+              let freeTime = null;
+              if (index > 0) {
+                const prevEnd = new Date(data[index - 1].end);
+                const currStart = new Date(task.start);
+                const diff = (currStart - prevEnd) / (1000 * 60); // Difference in minutes
+                freeTime = diff > 0 ? `${diff} min Free` : null;
+              }
 
-      // Conditional colors based on task completion
-      const taskColor = task.completed ? "border-green-500" : "border-red-500"; // Rectangle background
-      const textColor = task.completed ? "text-green-500" : "text-red-500"; // Text color
+              return (
+                <div
+                  key={task.id}
+                  className="relative flex flex-row items-center space-x-4"
+                >
+                  {/* Free Time (If applicable) */}
+                  {freeTime && (
+                    <div
+                      className={`grid place-items-center h-full rounded-lg bg-slate-400`}
+                      style={{
+                        width: "150px", // Fixed width
+                        height: "40px", // Fixed height
+                      }}
+                    >
+                      <div className=" text-xs text-gray-300 px-2">
+                        {freeTime}
+                      </div>
+                    </div>
+                  )}
+                  {/* Rectangle */}
+                  <div
+                    className={`relative flex flex-col items-center justify-between rounded-lg ${taskColor} p-2`}
+                    style={{
+                      width: "150px", // Fixed width
+                      height: "100px", // Fixed height
+                    }}
+                  >
+                    {/* Task Name */}
+                    <span
+                      className={`text-xs sm:text-sm font-medium text-center line-clamp-2 px-2 text-yellow-800`}
+                      title={task.name}
+                    >
+                      {task.name}
+                    </span>
 
-      return (
-        <div
-          key={task.id}
-          className="absolute mb-20 ml-2 sm:ml-4" // Adjusted left margin for smaller screens
-          style={{
-            left: `${taskStartOffset}%`,
-            width: `${taskDuration}%`,
-            bottom: 0,
-          }}
-        >
-          {/* Task Name Centered on the Horizontal Line of the Rectangle */}
-          <div
-            className={`z-50 bg-white dark:bg-[rgb(20,24,39,1)] absolute left-1/2 transform -translate-x-1/2 -translate-y-[50%] text-xs font-medium text-center sm:text-sm ${textColor}`} // Adjusted font size for small screens
-            style={{
-              zIndex: 10,
-            }}
-          >
-            {task.name}
-          </div>
+                    {/* Task Duration */}
+                    <span
+                      className={`text-[10px] sm:text-xs mt-1  text-gray-200 `}
+                    >
+                      {Math.round(
+                        (new Date(task.end) - new Date(task.start)) /
+                          (1000 * 60)
+                      )}{" "}
+                      min
+                    </span>
 
-          {/* Task Rectangle with dynamic height */}
-          <div
-            className={`relative border-2 sm:border-4 border-b-0 sm:border-b-0 rounded-t-lg ${taskColor}`}
-            style={{
-              height: `${taskHeight}px`, // Ensure height is within a visible range
-            }}
-          ></div>
-
-          {/* Times on the Timeline Line */}
-          <div className="absolute flex justify-between w-full text-[9px] -bottom-6 sm:text-sm">
-            {" "}
-            {/* Smaller text size for smaller screens */}
-            {/* Start Time */}
-            <span
-              className={`absolute left-0 transform -translate-x-1/2 -rotate-45 ${textColor}`}
-            >
-              {formatTime(task.start)}
-            </span>
-            {/* End Time */}
-            <span
-              className={`absolute right-0 transform translate-x-1/2 -rotate-45 ${textColor}`}
-            >
-              {formatTime(task.end)}
-            </span>
-          </div>
+                    {/* Start and End Times */}
+                    <div className="flex justify-between w-full text-[10px] sm:text-xs mt-2 text-gray-200">
+                      <span>{formatTime(task.start)}</span>
+                      <span>{formatTime(task.end)}</span>
+                    </div>
+                  </div>
+                </div>
+              );
+            })
+          ) : (
+            // If no tasks, show "Free Time" across the timeline
+            <div className="absolute w-full flex justify-center text-gray-500 text-sm">
+              Nothing to do
+            </div>
+          )}
         </div>
-      );
-    })}
-  </div>
-</div>
-
+      </div>
 
       {isModalOpen != "0" && (
         <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">

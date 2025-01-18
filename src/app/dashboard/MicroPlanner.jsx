@@ -2,18 +2,20 @@
 import { useEffect, useState } from "react";
 import { Switch } from "@/components/ui/switch";
 import axios from "axios";
-import { AddMicroPlanner } from "@/actions/AddMicroPlanner";
+import { AddOrUpdateMicroPlanner } from "@/actions/AddMicroPlanner";
 import { useRouter } from "next/navigation";
-import { Edit, Edit2, Edit2Icon, Trash2 } from "lucide-react";
+import { Trash2 } from "lucide-react";
 import { DeleteMicroPlanner } from "@/actions/DeleteMicroPlanner";
 import { time } from "drizzle-orm/mysql-core";
-import { FiEdit, FiEdit2, FiEdit3 } from "react-icons/fi";
+import { FiEdit3 } from "react-icons/fi";
+import { set } from "zod";
 
 const MicroPlanner = ({ userData }) => {
   const [data, setData] = useState(userData);
-  const [isModalOpen, setIsModalOpen] = useState("0"); // State for modal visibility
+  const [isModalOpen, setIsModalOpen] = useState("0"); // Stores the ID of the task to be deleted
   const [errors, setErrors] = useState({ deleteError: "" });
   const [formData, setFormData] = useState({
+    id: "",
     name: "",
     start: new Date().toLocaleTimeString("en-US", {
       hour: "2-digit",
@@ -23,13 +25,22 @@ const MicroPlanner = ({ userData }) => {
     }),
     totalTime: "15", // Default value in minutes
   });
+  const [editing, setEditing] = useState(false);
 
   const editingTask = (item) => {
+
+    setEditing(true);
     
+    let duration = Math.round(
+      (new Date(item.end) - new Date(item.start)) /
+      (1000 * 60)
+    )
+
     setFormData({
+      id: item.id,
       name: item.name,
-      start: item.start,
-      totalTime: item.totalTime,
+      start: item.start.split (" ")[1],
+      totalTime: duration,
     })
   };
 
@@ -172,12 +183,22 @@ const MicroPlanner = ({ userData }) => {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    const calculatedStartTime = calculateStartTime();
-    const calculatedEndTime = calculateEndTime();
+    if (e.nativeEvent.submitter.name === "cancelUpdate") {
+      setEditing(false);
+    }
+    else if (e.nativeEvent.submitter.name === "updateTask") {
+      // Call the server action to update the MicroPlanner
+      const { success, error } = await AddOrUpdateMicroPlanner(formData.name, calculateStartTime(), calculateEndTime(), formData.id);
+      setEditing(false);
+    }
+    else {
+      // Call the server action to add the MicroPlanner
+      const { success, error } = await AddOrUpdateMicroPlanner(formData.name, calculateStartTime(), calculateEndTime());
+    }
 
-    AddMicroPlanner(formData.name, calculatedStartTime, calculatedEndTime);
-
+    // Reset the form data
     setFormData({
+      id: "",
       name: "",
       start: new Date().toLocaleTimeString("en-US", {
         hour: "2-digit",
@@ -291,12 +312,31 @@ const MicroPlanner = ({ userData }) => {
               </select>
             </div>
           </div>
-          <button
+          {!editing ? (
+            <button
+              name="newTask"
             type="submit"
             className="w-full bg-blue-500 text-white px-4 py-2 rounded-md text-sm sm:text-base hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
           >
             Submit Task
           </button>
+          ) : (
+              <div className="flex justify-around">
+            <button
+                  type="submit"
+                  name="updateTask"
+              className="w-[45%] bg-blue-500 text-white px-4 py-2 rounded-md text-sm sm:text-base hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+              >
+                Update Task
+            </button>
+            <button
+                  type="submit"
+                  name="cancelUpdate"
+                  className="w-[45%] bg-blue-500 text-white px-4 py-2 rounded-md text-sm sm:text-base hover:bg-blue-600 focus:outline-none focus:ring-2 focus:ring-blue-500"
+            >
+              Cancel
+                </button>
+                </div>)}
         </form>
       </div>
 

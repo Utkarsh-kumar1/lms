@@ -350,7 +350,7 @@ const MicroPlanner = ({ userData }) => {
       </div>
 
       {/* Timeline Component */}
-      <div className="flex flex-col items-start w-full px-4 py-8 overflow-x-auto">
+      <div className={`flex flex-col w-full px-4 py-8 overflow-x-auto ${data.length > 0 ? "items-start" : "items-center"}`}>
         {/* Timeline Chart */}
         <div className="relative flex items-center space-x-4">
           {data.length > 0 ? (
@@ -425,7 +425,7 @@ const MicroPlanner = ({ userData }) => {
             })
           ) : (
             // If no tasks, show "Free Time" across the timeline
-            <div className="absolute w-full flex justify-center text-gray-500 text-sm">
+            <div className="absolute w-max flex justify-center text-gray-500 text-sm">
               Nothing to do
             </div>
           )}

@@ -2,7 +2,7 @@ import { getServerSession } from "next-auth";
 import Dashboard from "./Dashboard";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import { db } from "@/db/drizzle";
-import { asc, or, sql } from "drizzle-orm";
+import { asc, isNull, or, sql } from "drizzle-orm";
 import { microPlanner, quotes } from "@/db/schema";
 
 async function fetchChartLineData(id) {
@@ -157,7 +157,7 @@ async function fetchData(id) {
             eq(sql`DATE(${microMonitorTasks.start})`, sql`CURRENT_DATE()`),
             eq(sql`DATE(${microMonitorTasks.end})`, sql`CURRENT_DATE()`),
             eq(sql`DATE(${microMonitorTasks.completed})`, sql`CURRENT_DATE()`),
-            eq(microMonitorTasks.completed, null)
+            isNull(microMonitorTasks.completed)
           )
         ),
       orderBy: ( microMonitorTasks, { asc })=> asc(microMonitorTasks.start)

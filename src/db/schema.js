@@ -1,4 +1,4 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, char, varchar, json, index, foreignKey, primaryKey, timestamp, int, tinyint, bigint, unique, longtext, boolean, check, uniqueIndex, text } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, char, varchar, json, index, foreignKey, primaryKey, timestamp, int, tinyint, bigint, unique, longtext, boolean, check, uniqueIndex, text, date, mysqlEnum, time, datetime } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 import { v4 as uuidv4 } from "uuid";
 
@@ -102,6 +102,54 @@ export const microPlanner = mysqlTable("microPlanner", {
 	completed: timestamp("completed", { mode: 'string' }),
 	updated: timestamp("updated", { mode: 'string' }).notNull(),
 });
+
+export const recurringTasks = mysqlTable('recurring_tasks', {
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
+	owner: char("owner", { length: 36 }).notNull(),
+	title: varchar('title', { length: 255 }).notNull(),
+	startTime: timestamp('startTime', { mode: 'string' }),
+	duration: int('duration'),
+	description: text('description'),
+	isRecurring: tinyint('isRecurring'),
+	startDate: date('startDate').notNull(),
+	endDate: date('endDate'),
+	recurrencePattern: mysqlEnum('recurrencePattern', [
+	  'daily',
+	  'weekly',
+	  'monthly',
+	  'yearly',
+	  'custom',
+	]).notNull(),
+	recurrenceInterval: int('recurrenceInterval').default(1),
+	recurrenceDays: varchar('recurrenceDays', { length: 255 }),
+	recurrenceMonthDays: varchar('recurrenceMonthDays', { length: 255 }),
+	recurrenceYearDays: varchar('recurrenceYearDays', { length: 255 }),
+	customCron: varchar('customCron', { length: 255 }),
+	isActive: tinyint('isActive').default(1),
+	createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow(),
+	updatedAt: timestamp('updatedAt', { mode: 'string' })
+	  .defaultNow()
+	  .onUpdateNow(),
+	priority: mysqlEnum('priority', ['low', 'medium', 'high']).default('medium'),
+});
+  
+export const tasks = mysqlTable("tasks", {
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
+	recurringTaskId: char("recurringTaskId", { length: 36 }).default(null),
+	title: varchar("title", { length: 255 }).notNull(),
+	description: text("description"),
+	startTime: time("startTime"),
+	duration: int("duration"),
+	dueDate: datetime("dueDate"),
+	owner: char("owner", { length: 36 }).default(null),
+	priority: varchar("priority", { length: 6 }).notNull().default("Medium"), // ENUM stored as varchar
+	status: varchar("status", { length: 12 }).notNull().default("Pending"), // ENUM stored as varchar
+	createdAt: timestamp("createdAt", { mode: "string" }).defaultNow(),
+	updatedAt: timestamp("updatedAt", { mode: "string" }).defaultNow().onUpdateNow(),
+  }, (table) => ({
+	ownerIdx: index("created_by").on(table.owner),
+	recurringTaskIdx: index("FK_tasks_recurring_tasks").on(table.recurringTaskId),
+  }));
 
 export const eventLogs = mysqlTable("eventLogs", {
 	id: char("id", { length: 36 }).notNull(),

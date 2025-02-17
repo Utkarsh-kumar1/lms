@@ -15,6 +15,10 @@ export const ActivityItem = ({ activity }) => {
   const router = useRouter();
 
   useEffect(() => {
+    console.log("Activity", activity);
+  }, []);
+
+  useEffect(() => {
     const handler = setTimeout(() => {
       if (isCompleted !== activity.isCompleted) {
         setIsProcessing(false);
@@ -64,7 +68,7 @@ export const ActivityItem = ({ activity }) => {
       {/* Task Name and Streak */}
       <div className="flex flex-col">
         <span className="text-gray-800 dark:text-gray-200 text-sm font-bold sm:font-semibold sm:text-lg">
-          {activity.task}
+          {activity.title}
         </span>
         <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
           <span className="mr-2 text-sm sm:text-lg">

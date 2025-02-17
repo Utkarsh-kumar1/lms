@@ -2,8 +2,8 @@
 import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
 import { useState, useEffect } from "react";
 
-export default function RecurringTaskForm({ isOpen }) {
-  const [isOpenState, setIsOpenState] = useState(isOpen);
+export default function AddTasks({ isOpen, onClose }) {
+  // const [isOpenState, setIsOpenState] = useState(isOpen);
   const [task, setTask] = useState({
     title: "",
     startTime: new Date().toLocaleTimeString("en-US", {
@@ -114,24 +114,25 @@ export default function RecurringTaskForm({ isOpen }) {
     }
     
     const {success, error} = await AddOrUpdateTasks(task);
-    // console.log(AddOrUpdateTasks(task)); 
-    console.log("Success", success);
-    console.log("Error", error);
+    // console.log(AddOrUpdateTasks(task));
+    // console.log("Success", success);
+    // console.log("Error", error);
+    onClose();
     
   };
 
   const handleOutsideClick = (e) => {
     if (e.target === e.currentTarget) {
-      setIsOpenState(false);
+      onClose();
     }
   }
   const handleEscapeKeyDown = (event) => {
     if (event.key === "Escape") {
-      setIsOpenState(false);
+      onClose();
     }
   };
   
-  if (!isOpenState) {
+  if (!isOpen) {
     return null;
   }
   return (

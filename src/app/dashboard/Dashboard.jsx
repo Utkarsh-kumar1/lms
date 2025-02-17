@@ -31,7 +31,7 @@ export default function Dashboard({ userData }) {
         <DailyActivities userData={userData} />
       </div> */}
 
-      <div className="">
+      <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-3 sm:p-6">
         <BuildingBlocks />
         {/* <AddTasks isOpen={true} /> */}
       </div>

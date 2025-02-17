@@ -5,6 +5,8 @@ import ChartLine from "./ChartLine";
 import DailyActivities from "./DailyActivities";
 import Quotes from "./Quotes";
 import MicroPlanner from "./MicroPlanner";
+import AddTasks from "./AddTasks";
+import BuildingBlocks from "./BuildingBlocks";
 
 export default function Dashboard({ userData }) {
   return (
@@ -25,8 +27,13 @@ export default function Dashboard({ userData }) {
         <ChartLine className="h-[30rem]" data={userData.chartLineData} />
       </div>
 
-      <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-3 sm:p-6">
+      {/* <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-3 sm:p-6">
         <DailyActivities userData={userData} />
+      </div> */}
+
+      <div className="">
+        <BuildingBlocks />
+        {/* <AddTasks isOpen={true} /> */}
       </div>
     </div>
   );

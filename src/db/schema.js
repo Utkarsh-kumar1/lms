@@ -140,7 +140,7 @@ export const tasks = mysqlTable("tasks", {
 	description: text("description"),
 	startTime: time("startTime"),
 	duration: int("duration"),
-	dueDate: datetime("dueDate"),
+	dueDate: date("dueDate"),
 	owner: char("owner", { length: 36 }).default(null),
 	priority: varchar("priority", { length: 6 }).notNull().default("Medium"), // ENUM stored as varchar
 	status: varchar("status", { length: 12 }).notNull().default("Pending"), // ENUM stored as varchar

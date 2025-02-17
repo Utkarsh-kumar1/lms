@@ -40,7 +40,7 @@ export default function BuildingBlocks() {
     <div>
       <div className="flex ">
         <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200 mb-4 text-center">
-          Today's Building Blocks
+          Today&apos;s Building Blocks
         </h1>
         <Plus className="w-5 h-5 cursor-pointer" onClick={togglePopup} />
         <AddTasks isOpen={isPopupVisible} onClose={togglePopup} />

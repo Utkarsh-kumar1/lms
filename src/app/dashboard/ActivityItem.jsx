@@ -1,11 +1,11 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { Trash2, Star } from "lucide-react";
+import { Trash2, Star, Ellipsis } from "lucide-react";
 import axios from "axios";
 import { DeleteActivity } from "@/actions/DeleteActivity";
 
-export const ActivityItem = ({ activity }) => {
+export const ActivityItem = ({ activity, reload }) => {
   const [status, setStatus] = useState(activity.status);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
@@ -27,54 +27,93 @@ export const ActivityItem = ({ activity }) => {
     }
   }, [status, activity.id, activity.status, router]);
 
+  useEffect(() => {
+    if (lastUpdated) {
+      const timer = setTimeout(() => setLastUpdated(null), 60000);
+      return () => clearTimeout(timer);
+    }
+  }, [lastUpdated]);
+
   const handleStatusChange = () => {
     setStatus((prev) =>
-      prev === "Pending" ? "In Progress" : prev === "In Progress" ? "Completed" : "Pending"
+      prev === "Pending"
+        ? "In Progress"
+        : prev === "In Progress"
+        ? "Completed"
+        : "Pending"
     );
   };
 
   const handleDelete = async () => {
-    const { success, error } = await DeleteActivity(activity.title, activity.id);
-    if (success) {
+    const id = activity.id;
+    try {
+      const response = await axios.delete(`/api/buildingBlocks`, {
+        data: { id },
+      });
       setIsModalOpen(false);
-      router.refresh();
-    } else if (error) {
-      setErrors((prev) => ({
-        ...prev,
-        deleteError: error || "Something Went Wrong",
-      }));
+      // router.refresh();
+      reload();
+      // console.log("Deleted successfully:", response.data);
+
+    } catch (error) {
+      // setErrors((prev) => ({
+      //   ...prev,
+      //   deleteError: error || "Something Went Wrong",
+      // }));
+      console.error("Error deleting:", error);
     }
   };
 
   const formatDate = (date) =>
-    new Date(date).toLocaleDateString("en-GB", { day: "2-digit", month: "short", year: "numeric" });
+    new Date(date).toLocaleDateString("en-GB", {
+      day: "2-digit",
+      month: "short",
+      year: "numeric",
+    });
 
   const formatTime = (time) => {
     let [hours, minutes, seconds] = time.split(":").map(Number);
     let date = new Date();
     date.setHours(hours, minutes, seconds);
-    return date.toLocaleTimeString("en-US", { hour: "2-digit", minute: "2-digit", hour12: true });
+    return date.toLocaleTimeString("en-US", {
+      hour: "2-digit",
+      minute: "2-digit",
+      hour12: true,
+    });
   };
 
-  const wasUpdatedRecently = lastUpdated && (new Date() - lastUpdated) / 1000 < 30;
+  const wasUpdatedRecently =
+    lastUpdated && (new Date() - lastUpdated) / 1000 < 30;
 
   return (
     <div
-      className={`relative flex justify-between items-center p-4 mb-3 rounded-lg shadow-sm transition-all duration-300 ${
-        status === "Completed" ? "bg-green-100 dark:bg-green-900" : "bg-white dark:bg-gray-700 hover:shadow-lg"
-      }`}
-    >
-      <div className="flex flex-col">
-        <span className="text-gray-800 dark:text-gray-200 text-sm font-bold sm:font-semibold sm:text-lg">
+  className={`relative flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 mb-3 rounded-lg shadow-sm transition-all duration-300 
+  ${
+    status === "Completed"
+      ? "bg-green-100 dark:bg-green-500"
+      : status === "In Progress"
+      ? "bg-yellow-100 dark:bg-yellow-600"
+      : "bg-white dark:bg-gray-700 hover:shadow-lg"
+  }
+`}
+>
+    
+      {/* Activity Details */}
+      <div className="flex flex-col flex-1">
+        <span className="text-gray-800 dark:text-gray-200 text-base sm:text-lg font-semibold">
           {activity.title}
         </span>
-        <span className="text-sm text-gray-500 dark:text-gray-400">{activity.description}</span>
+        <span className="text-sm text-gray-500 dark:text-gray-400">
+          {activity.description}
+        </span>
         <div className="text-sm text-gray-500 dark:text-gray-400">
           {formatDate(activity.dueDate)}, {formatTime(activity.startTime)}
         </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">Duration: {activity.duration} minutes</div>
-        <div className="flex items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
-          <span className="mr-2 text-sm sm:text-lg">
+        <div className="text-sm text-gray-500 dark:text-gray-400">
+          Duration: {activity.duration} minutes
+        </div>
+        <div className="flex flex-wrap items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+          <span className="mr-2">
             Streak: {activity.streak} {activity.streak !== 0 ? "🔥" : ""}
           </span>
           {activity.isBestStreak && (
@@ -86,34 +125,42 @@ export const ActivityItem = ({ activity }) => {
         </div>
       </div>
 
-      <div className="flex items-center gap-4">
+      {/* Actions */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-3 sm:mt-0">
         <button
-          className="px-3 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+          className="w-full sm:w-auto px-3 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
           onClick={handleStatusChange}
         >
           {status}
         </button>
-        <span className="px-3 py-1 text-sm font-semibold text-white bg-gray-500 rounded-lg cursor-default">
+        <span className="w-full sm:w-auto px-3 py-1 text-sm font-semibold text-white bg-gray-500 rounded-lg text-center">
           Priority: {activity.priority}
         </span>
-        <button onClick={() => setIsModalOpen(true)} className="text-white rounded">
-          <Trash2 className="w-5 h-5" color="red" />
+        <button onClick={() => setIsModalOpen(true)} className="text-white">
+          <Trash2 className="w-5 h-5 text-red-500" />
         </button>
       </div>
 
       {wasUpdatedRecently && (
-        <div className="absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-400">
-          Last updated just now
+        <div className="flex items-center justify-center gap-1 absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-400">
+          <Ellipsis /> <div>Updated just now</div>
         </div>
       )}
 
+      {/* Delete Confirmation Modal */}
       {isModalOpen && (
-        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50">
-          <div className="bg-white dark:bg-gray-800 rounded-lg p-6">
-            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">Confirm Deletion</h2>
-            <p className="text-gray-700 dark:text-gray-300">Are you sure you want to delete this activity?</p>
+        <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 z-50 p-4">
+          <div className="bg-white dark:bg-gray-800 rounded-lg p-6 w-full max-w-sm sm:max-w-md">
+            <h2 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
+              Confirm Deletion
+            </h2>
+            <p className="text-gray-700 dark:text-gray-300">
+              Are you sure you want to delete this activity?
+            </p>
             {errors.deleteError && (
-              <p className="text-red-400 dark:text-red-300 w-full text-center">{errors.deleteError}</p>
+              <p className="text-red-400 dark:text-red-300 text-center mt-2">
+                {errors.deleteError}
+              </p>
             )}
             <div className="flex justify-end mt-4">
               <button

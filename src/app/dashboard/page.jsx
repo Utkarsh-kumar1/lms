@@ -32,18 +32,18 @@ async function fetchChartLineData(id) {
           end: true,
         },
       },
-      dailyActivitiesScheduleds: {
-        where: (dailyActivitiesScheduleds, { between, sql, and, eq }) =>
+      tasks: {
+        where: (tasks, { between, sql, and, eq }) =>
           and(
             between(
-              sql`DATE(${dailyActivitiesScheduleds.startDate})`,
+              sql`DATE(${tasks.dueDate})`,
               sql`DATE(NOW() - INTERVAL 6 DAY)`,
               sql`DATE(NOW())`
             ),
-            eq(dailyActivitiesScheduleds.isCompleted, true)
+            eq(tasks.status, "Completed")
           ),
         columns: {
-          startDate: true,
+          dueDate: true,
         },
       },
     },
@@ -71,16 +71,17 @@ async function fetchChartLineData(id) {
 
   const processResults = (data) => {
     return data.reduce((acc, item) => {
-      const dayName = getDayName(new Date(item.end || item.startDate));
+      const dayName = getDayName(new Date(item.end || item.startDate || item.dueDate));
       acc[dayName] = (acc[dayName] || 0) + 1;
       return acc;
     }, {});
   };
 
+
   const activityCounts = processResults(result.activities);
   const revisionCounts = processResults(result.revisions);
   const dailyActivitiesScheduledsCounts = processResults(
-    result.dailyActivitiesScheduleds
+    result.tasks
   );
 
   // Get the last 6 days in the correct order
@@ -181,7 +182,7 @@ async function fetchData(id) {
 
     return userData;
   } catch (error) {
-    // console.log(error);
+    console.log(error);
     throw new Error("Error while fetching Data");
   }
 }

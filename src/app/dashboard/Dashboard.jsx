@@ -15,10 +15,14 @@ export default function Dashboard({ userData }) {
       <div className=" dark:bg-gray-900  text-2xl shadow-md rounded-lg p-3 text-back sm:p-6 ">
         <Quotes quote={userData?.quote?.[0]} />
       </div>
-      
+
       <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-3 sm:p-6">
-        <MicroPlanner userData={userData.microPlannerTasks} />
+        <BuildingBlocks />
       </div>
+      
+      {/* <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-3 sm:p-6">
+        <MicroPlanner userData={userData.microPlannerTasks} />
+      </div> */}
 
       <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg min-h-[30rem]">
         <div className="text-lg font-bold text-gray-800 dark:text-gray-200 mt-4 mx-auto text-center">
@@ -31,10 +35,6 @@ export default function Dashboard({ userData }) {
         <DailyActivities userData={userData} />
       </div> */}
 
-      <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-3 sm:p-6">
-        <BuildingBlocks />
-        {/* <AddTasks isOpen={true} /> */}
-      </div>
     </div>
   );
 }

@@ -356,7 +356,8 @@ export const usersRelations = relations(users, ({ many }) => ({
 	revisions: many(revision),
 	subjects: many(subject),
 	notes: many(notes),
-	dailyActivitiesScheduledsView: many(dailyActivitiesScheduledView)
+	dailyActivitiesScheduledsView: many(dailyActivitiesScheduledView),
+	tasks: many(tasks)
 }));
 
 export const courseRelations = relations(course, ({ one, many }) => ({
@@ -409,4 +410,11 @@ export const topicsRelations = relations(topics, ({ one, many }) => ({
 		references: [course.id]
 	}),
 	notes: many(notes)
+}));
+
+export const tasksRelations = relations(tasks, ({ one }) => ({
+	user: one(users, {
+		fields: [tasks.owner],
+		references: [users.id]
+	}),
 }));

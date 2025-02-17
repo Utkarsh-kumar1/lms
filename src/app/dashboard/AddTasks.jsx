@@ -1,9 +1,7 @@
-"use client";
 import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
 import { useState, useEffect } from "react";
 
 export default function AddTasks({ isOpen, onClose }) {
-  // const [isOpenState, setIsOpenState] = useState(isOpen);
   const [task, setTask] = useState({
     title: "",
     startTime: new Date().toLocaleTimeString("en-US", {
@@ -26,7 +24,7 @@ export default function AddTasks({ isOpen, onClose }) {
     customCron: "",
     customCronDescription: "",
   });
-  
+
   const recurrenceOptions = ["Daily", "Weekly", "Monthly", "Yearly", "Custom"];
   const priorityOptions = ["Low", "Medium", "High"];
   const daysOfWeek = [
@@ -39,53 +37,45 @@ export default function AddTasks({ isOpen, onClose }) {
     "Sunday",
   ];
   const daysOfMonth = Array.from({ length: 31 }, (_, i) => i + 1);
-  
+
   useEffect(() => {
-    // console.log(task.customCron.trim())
     if (task.recurrencePattern === "custom" && task.customCron.trim() !== "") {
-      fetchCronDescription(task.customCron.replace(/\s+/g, "_")); // Convert spaces to underscores for URL
+      fetchCronDescription(task.customCron.replace(/\s+/g, "_"));
     }
   }, [task.customCron]);
-  
+
   const handleChange = (name, value) => {
-    
     if (name === "recurrenceYearDays") {
-      value = value.replace(" ", ""); 
+      value = value.replace(" ", "");
     }
     setTask((prev) => ({
       ...prev,
       [name]: value,
     }));
   };
-  
+
   const toggleSelection = (name, value) => {
     setTask((prev) => ({
       ...prev,
       [name]: prev[name].includes(value)
-      ? prev[name].filter((v) => v !== value)
-      : [...prev[name], value],
+        ? prev[name].filter((v) => v !== value)
+        : [...prev[name], value],
     }));
   };
-  
+
   const isValidCommaSeparatedIntegers = (min = 1, max = 365) => {
-    // Remove all spaces from the input
     const trimmedInput = task.recurrenceYearDays.replace(/\s/g, "");
-    
-    // Regex to check for comma-separated integers
     const regex = /^\d+(,\d+)*$/;
-    
     if (!regex.test(trimmedInput)) {
-      return false; // Input is not in the correct format
+      return false;
     }
-  
-    // Split the input into individual values and validate each one
     const values = trimmedInput.split(",");
     return values.every((value) => {
       const num = parseInt(value, 10);
       return !isNaN(num) && num >= min && num <= max;
     });
   };
-  
+
   const fetchCronDescription = async (cronExpr) => {
     try {
       const response = await fetch(
@@ -103,287 +93,251 @@ export default function AddTasks({ isOpen, onClose }) {
       }));
     }
   };
-  
+
   const handleSubmit = async (e) => {
     e.preventDefault();
-    // console.log("Submitting Task:", task);
-    
-    if (task.isRecurring && !isValidCommaSeparatedIntegers()) {
+    if (task.recurrencePattern === "custom" && !isValidCommaSeparatedIntegers()) {
       alert("Invalid input. Please enter comma-separated integers (e.g., 1,2,3).");
       return;
     }
-    
-    const {success, error} = await AddOrUpdateTasks(task);
-    // console.log(AddOrUpdateTasks(task));
-    // console.log("Success", success);
-    // console.log("Error", error);
+    const { success, error } = await AddOrUpdateTasks(task);
     onClose();
-    
   };
 
   const handleOutsideClick = (e) => {
     if (e.target === e.currentTarget) {
       onClose();
     }
-  }
+  };
   const handleEscapeKeyDown = (event) => {
     if (event.key === "Escape") {
       onClose();
     }
   };
-  
+
   if (!isOpen) {
     return null;
   }
+
   return (
-    <div className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50 "
+    <div
+      className="fixed inset-0 flex items-center justify-center bg-black bg-opacity-50 backdrop-blur-sm z-50"
       onClick={handleOutsideClick}
       onKeyDown={handleEscapeKeyDown}
     >
-    <div className=" max-w-lg max-h-screen mx-auto p-6 bg-white shadow-md rounded-lg overflow-y-auto">
-      <h2 className="text-2xl font-bold mb-4">Create Recurring Task</h2>
-      <form onSubmit={handleSubmit} className="space-y-4">
-        <input
-          type="text"
-          name="title"
-          placeholder="Task Title"
-          value={task.title}
-          onChange={(e) => handleChange("title", e.target.value)}
-          className="w-full p-2 border rounded"
-          required
-        />
-
-        <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
-          <div className="flex-1">
-            <label className="block mb-2">
-              Start Time
-            </label>
-            <input
-              type="time"
-              name="start"
-              value={(task.startTime)}
-              onChange={(e) => handleChange("startTime", e.target.value)}
-              className="mt-1 block w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-              required
-            />
-          </div>
-          <div className="flex-1">
-            <label className="block mb-2">
-              Total Time
-            </label>
-            <select
-              name="totalTime"
-              value={task.duration}
-              onChange={(e) => handleChange("duration", parseInt(e.target.value, 10))}
-              className="mt-1 block w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
-            >
-              {[15, 30, 45, 60, 75, 90, 105, 120].map((minutes) => {
-                const hours = minutes / 60;
-                const label =
-                  minutes > 59
-                    ? `${hours.toFixed(2)} hours`
-                    : `${minutes} minutes`;
-                return (
-                  <option key={minutes} value={minutes}>
-                    {label}
-                  </option>
-                );
-              })}
-            </select>
-          </div>
-        </div>
-
-        <textarea
-          name="description"
-          placeholder="Description"
-          value={task.description}
-          onChange={(e) => handleChange("description", e.target.value)}
-          className="w-full p-2 border rounded"
-        />
-
-        <label className="flex items-center space-x-2 cursor-pointer">
+      <div className="max-w-lg max-h-screen mx-auto p-6 bg-white shadow-md rounded-lg overflow-y-auto transition-all duration-300 ease-in-out">
+        <h2 className="text-2xl font-bold mb-4">Create Recurring Task</h2>
+        <form onSubmit={handleSubmit} className="space-y-4">
           <input
-            type="checkbox"
-            checked={task.isRecurring}
-            onChange={() => handleChange("isRecurring",!task.isRecurring)}
-            className="w-5 h-5 text-blue-600 border-gray-300 rounded "
+            type="text"
+            name="title"
+            placeholder="Task Title"
+            value={task.title}
+            onChange={(e) => handleChange("title", e.target.value)}
+            className="w-full p-2 border rounded"
+            required
           />
-          <span className="text-gray-700">Recurring</span>
-        </label>
-
-        {task.isRecurring && (
-          <div>
-            <div>
-              <label className="block mb-2">Start:</label>
+          <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
+            <div className="flex-1">
+              <label className="block mb-2">Start Time</label>
               <input
-                type="date"
-                name="startDate"
-                value={task.startDate}
-                onChange={(e) => handleChange("startDate", e.target.value)}
-                className="w-full p-2 border rounded"
+                type="time"
+                name="start"
+                value={task.startTime}
+                onChange={(e) => handleChange("startTime", e.target.value)}
+                className="mt-1 block w-full px-3 py-2 text-sm sm:text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
                 required
               />
             </div>
-
-            <div>
-              <label className="block mb-2">End:</label>
-              <input
-                type="date"
-                name="endDate"
-                value={task.endDate}
-                onChange={(e) => handleChange("endDate", e.target.value)}
-                className="w-full p-2 border rounded"
-              />
-            </div>
-
-            <div>
-              <label className="block mb-2">Recurrence Pattern:</label>
-              <div className="flex gap-2 flex-wrap">
-                {recurrenceOptions.map((option) => (
-                  <button
-                    key={option}
-                    type="button"
-                    onClick={() =>
-                      handleChange("recurrencePattern", option.toLowerCase())
-                    }
-                    className={`px-4 py-2 border rounded ${
-                      task.recurrencePattern === option.toLowerCase()
-                        ? "bg-blue-500 text-white"
-                        : "bg-gray-100"
-                    }`}
-                  >
-                    {option}
-                  </button>
-                ))}
-              </div>
-            </div>
-
-            {task.recurrencePattern === "daily" && (
-              <div>
-                <label className="block mb-2">Repeat every:</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="30"
-                  value={task.recurrenceInterval}
-                  onChange={(e) =>
-                    handleChange(
-                      "recurrenceInterval",
-                      parseInt(e.target.value, 10)
-                    )
-                  }
-                  className="w-full p-2 border rounded"
-                />
-                <span className="text-gray-600">days</span>
-              </div>
-            )}
-
-            {task.recurrencePattern === "weekly" && (
-              <div>
-                <label className="block mb-2">Select Days:</label>
-                <div className="grid grid-cols-3 gap-2">
-                  {daysOfWeek.map((day) => (
-                    <button
-                      key={day}
-                      type="button"
-                      onClick={() => toggleSelection("recurrenceDays", day)}
-                      className={`p-2 border rounded ${
-                        task.recurrenceDays.includes(day)
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100"
-                      }`}
-                    >
-                      {day}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {task.recurrencePattern === "monthly" && (
-              <div>
-                <label className="block mb-2">Select Days of the Month:</label>
-                <div className="grid grid-cols-6 gap-2">
-                  {daysOfMonth.map((day) => (
-                    <button
-                      key={day}
-                      type="button"
-                      onClick={() =>
-                        toggleSelection("recurrenceMonthDays", day)
-                      }
-                      className={`p-2 border rounded ${
-                        task.recurrenceMonthDays.includes(day)
-                          ? "bg-blue-500 text-white"
-                          : "bg-gray-100"
-                      }`}
-                    >
-                      {day}
-                    </button>
-                  ))}
-                </div>
-              </div>
-            )}
-
-            {task.recurrencePattern === "yearly" && (
-              <input
-                type="text"
-                name="recurrenceYearDays"
-                placeholder="Enter day numbers (1-365, comma-separated)"
-                value={task.recurrenceYearDays}
-                onChange={e => handleChange("recurrenceYearDays", e.target.value)}
-                className="w-full p-2 border rounded"
-              />
-            )}
-
-              {task.recurrencePattern === "custom" && (<div className="mt-4"> Under Development </div>)}
-            {false === "custom" && (
-              <div className="mt-4">
-                <label className="block mb-2">Cron Expression:</label>
-                <input
-                  type="text"
-                  placeholder="e.g., 0 0 * * 1-5"
-                  value={task.customCron}
-                  onChange={(e) =>
-                    setTask({ ...task, customCron: e.target.value })
-                  }
-                  className="w-full p-2 border rounded"
-                />
-                <p className="text-gray-600 mt-2">
-                  Description: {task.customCronDescription || "N/A"}
-                </p>
-              </div>
-            )}
-          </div>
-        )}
-
-        <div>
-          <label className="block mb-2">Priority:</label>
-          <div className="flex gap-2">
-            {priorityOptions.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => handleChange("priority", option.toLowerCase())}
-                className={`px-4 py-2 border rounded ${
-                  task.priority === option.toLowerCase()
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100"
-                }`}
+            <div className="flex-1">
+              <label className="block mb-2">Total Time</label>
+              <select
+                name="totalTime"
+                value={task.duration}
+                onChange={(e) => handleChange("duration", parseInt(e.target.value, 10))}
+                className="mt-1 block w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {option}
-              </button>
-            ))}
+                {[15, 30, 45, 60, 75, 90, 105, 120].map((minutes) => {
+                  const hours = minutes / 60;
+                  const label =
+                    minutes > 59
+                      ? `${hours.toFixed(2)} hours`
+                      : `${minutes} minutes`;
+                  return (
+                    <option key={minutes} value={minutes}>
+                      {label}
+                    </option>
+                  );
+                })}
+              </select>
+            </div>
           </div>
-        </div>
 
-        <button
-          type="submit"
-          className="w-full bg-blue-600 text-white p-2 rounded"
-        >
-          Submit Task
-        </button>
-      </form>
+          <textarea
+            name="description"
+            placeholder="Description"
+            value={task.description}
+            onChange={(e) => handleChange("description", e.target.value)}
+            className="w-full p-2 border rounded"
+          />
+
+          <label className="flex items-center space-x-2 cursor-pointer">
+            <input
+              type="checkbox"
+              checked={task.isRecurring}
+              onChange={() => handleChange("isRecurring", !task.isRecurring)}
+              className="w-5 h-5 text-blue-600 border-gray-300 rounded"
+            />
+            <span className="text-gray-700">Recurring</span>
+          </label>
+
+          <div
+            className={`transition-all duration-300 ease-in-out ${
+              task.isRecurring ? "max-h-[1000px]" : "max-h-0"
+            } overflow-hidden`}
+          >
+            {task.isRecurring && (
+              <div>
+                <div>
+                  <label className="block mb-2">Start:</label>
+                  <input
+                    type="date"
+                    name="startDate"
+                    value={task.startDate}
+                    onChange={(e) => handleChange("startDate", e.target.value)}
+                    className="w-full p-2 border rounded"
+                    required
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2">End:</label>
+                  <input
+                    type="date"
+                    name="endDate"
+                    value={task.endDate}
+                    onChange={(e) => handleChange("endDate", e.target.value)}
+                    className="w-full p-2 border rounded"
+                  />
+                </div>
+
+                <div>
+                  <label className="block mb-2">Recurrence Pattern:</label>
+                  <div className="flex gap-2 flex-wrap">
+                    {recurrenceOptions.map((option) => (
+                      <button
+                        key={option}
+                        type="button"
+                        onClick={() =>
+                          handleChange("recurrencePattern", option.toLowerCase())
+                        }
+                        className={`px-4 py-2 border rounded ${
+                          task.recurrencePattern === option.toLowerCase()
+                            ? "bg-blue-500 text-white"
+                            : "bg-gray-100"
+                        }`}
+                      >
+                        {option}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+
+                {task.recurrencePattern === "daily" && (
+                  <div>
+                    <label className="block mb-2">Repeat every:</label>
+                    <input
+                      type="number"
+                      min="1"
+                      max="30"
+                      value={task.recurrenceInterval}
+                      onChange={(e) =>
+                        handleChange("recurrenceInterval", parseInt(e.target.value, 10))
+                      }
+                      className="w-full p-2 border rounded"
+                    />
+                    <span className="text-gray-600">days</span>
+                  </div>
+                )}
+
+                {task.recurrencePattern === "weekly" && (
+                  <div>
+                    <label className="block mb-2">Select Days:</label>
+                    <div className="grid grid-cols-3 gap-2">
+                      {daysOfWeek.map((day) => (
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => toggleSelection("recurrenceDays", day)}
+                          className={`p-2 border rounded ${
+                            task.recurrenceDays.includes(day)
+                              ? "bg-blue-500 text-white"
+                              : "bg-gray-100"
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {task.recurrencePattern === "monthly" && (
+                  <div>
+                    <label className="block mb-2">Select Days of the Month:</label>
+                    <div className="grid grid-cols-6 gap-2">
+                      {daysOfMonth.map((day) => (
+                        <button
+                          key={day}
+                          type="button"
+                          onClick={() => toggleSelection("recurrenceMonthDays", day)}
+                          className={`p-2 border rounded ${
+                            task.recurrenceMonthDays.includes(day)
+                              ? "bg-blue-500 text-white"
+                              : "bg-gray-100"
+                          }`}
+                        >
+                          {day}
+                        </button>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {task.recurrencePattern === "custom" && (
+                  <div>
+                    <label className="block mb-2">Custom Cron:</label>
+                    <input
+                      type="text"
+                      name="customCron"
+                      value={task.customCron}
+                      onChange={(e) => handleChange("customCron", e.target.value)}
+                      className="w-full p-2 border rounded"
+                    />
+                    <p className="text-sm text-gray-500 mt-2">{task.customCronDescription}</p>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <div className="flex justify-end space-x-4">
+            <button
+              type="button"
+              onClick={onClose}
+              className="px-4 py-2 bg-gray-300 rounded-md"
+            >
+              Cancel
+            </button>
+            <button
+              type="submit"
+              className="px-4 py-2 bg-blue-500 text-white rounded-md"
+            >
+              Save Task
+            </button>
+          </div>
+        </form>
       </div>
-      </div>
+    </div>
   );
 }

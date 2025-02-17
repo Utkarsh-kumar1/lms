@@ -67,3 +67,38 @@ export async function PATCH(req) {
     );
   }
 }
+
+
+export async function DELETE(req) {
+  const secret = process.env.JWT_SECRET;
+  const token = await getToken({ req, secret });
+  const { id } = await req.json();
+  
+  console.log("id in delete from route.js", id);
+
+  if (!token) {
+    return Response.json(ApiResponse.error(401, "Unauthorized access"), {
+      status: 401,
+    });
+  }
+
+  if (!id) {
+    return Response.json(ApiResponse.error(400, "id is required"), {
+      status: 400,
+    });
+  }
+
+  try {
+    const deleteResponse = await db
+  .delete(tasks)  
+  .where(and(eq(tasks.id, id), eq(tasks.owner, token.id)));
+
+    return Response.json({ status: 200, message: "Delete successful" });
+  } catch (error) {
+    console.log(error);
+    return Response.json(
+      ApiResponse.error(500, "Error while deleting Building Block "),
+      { status: 500 }
+    );
+  }
+}

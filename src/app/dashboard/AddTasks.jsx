@@ -105,7 +105,7 @@ export default function AddTasks({ isOpen, onClose }) {
       alert("Invalid input. Please enter comma-separated integers (e.g., 1,2,3).");
       return;
     }
-    const { success, error } = await AddOrUpdateTasks(task);
+    const { success, error } = await AddOrUpdateTasks({ task });
     clearStates();
     onClose();
   };

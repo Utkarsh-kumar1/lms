@@ -2,7 +2,7 @@ import { getToken } from "next-auth/jwt";
 import ApiResponse from "@/helpers/ApiResponse";
 import { db } from "@/db/drizzle";
 import { tasks } from "@/db/schema";
-import { and, eq, lte, ne } from "drizzle-orm";
+import { and, eq, isNotNull, lte, ne } from "drizzle-orm";
 
 export async function GET(req) {
   const secret = process.env.JWT_SECRET;
@@ -19,7 +19,7 @@ export async function GET(req) {
     const data = await db
       .select()
       .from(tasks)
-      .where(and(eq(tasks.owner, token.id), eq(tasks.dueDate, today)))
+      .where(and(eq(tasks.owner, token.id), eq(tasks.dueDate, today), isNotNull(tasks.duration)))
       .orderBy(tasks.startTime);
 
     return Response.json(

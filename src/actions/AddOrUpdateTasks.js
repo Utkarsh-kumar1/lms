@@ -84,7 +84,8 @@ export async function AddOrUpdateTasks(task, id = null) {
                 startTime: startTime,
                 duration: duration,
               description: description,
-                dueDate: new Date(),
+            dueDate: new Date(),
+            priority: priority,
           })
       }
     // console.log("Logging results from server actions", res);

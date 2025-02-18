@@ -19,7 +19,8 @@ export async function GET(req) {
     const data = await db
       .select()
       .from(tasks)
-      .where(and(eq(tasks.owner, token.id), eq(tasks.dueDate, today)));
+      .where(and(eq(tasks.owner, token.id), eq(tasks.dueDate, today)))
+      .orderBy(tasks.startTime);
 
     return Response.json(
       ApiResponse.success(200, data, "Data fetched successfully"),

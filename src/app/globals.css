@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+html {
+  scroll-behavior: smooth;
+}
+
 @layer base {
   :root {
     --background: 0 0% 100%;
@@ -75,6 +79,8 @@
   }
 }
 
+
+
 @layer base {
   * {
     @apply border-border;
@@ -82,4 +88,32 @@
   body {
     @apply bg-background text-foreground;
   }
+}
+
+.home-svg {
+  background-image: url('../../public/home.svg');
+  background-size: cover; 
+  background-position: center; 
+  background-repeat: no-repeat;  
+}
+
+.delius-regular {
+  font-family: "Delius", serif;
+  font-weight: 400;
+  font-style: normal;
+}
+
+.text-clamp {
+  display: -webkit-box;
+  -webkit-line-clamp: 2;
+  line-clamp: 2;
+  -webkit-box-orient: vertical;
+  overflow: hidden;
+  /* transition: all 10s ease-in; */
+}
+
+.text-clamp:hover {
+  -webkit-line-clamp: unset;
+  line-clamp: unset;
+  overflow: visible;
 }

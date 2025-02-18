@@ -65,7 +65,7 @@ export default function DataRow({ subtopic, subIndex }) {
       <TableRow
         key={subIndex}
         className={` dark:text-white ${
-          isCompleted ? "bg-green-100 dark:bg-green-900" : "bg-gray-500"
+          isCompleted ? "bg-green-100 dark:bg-green-900" : ""
         }  transition duration-150 sm:text-sm `}
       >
         <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-white">
@@ -79,7 +79,7 @@ export default function DataRow({ subtopic, subIndex }) {
               className="px-3 py-1 text-sm font-medium text-white bg-blue-500 rounded-lg shadow-md hover:bg-blue-600 active:bg-blue-700"
               onClick={handleCreateActivity}
             >
-              Create
+              Add
             </button>
           )}
         </TableCell>

@@ -149,7 +149,15 @@ async function fetchActivity(id) {
       )
     )
     .orderBy(course.created, topics.topicIndex, subtopics.subTopicIndex);
-  return [...data, ...coursesAndTopicsToSchedule];
+  const finalData = [...data, ...coursesAndTopicsToSchedule];
+
+  return {
+    props: {
+      finalData,
+    },
+    // Revalidate every 10 seconds
+    revalidate: 10,
+  };
 }
 
 export default async function ProtectedPage() {
@@ -160,7 +168,8 @@ export default async function ProtectedPage() {
     return null;
   }
 
-  const activity = await fetchActivity(session.id);
+  const activity = (await fetchActivity(session.id)).props.finalData;
+  // console.log(activity);
 
   if (!activity || activity.length === 0) {
     return (

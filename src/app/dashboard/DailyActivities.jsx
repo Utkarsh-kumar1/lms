@@ -7,6 +7,7 @@ import { useOptimistic } from "react";
 import { ActivityItem } from "./ActivityItem";
 
 function DailyActivities({ userData }) {
+  const [showMore, setShowMore] = useState(false);
   const [showPrevious, setShowPrevious] = useState(false);
   const [date, setDate] = useState(new Date());
   const [isLoading, setIsLoading] = useState(false);
@@ -22,7 +23,7 @@ function DailyActivities({ userData }) {
   });
 
   const [optimisticActivities, addOptimisticActivities] = useOptimistic(
-    userData.dailyActivitiesScheduledsView,
+    userData.dailyActivitiesScheduleds,
     (state, newActivity) => [...state, newActivity]
   );
 
@@ -160,6 +161,30 @@ function DailyActivities({ userData }) {
           </>
         )}
       </div>
+      <div className="text-[10px] font-medium text-gray-800 dark:text-gray-200 px-8 py-2 bg-gray-50 dark:bg-gray-800 rounded-lg shadow-sm">
+      {/* Heading and Show More Button */}
+      <div className="flex items-center gap-2 mb-2">
+        <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100">Habit Timeline</h3>
+        <button
+          onClick={() => setShowMore(!showMore)}
+          className="text-blue-500 hover:underline text-[9px]"
+        >
+          {showMore ? "Show Less" : "Show More"}
+        </button>
+      </div>
+
+      {/* Content */}
+      {showMore && (
+        <div>
+          <span className="font-semibold text-green-600 dark:text-green-400">Spark (Days 1–7):</span> Start small to ignite change,
+          <span className="font-semibold text-blue-600 dark:text-blue-400 ml-2">Momentum (Week 2–4):</span> Build consistency with tiny wins,
+          <span className="font-semibold text-purple-600 dark:text-purple-400 ml-2">Rhythm (Month 2–3):</span> Integrate habits into your flow,
+          <span className="font-semibold text-yellow-600 dark:text-yellow-400 ml-2">Identity (Month 4–6):</span> Become the person your habits reflect,
+          <span className="font-semibold text-red-600 dark:text-red-400 ml-2">Mastery (6+ Months):</span> Expand and reinforce lasting success.
+        </div>
+      )}
+    </div>
+
     </>
   );
 }

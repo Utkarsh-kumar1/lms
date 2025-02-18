@@ -70,11 +70,11 @@ export default function SubtopicCard({
 
   const toggleCompletionStatus = () => {
     // Toggle the completion status immediately for the UI
-    if (!isProcessing) {
-      const newStatus = !isCompleted;
-      setIsCompleted(newStatus);
-      setDebouncedIsCompleted(newStatus); // Set the debounced value for network call
-    }
+    // if (!isProcessing) {
+    //   const newStatus = !isCompleted;
+    //   setIsCompleted(newStatus);
+    //   setDebouncedIsCompleted(newStatus); // Set the debounced value for network call
+    // }
   };
 
   const handleDeleteClick = async (e) => {

@@ -1,9 +1,17 @@
-import { mysqlTable, mysqlSchema, AnyMySqlColumn, char, varchar, json, index, foreignKey, primaryKey, timestamp, int, tinyint, bigint, unique, longtext, boolean, check, uniqueIndex } from "drizzle-orm/mysql-core"
+import { mysqlTable, mysqlSchema, AnyMySqlColumn, char, varchar, json, index, foreignKey, primaryKey, timestamp, int, tinyint, bigint, unique, longtext, boolean, check, uniqueIndex, text, date, mysqlEnum, time, datetime } from "drizzle-orm/mysql-core"
 import { sql } from "drizzle-orm"
 import { v4 as uuidv4 } from "uuid";
 
 
 import { relations } from "drizzle-orm/relations";
+
+export const quotes = mysqlTable("quotes", {
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
+	quote: text("quote").notNull(),
+	author: varchar("author", { length: 255 }).notNull(),
+	tags: json("tags"),
+	today: boolean("today"),
+});
 
 export const revisionView = mysqlTable("RevisionView", {
 	userId: char("userId", { length: 36 }).notNull(),
@@ -42,6 +50,8 @@ export const course = mysqlTable("course", {
 	created: timestamp("created", { mode: 'string' }).defaultNow().notNull(),
 	courseName: varchar("courseName", { length: 255 }).notNull(),
 	subject: char("subject", { length: 36 }).references(() => subject.id, { onUpdate: "cascade" }).notNull(),
+	spaceRepetition: json("spaceRepetition").$default(() => [1,3,4,7,15]),
+	activityScheduleCount: int("ActivityScheduleCount").default(4),
 	isCompleted: boolean("isCompleted").default(false).notNull(),
 	session: int("session").default(0),
 	wantRevision: boolean("wantRevision").default(true).notNull(),
@@ -63,6 +73,8 @@ export const dailyActivitiesScheduled = mysqlTable("dailyActivitiesScheduled", {
 	startDate: timestamp("startDate", { mode: 'string' }).defaultNow().notNull(),
 	task: varchar("task", { length: 50 }).notNull(),
 	isCompleted: tinyint("isCompleted").default(0).notNull(),
+	streak: int("streak"),
+	isBestStreak: tinyint("isBestStreak"),
 },
 	(table) => {
 		return {
@@ -79,6 +91,65 @@ export const dailyActivitiesScheduledView = mysqlTable("dailyActivitiesScheduled
 	streak: bigint("streak", { mode: "number" }),
 	isBestStreak: int("isBestStreak"),
 });
+
+export const microPlanner = mysqlTable("microPlanner", {
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
+	owner: char("owner", { length: 36 }).notNull(),
+	created: timestamp("created", { mode: 'string' }).notNull(),
+	name: varchar("name", { length: 100 }).notNull(),
+	start: timestamp("start", { mode: 'string' }).notNull(),
+	end: timestamp("end", { mode: 'string' }).notNull(),
+	completed: timestamp("completed", { mode: 'string' }),
+	updated: timestamp("updated", { mode: 'string' }).notNull(),
+});
+
+export const recurringTasks = mysqlTable('recurring_tasks', {
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
+	owner: char("owner", { length: 36 }).notNull(),
+	title: varchar('title', { length: 255 }).notNull(),
+	startTime: timestamp('startTime', { mode: 'string' }),
+	duration: int('duration'),
+	description: text('description'),
+	isRecurring: tinyint('isRecurring'),
+	startDate: date('startDate').notNull(),
+	endDate: date('endDate'),
+	recurrencePattern: mysqlEnum('recurrencePattern', [
+	  'daily',
+	  'weekly',
+	  'monthly',
+	  'yearly',
+	  'custom',
+	]).notNull(),
+	recurrenceInterval: int('recurrenceInterval').default(1),
+	recurrenceDays: varchar('recurrenceDays', { length: 255 }),
+	recurrenceMonthDays: varchar('recurrenceMonthDays', { length: 255 }),
+	recurrenceYearDays: varchar('recurrenceYearDays', { length: 255 }),
+	customCron: varchar('customCron', { length: 255 }),
+	isActive: tinyint('isActive').default(1),
+	createdAt: timestamp('createdAt', { mode: 'string' }).defaultNow(),
+	updatedAt: timestamp('updatedAt', { mode: 'string' })
+	  .defaultNow()
+	  .onUpdateNow(),
+	priority: mysqlEnum('priority', ['low', 'medium', 'high']).default('medium'),
+});
+  
+export const tasks = mysqlTable("tasks", {
+	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
+	recurringTaskId: char("recurringTaskId", { length: 36 }).default(null),
+	title: varchar("title", { length: 255 }).notNull(),
+	description: text("description"),
+	startTime: time("startTime"),
+	duration: int("duration"),
+	dueDate: date("dueDate"),
+	owner: char("owner", { length: 36 }).default(null),
+	priority: varchar("priority", { length: 6 }).notNull().default("Medium"), // ENUM stored as varchar
+	status: varchar("status", { length: 12 }).notNull().default("Pending"), // ENUM stored as varchar
+	createdAt: timestamp("createdAt", { mode: "string" }).defaultNow(),
+	updatedAt: timestamp("updatedAt", { mode: "string" }).defaultNow().onUpdateNow(),
+  }, (table) => ({
+	ownerIdx: index("created_by").on(table.owner),
+	recurringTaskIdx: index("FK_tasks_recurring_tasks").on(table.recurringTaskId),
+  }));
 
 export const eventLogs = mysqlTable("eventLogs", {
 	id: char("id", { length: 36 }).notNull(),
@@ -219,7 +290,7 @@ export const users = mysqlTable("users", {
 	avatarUrl: varchar("avatarUrl", { length: 255 }),
 	userPassword: varchar("userPassword", { length: 255 }).notNull(),
 	refreshToken: varchar("refreshToken", { length: 255 }),
-	spaceRepetition: json("spaceRepetition").$default(() => []),
+	spaceRepetition: json("spaceRepetition").$default(() => [1,3,4,7,15]),
 	activityScheduleCount: int("ActivityScheduleCount").default(4),
 	otp: varchar("otp", { length: 4 }),
 	isVerified: boolean("isVerified").notNull().default(0),
@@ -285,7 +356,8 @@ export const usersRelations = relations(users, ({ many }) => ({
 	revisions: many(revision),
 	subjects: many(subject),
 	notes: many(notes),
-	dailyActivitiesScheduledsView: many(dailyActivitiesScheduledView)
+	dailyActivitiesScheduledsView: many(dailyActivitiesScheduledView),
+	tasks: many(tasks)
 }));
 
 export const courseRelations = relations(course, ({ one, many }) => ({
@@ -338,4 +410,11 @@ export const topicsRelations = relations(topics, ({ one, many }) => ({
 		references: [course.id]
 	}),
 	notes: many(notes)
+}));
+
+export const tasksRelations = relations(tasks, ({ one }) => ({
+	user: one(users, {
+		fields: [tasks.owner],
+		references: [users.id]
+	}),
 }));

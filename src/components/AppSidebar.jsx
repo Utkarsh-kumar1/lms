@@ -30,6 +30,7 @@ import {
   SidebarOpen,
   SidebarOpenIcon,
   PanelLeft,
+  Brain,
 } from "lucide-react";
 import {
   DropdownMenu,
@@ -58,6 +59,12 @@ export function AppSidebar() {
       name: "Dashboard",
       url: "/dashboard",
       icon: LayoutDashboardIcon,
+      isActive: status === "authenticated",
+    },
+    {
+      name: "MindMap",
+      url: "/mindmap",
+      icon: Brain,
       isActive: status === "authenticated",
     },
     {

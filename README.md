@@ -1,36 +1,51 @@
-This is a [Next.js](https://nextjs.org/) project bootstrapped with [`create-next-app`](https://github.com/vercel/next.js/tree/canary/packages/create-next-app).
+# Ignify.fun
 
-## Getting Started
+Welcome to **Ignify.fun** — a dynamic, interactive web application built with Next.js. Ignify.fun offers a smooth user experience with a focus on personalization, activity tracking, and performance.
 
-First, run the development server:
+## Features
 
-```bash
-npm run dev
-# or
-yarn dev
-# or
-pnpm dev
-# or
-bun dev
-```
+### 1. User Registration and Authentication
+- **Optimized Sign-Up Process:** Quick and efficient sign-up with streamlined OTP verification.
+- **Secure Login:** Enhanced security for user verification and session handling.
 
-Open [http://localhost:3000](http://localhost:3000) with your browser to see the result.
+### 2. Dashboard for Activity Tracking
+- **Data Management:** Easily add and organize data entries within the dashboard.
+- **Visual Activity Tracking:** Monitor daily activity completion streaks, with best streak highlights.
+- **Dynamic Chart Integration:** View activity trends over time with enhanced line charts and color themes.
+- **Time Zone Support:** Daily activities tracked in IST, ensuring accuracy for users in this time zone.
 
-You can start editing the page by modifying `app/page.js`. The page auto-updates as you edit the file.
+### 3. Dark Mode and Light Mode Support
+- **Dark Mode:** Enhanced visibility with a dark theme, featuring customized colors and loading indicators.
+- **Light Mode Improvements:** Clean and minimalist design with lighter background colors for better readability.
 
-This project uses [`next/font`](https://nextjs.org/docs/basic-features/font-optimization) to automatically optimize and load Inter, a custom Google Font.
+### 4. Daily Activities and Streaks
+- **Daily Streak Tracking:** Track your daily activity completion streaks, including best streaks.
+- **Editable Entries:** Adjust daily activities from the previous day, with restrictions on editing older entries.
+- **Date Display:** Activities now display both the date and day for quick reference.
 
-## Learn More
+### 5. File Upload and Notes Management
+- **File Uploads:** Upload files for activities and organize them efficiently.
+- **Notes UI:** Improved layout for note-taking, with relative file paths for better accessibility.
 
-To learn more about Next.js, take a look at the following resources:
+### 6. Daily Quotes
+- **Motivational Quotes:** Receive daily quotes for inspiration, with error handling to ensure smooth operation.
 
-- [Next.js Documentation](https://nextjs.org/docs) - learn about Next.js features and API.
-- [Learn Next.js](https://nextjs.org/learn) - an interactive Next.js tutorial.
+## How to Use Ignify.fun
 
-You can check out [the Next.js GitHub repository](https://github.com/vercel/next.js/) - your feedback and contributions are welcome!
+1. **Sign Up / Log In**
+   - Visit [Ignify.fun](https://ignify.fun) and register for an account or log in with your credentials.
 
-## Deploy on Vercel
+2. **Access Your Dashboard**
+   - Once logged in, access your dashboard to add and track daily activities, monitor streaks, and view visualized data.
 
-The easiest way to deploy your Next.js app is to use the [Vercel Platform](https://vercel.com/new?utm_medium=default-template&filter=next.js&utm_source=create-next-app&utm_campaign=create-next-app-readme) from the creators of Next.js.
+3. **Manage Activities and Notes**
+   - Use the Activities tab to record, edit, and track your progress.
+   - Use the Notes section to store information related to each activity.
 
-Check out our [Next.js deployment documentation](https://nextjs.org/docs/deployment) for more details.
+4. **Toggle Dark Mode**
+   - Switch between light and dark themes in the settings for a tailored viewing experience.
+
+5. **Daily Quote**
+   - Each day, receive a new motivational quote on your dashboard to keep you inspired.
+
+Ignite your productivity and routine with Ignify.fun, where you can stay on top of your activities and reach new milestones!

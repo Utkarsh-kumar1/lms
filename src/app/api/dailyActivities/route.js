@@ -20,9 +20,9 @@ export async function GET(req) {
         const dailyActivities = await db.query.users.findFirst({
 
             with: {
-                dailyActivitiesScheduledsView: {
-                    where: (dailyActivitiesScheduled, { eq, sql }) => eq(
-                        sql`Date(${dailyActivitiesScheduled.startDate})`,
+                dailyActivitiesScheduleds: {
+                    where: (dailyActivitiesSchedules, { eq, sql }) => eq(
+                        sql`Date(${dailyActivitiesSchedules.startDate})`,
                         date ? sql`Date(${date})` : sql`CURRENT_DATE()`
                     ),
                 }
@@ -31,7 +31,7 @@ export async function GET(req) {
             where: (user, { eq }) => eq(user.id, token.id)
         })
 
-        return Response.json(ApiResponse.success(200, dailyActivities.dailyActivitiesScheduledsView, "Data fetched successfully"), { status: 200 });
+        return Response.json(ApiResponse.success(200, dailyActivities.dailyActivitiesScheduleds, "Data fetched successfully"), { status: 200 });
     } catch (error) {
 
         return Response.json(ApiResponse.error(500, "Error while fetching the data"), { status: 200 });

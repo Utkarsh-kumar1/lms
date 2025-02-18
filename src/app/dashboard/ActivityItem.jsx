@@ -84,17 +84,39 @@ export const ActivityItem = ({ activity, reload }) => {
 
   const wasUpdatedRecently =
     lastUpdated && (new Date() - lastUpdated) / 1000 < 30;
+  
+  // Function to determine the background color for status (applied to the entire card)
+  const getStatusBgColor = () => {
+    switch (status) {
+      case "Completed":
+        return "bg-green-100 dark:bg-green-500";
+      case "In Progress":
+        return "bg-yellow-100 dark:bg-yellow-500";
+      case "Pending":
+        return "bg-gray-100 dark:bg-gray-500";
+      default:
+        return "bg-white dark:bg-gray-700";
+    }
+  };
+
+  // Function to determine the color for priority (applied to the priority label)
+  const getPriorityBgColor = () => {
+    switch (activity.priority) {
+      case "High":
+        return "bg-red-500 text-white";
+      case "Medium":
+        return "bg-orange-500 text-white";
+      case "Low":
+        return "bg-blue-500 text-white";
+      default:
+        return "bg-gray-800 text-white";
+    }
+  };
 
   return (
     <div
   className={`relative flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 mb-3 rounded-lg shadow-sm transition-all duration-300 
-  ${
-    status === "Completed"
-      ? "bg-green-100 dark:bg-green-500"
-      : status === "In Progress"
-      ? "bg-yellow-100 dark:bg-yellow-600"
-      : "bg-white dark:bg-gray-700 hover:shadow-lg"
-  }
+    ${getStatusBgColor()}
 `}
 >
     
@@ -133,7 +155,7 @@ export const ActivityItem = ({ activity, reload }) => {
         >
           {status}
         </button>
-        <span className="w-full sm:w-auto px-3 py-1 text-sm font-semibold text-white bg-gray-500 rounded-lg text-center">
+        <span className={`w-full sm:w-auto px-3 py-1 text-sm font-semibold text-white ${getPriorityBgColor()} rounded-lg text-center`}>
           Priority: {activity.priority}
         </span>
         <button onClick={() => setIsModalOpen(true)} className="text-white">

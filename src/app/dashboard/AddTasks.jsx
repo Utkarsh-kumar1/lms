@@ -1,29 +1,32 @@
 import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
 import { useState, useEffect } from "react";
 
+const initialTaskState =
+{
+  title: "",
+  startTime: new Date().toLocaleTimeString("en-US", {
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+    timeZone: "Asia/Kolkata",
+  }),
+  duration: 15,
+  description: "",
+  isRecurring: false,
+  startDate: new Date().toISOString().split("T")[0],
+  endDate: "",
+  recurrencePattern: "daily",
+  recurrenceInterval: 1,
+  recurrenceDays: ['Monday'],
+  recurrenceMonthDays: [1],
+  recurrenceYearDays: "",
+  priority: "medium",
+  customCron: "",
+  customCronDescription: "",
+};
+
 export default function AddTasks({ isOpen, onClose }) {
-  const [task, setTask] = useState({
-    title: "",
-    startTime: new Date().toLocaleTimeString("en-US", {
-      hour: "2-digit",
-      minute: "2-digit",
-      hour12: false,
-      timeZone: "Asia/Kolkata",
-    }),
-    duration: 15,
-    description: "",
-    isRecurring: false,
-    startDate: new Date().toISOString().split("T")[0],
-    endDate: "",
-    recurrencePattern: "daily",
-    recurrenceInterval: 1,
-    recurrenceDays: ['Monday'],
-    recurrenceMonthDays: [1],
-    recurrenceYearDays: "",
-    priority: "medium",
-    customCron: "",
-    customCronDescription: "",
-  });
+  const [task, setTask] = useState(initialTaskState);
 
   const recurrenceOptions = ["Daily", "Weekly", "Monthly", "Yearly", "Custom"];
   const priorityOptions = ["Low", "Medium", "High"];
@@ -48,6 +51,7 @@ export default function AddTasks({ isOpen, onClose }) {
     if (name === "recurrenceYearDays") {
       value = value.replace(" ", "");
     }
+    console.log(name, value);
     setTask((prev) => ({
       ...prev,
       [name]: value,
@@ -101,7 +105,17 @@ export default function AddTasks({ isOpen, onClose }) {
       return;
     }
     const { success, error } = await AddOrUpdateTasks(task);
+    clearStates();
     onClose();
+  };
+
+  const handleCancel = () => {
+    clearStates();
+    onClose();
+  };
+
+  const clearStates = () => { 
+    setTask(initialTaskState);
   };
 
   const handleOutsideClick = (e) => {
@@ -303,8 +317,18 @@ export default function AddTasks({ isOpen, onClose }) {
                     </div>
                   </div>
                 )}
-
-                {task.recurrencePattern === "custom" && (
+                {task.recurrencePattern === "yearly" && (
+              <input
+                type="text"
+                name="recurrenceYearDays"
+                placeholder="Enter day numbers (1-365, comma-separated)"
+                value={task.recurrenceYearDays}
+                onChange={e => handleChange("recurrenceYearDays", e.target.value)}
+                className="w-full p-2 border rounded"
+              />
+            )}
+                {task.recurrencePattern === "custom" && (<div>Under development</div>)}
+                {/* {task.recurrencePattern === "custom" && (
                   <div>
                     <label className="block mb-2">Custom Cron:</label>
                     <input
@@ -316,15 +340,35 @@ export default function AddTasks({ isOpen, onClose }) {
                     />
                     <p className="text-sm text-gray-500 mt-2">{task.customCronDescription}</p>
                   </div>
-                )}
+                )} */}
               </div>
             )}
           </div>
 
+          <div>
+          <label className="block mb-2">Priority:</label>
+          <div className="flex gap-2">
+            {priorityOptions.map((option) => (
+              <button
+                key={option}
+                type="button"
+                onClick={() => handleChange("priority", option.toLowerCase())}
+                className={`px-4 py-2 border rounded ${
+                  task.priority === option.toLowerCase()
+                    ? "bg-blue-500 text-white"
+                    : "bg-gray-100"
+                }`}
+              >
+                {option}
+              </button>
+            ))}
+          </div>
+        </div>
+
           <div className="flex justify-end space-x-4">
             <button
               type="button"
-              onClick={onClose}
+              onClick={handleCancel}
               className="px-4 py-2 bg-gray-300 rounded-md"
             >
               Cancel

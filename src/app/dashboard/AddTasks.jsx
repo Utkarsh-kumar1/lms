@@ -1,4 +1,5 @@
 import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
+import { Blocks } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const initialTaskState =
@@ -140,7 +141,7 @@ export default function AddTasks({ isOpen, onClose }) {
       onKeyDown={handleEscapeKeyDown}
     >
       <div className="max-w-lg max-h-screen mx-auto p-6 bg-white shadow-md rounded-lg overflow-y-auto transition-all duration-300 ease-in-out">
-        <h2 className="text-2xl font-bold mb-4">Create Recurring Task</h2>
+        <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-4">Creating Block <Blocks /></h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -377,7 +378,7 @@ export default function AddTasks({ isOpen, onClose }) {
               type="submit"
               className="px-4 py-2 bg-blue-500 text-white rounded-md"
             >
-              Save Task
+              Save Block
             </button>
           </div>
         </form>

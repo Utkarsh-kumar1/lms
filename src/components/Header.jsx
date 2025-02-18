@@ -12,6 +12,7 @@ import {
   Moon,
   Plus,
   Sun,
+  Trash2,
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
@@ -75,16 +76,31 @@ function Header() {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    
+
     console.log("Task Submitted:", task);
     const title = task;
 
-    const { success, error } = await AddOrUpdateTasks({title});
+    const { success, error } = await AddOrUpdateTasks({ title });
     console.log(success, error);
+    if (success) {
+      setRefreshData(!refreshData);
+    }
     setTask(""); // Clear input after submission
     setShowInput(false); // Hide input after submission
   };
 
+  const deleteTodo = async (id) => {
+    console.log("Deleting task with id:", id);
+    try {
+      const response = await axios.delete("/api/buildingBlocks", {
+        data: { id },
+      });
+      console.log("Deleted successfully:", response.data);
+      setRefreshData(!refreshData);
+    } catch (error) {
+      console.error("Error deleting:", error);
+    }
+  };
 
   // Flip title every 5 seconds
   useEffect(() => {
@@ -97,6 +113,25 @@ function Header() {
   // Handle click to toggle the scrollable list
   const handleTitleClick = () => {
     setShowList(!showList);
+  };
+
+  const formatDate = (dateStr) => {
+    const date = new Date(dateStr);
+    const now = new Date();
+
+    const options = { month: "short", day: "numeric" };
+    if (date.getFullYear() !== now.getFullYear()) {
+      options.year = "numeric";
+    }
+
+    const formattedDate = date.toLocaleDateString("en-US", options);
+    const formattedTime = date.toLocaleTimeString("en-US", {
+      hour: "numeric",
+      minute: "2-digit",
+      hour12: true,
+    });
+
+    return { formattedDate, formattedTime };
   };
 
   return (
@@ -127,29 +162,53 @@ function Header() {
           ))}
       </nav>
 
-      {/* For showing todos */}
-      <div className="relative">
-      <div 
-        className=" cursor-pointer" 
-        onClick={handleTitleClick}
-        style={{ transition: 'opacity 0.5s ease' }}
-      >
-        {todos[currentTitleIndex]?.title}
-      </div>
+      {todos?.length > 0 && (
+        <div className="relative">
+          {/* Title Button with Animated Width */}
+          <div
+            className="flex items-center justify-center cursor-pointer select-none bg-orange-200 hover:bg-orange-300 hover:text-gray-800 shadow-md rounded-lg p-2 focus:ring-2 focus:ring-orange-300 transition-all duration-300 ease-in-out"
+            onClick={handleTitleClick}
+          >
+            <span className="inline-block transition-all duration-300 ease-in-out">
+              {todos[currentTitleIndex]?.title}
+            </span>
+          </div>
 
-      {showList && (
-        <div className="absolute top-0 left-0 bg-white p-4 shadow-lg w-full h-48 overflow-y-scroll mt-6">
-          <ul>
-            {todos.map((item, index) => (
-              <li key={item.id} className="text-sm text-gray-700 py-1">
-                <span className="font-semibold">{item.title}</span> 
-                <span className="text-xs text-gray-500">- {new Date(item.createdAt).toLocaleString()}</span>
-              </li>
-            ))}
-          </ul>
+          {/* Task List (Fixed Width) */}
+          {showList && (
+            <div className="absolute top-full right-0 bg-white p-4 shadow-lg w-64 h-48 overflow-y-auto border mt-2 rounded-lg">
+              <ul className="divide-y-4 divide-gray-200">
+                {todos.map((item) => {
+                  const { formattedDate, formattedTime } = formatDate(
+                    item?.createdAt
+                  );
+                  return (
+                    <li
+                      key={item?.id}
+                      className="p-3 text-sm text-gray-700 flex flex-col"
+                    >
+                      {/* Task Title */}
+                      <span className="font-semibold">{item?.title}</span>
+
+                      {/* Date & Time */}
+                      <div className="text-xs text-gray-500 mt-1 flex justify-between items-center border-t pt-2">
+                        <span>{formattedDate}</span>
+                        <Trash2
+                          onClick={() => {
+                            deleteTodo(item?.id);
+                          }}
+                          className="w-3 h-3 text-red-500 cursor-pointer"
+                        />
+                        <span>{formattedTime}</span>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            </div>
+          )}
         </div>
       )}
-    </div>
 
       <div className="relative">
         {/* Clickable ToDo Button with animation */}
@@ -164,7 +223,8 @@ function Header() {
 
         {/* Floating Input Field & Submit Button with animation */}
         {showInput && (
-          <form onSubmit={handleSubmit}
+          <form
+            onSubmit={handleSubmit}
             className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border shadow-lg rounded-lg p-4 z-50 w-64 transition-all duration-500 ${
               showInput ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}

@@ -30,22 +30,8 @@ export async function AddOrUpdateTasks(task, id = null) {
     customCron,
     customCronDescription,
   } = task;
-  // console.log("Logging tasks from server actions", title);
-  // if (id) {
-  // if (!name) {
-  //     return { error: "Plan name is required " }
-  // }
-  // await db
-  //     .update(microPlanner)
-  //     .set({
-  //         name: name,
-  //         start: start,
-  //         end: end
-  //     })
-  //     .where(eq(microPlanner.id, id), eq(microPlanner.owner, token.id))
-  // revalidatePath("/dashboard")
-  // return { success: true }
-  // } else {
+
+  console.log("Logging tasks from server actions", title, startDate, duration, recurrencePattern);
   // Insert a new Task into the database
   try {
     // console.log(title);
@@ -60,6 +46,8 @@ export async function AddOrUpdateTasks(task, id = null) {
         dueDate: null,
         priority: "low",
         });
+
+        return { success: true };
       } else {
         return {
           error: "Title, Start Date and Recurrence Pattern are required ",
@@ -96,7 +84,7 @@ export async function AddOrUpdateTasks(task, id = null) {
         priority: priority,
       });
     }
-    // console.log("Logging results from server actions", res);
+    console.log("Logging results from server actions", title);
 
     //   revalidatePath("/dashboard");
     return { success: true };

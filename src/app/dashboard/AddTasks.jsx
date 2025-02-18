@@ -52,7 +52,7 @@ export default function AddTasks({ isOpen, onClose }) {
     if (name === "recurrenceYearDays") {
       value = value.replace(" ", "");
     }
-    console.log(name, value);
+    // console.log(name, value);
     setTask((prev) => ({
       ...prev,
       [name]: value,
@@ -105,7 +105,15 @@ export default function AddTasks({ isOpen, onClose }) {
       alert("Invalid input. Please enter comma-separated integers (e.g., 1,2,3).");
       return;
     }
-    const { success, error } = await AddOrUpdateTasks({ task });
+    // Trim all
+    for (const key in task) {
+      if (typeof task[key] === "string") {
+        task[key] = task[key].trim();
+      }
+    }
+    console.log("Task Submitted:", task);
+    const { success, error } = await AddOrUpdateTasks( task );
+    console.log(success, error);
     clearStates();
     onClose();
   };

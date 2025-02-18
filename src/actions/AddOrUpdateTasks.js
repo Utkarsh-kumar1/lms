@@ -53,7 +53,12 @@ export async function AddOrUpdateTasks(task, id = null) {
       if (title) {
         await db.insert(tasks).values({
           owner: token.id,
-          title: title,
+        title: title,
+        startTime: null,
+        duration: null,
+        description: null,
+        dueDate: null,
+        priority: "low",
         });
       } else {
         return {

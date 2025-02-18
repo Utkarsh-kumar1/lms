@@ -15,6 +15,7 @@ import {
 } from "lucide-react";
 import { useTheme } from "next-themes";
 import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
+import axios from "axios";
 
 function Header() {
   const pathname = usePathname();
@@ -25,9 +26,32 @@ function Header() {
   const [task, setTask] = useState("");
   const timerRef = useRef(null);
   const inputRef = useRef(null);
+  const [refreshData, setRefreshData] = useState(false);
+  const [todos, setTodos] = useState([]);
+  const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
+  const [showList, setShowList] = useState(false);
 
   // Ensures the component is mounted before rendering theme-dependent content
   useEffect(() => setMounted(true), []);
+
+  useEffect(() => {
+    // Fetch building blocks
+    const today = "todo";
+
+    const fetchToDos = async () => {
+      try {
+        const { data } = await axios.get("/api/buildingBlocks", {
+          params: { today },
+        });
+        // const data = await response.json()
+        setTodos(data.data);
+        console.log("Data", data.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchToDos();
+  }, [refreshData]);
 
   const paths = decodeURI(pathname).split("/");
 
@@ -61,6 +85,20 @@ function Header() {
     setShowInput(false); // Hide input after submission
   };
 
+
+  // Flip title every 5 seconds
+  useEffect(() => {
+    const interval = setInterval(() => {
+      setCurrentTitleIndex((prevIndex) => (prevIndex + 1) % todos.length);
+    }, 5000);
+    return () => clearInterval(interval);
+  }, [todos]);
+
+  // Handle click to toggle the scrollable list
+  const handleTitleClick = () => {
+    setShowList(!showList);
+  };
+
   return (
     <header className="min-h-12 sticky top-0 bg-white/30 backdrop-blur-md flex items-center justify-between px-4 shadow-sm z-50 dark:bg-gray-900 gap-3">
       {/* Sidebar Trigger */}
@@ -88,9 +126,30 @@ function Header() {
             </span>
           ))}
       </nav>
-      {/* <div className=" w-64 h-64 rounded-lg shadow-[inset_6px_6px_12px_rgba(0,0,0,0.2)] bg-orange-200 p-6 flex items-center justify-center">
-  Pushed Down Effect
-      </div> */}
+
+      {/* For showing todos */}
+      <div className="relative">
+      <div 
+        className=" cursor-pointer" 
+        onClick={handleTitleClick}
+        style={{ transition: 'opacity 0.5s ease' }}
+      >
+        {todos[currentTitleIndex]?.title}
+      </div>
+
+      {showList && (
+        <div className="absolute top-0 left-0 bg-white p-4 shadow-lg w-full h-48 overflow-y-scroll mt-6">
+          <ul>
+            {todos.map((item, index) => (
+              <li key={item.id} className="text-sm text-gray-700 py-1">
+                <span className="font-semibold">{item.title}</span> 
+                <span className="text-xs text-gray-500">- {new Date(item.createdAt).toLocaleString()}</span>
+              </li>
+            ))}
+          </ul>
+        </div>
+      )}
+    </div>
 
       <div className="relative">
         {/* Clickable ToDo Button with animation */}

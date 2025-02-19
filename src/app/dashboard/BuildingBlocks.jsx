@@ -91,7 +91,7 @@ export default function BuildingBlocks() {
 
           {/* Date in Center */}
           <span className="text-lg font-semibold">
-            {date.toLocaleDateString("en-GB")}
+            {formatDate(date).formattedDate}
           </span>
 
           {/* Right Arrow */}

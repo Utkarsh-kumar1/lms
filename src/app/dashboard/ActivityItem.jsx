@@ -129,7 +129,7 @@ export const ActivityItem = ({ activity, reload }) => {
           {activity.description}
         </span>
         <div className="text-sm text-gray-500 dark:text-gray-400">
-          {formatDate(activity.dueDate)}, {formatTime(activity.startTime)}
+          {formatTime(activity.startTime)}
         </div>
         <div className="text-sm text-gray-500 dark:text-gray-400">
           Duration: {activity.duration} minutes

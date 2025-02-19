@@ -57,7 +57,7 @@ function Header() {
   const paths = decodeURI(pathname).split("/");
 
   // Function to start/reset the timer (only when task is empty & input is not focused)
-  const resetTimer = () => {
+  const resetTimer = () => { 
     if (timerRef.current) clearTimeout(timerRef.current);
     if (task.trim() === "" && document.activeElement !== inputRef.current) {
       timerRef.current = setTimeout(() => {
@@ -135,7 +135,7 @@ function Header() {
   };
 
   return (
-    <header className="min-h-12 sticky top-0 bg-white/30 backdrop-blur-md flex items-center justify-between px-4 shadow-sm z-50 dark:bg-gray-900 gap-3">
+    <header className="min-h-12 sticky top-0 bg-white/30 backdrop-blur-md flex items-center justify-between px-4 shadow-sm z-50 dark:bg-transparent gap-3">
       {/* Sidebar Trigger */}
       <div>
         {isMobile && (
@@ -213,19 +213,19 @@ function Header() {
       <div className="relative">
         {/* Clickable ToDo Button with animation */}
         <div
-          className="flex items-center justify-center mr-6 cursor-pointer select-none  bg-orange-200 hover:bg-orange-300 hover:text-gray-800 shadow-md rounded-lg p-2 focus:ring-2 focus:ring-orange-300"
+          className="flex items-center justify-center mr-6 cursor-pointer select-none  bg-orange-200 hover:bg-orange-300 hover:text-gray-800 shadow-md rounded-lg p-1 focus:ring-2 focus:ring-orange-300 hover:scale-105"
           onClick={() => setShowInput(!showInput)}
           aria-label="Toggle ToDo Input"
         >
-          <span className="mr-2">ToDo</span>
-          <ClipboardList className="p-0.5 transform transition-transform duration-300 ease-in-out hover:scale-110" />
+          <span className="mr-2 dark:text-slate-400 ">ToDo</span>
+          <ClipboardList className="p-0.5 transform transition-transform duration-300 ease-in-out hover:scale-110 dark:text-slate-400" />
         </div>
 
         {/* Floating Input Field & Submit Button with animation */}
         {showInput && (
           <form
             onSubmit={handleSubmit}
-            className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border shadow-lg rounded-lg p-4 z-50 w-64 transition-all duration-500 ${
+            className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border shadow-lg rounded-lg p-4 z-50 w-64 transition-all duration-500 dark:bg-slate-700 ${
               showInput ? "opacity-100" : "opacity-0 pointer-events-none"
             }`}
           >

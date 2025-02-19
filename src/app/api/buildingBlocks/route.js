@@ -2,13 +2,13 @@ import { getToken } from "next-auth/jwt";
 import ApiResponse from "@/helpers/ApiResponse";
 import { db } from "@/db/drizzle";
 import { tasks } from "@/db/schema";
-import { and, eq, lte, ne } from "drizzle-orm";
+import { and, eq, isNotNull, isNull, lte, ne } from "drizzle-orm";
 
 export async function GET(req) {
   const secret = process.env.JWT_SECRET;
   const token = await getToken({ req, secret });
   const today = req.nextUrl.searchParams.get("today");
-  // console.log("today", today);
+  console.log("today", today);
   if (!token) {
     return Response.json(ApiResponse.error(401, "Unauthorized access"), {
       status: 401,
@@ -16,16 +16,34 @@ export async function GET(req) {
   }
 
   try {
-    const data = await db
-      .select()
-      .from(tasks)
-      .where(and(eq(tasks.owner, token.id), eq(tasks.dueDate, today)))
-      .orderBy(tasks.startTime);
 
-    return Response.json(
-      ApiResponse.success(200, data, "Data fetched successfully"),
-      { status: 200 }
-    );
+    if (today === "todo") {
+      const data = await db
+        .select()
+        .from(tasks)
+        .where(and(eq(tasks.owner, token.id), isNull(tasks.duration)))
+        .orderBy(tasks.createdAt);
+      
+        return Response.json(
+          ApiResponse.success(200, data, "Data fetched successfully"),
+          { status: 200 }
+        );
+    }
+    else {
+
+      const data = await db
+        .select()
+        .from(tasks)
+        .where(and(eq(tasks.owner, token.id), eq(tasks.dueDate, today), isNotNull(tasks.duration)))
+        .orderBy(tasks.startTime);
+      
+        return Response.json(
+          ApiResponse.success(200, data, "Data fetched successfully"),
+          { status: 200 }
+        );
+    }
+
+
   } catch (error) {
     console.error(error);
 

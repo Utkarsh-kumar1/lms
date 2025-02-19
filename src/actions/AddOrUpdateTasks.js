@@ -29,70 +29,67 @@ export async function AddOrUpdateTasks(task, id = null) {
     priority,
     customCron,
     customCronDescription,
-    } = task;
-  // console.log("Logging tasks from server actions", title);
-  // if (id) {
-  // if (!name) {
-  //     return { error: "Plan name is required " }
-  // }
-  // await db
-  //     .update(microPlanner)
-  //     .set({
-  //         name: name,
-  //         start: start,
-  //         end: end
-  //     })
-  //     .where(eq(microPlanner.id, id), eq(microPlanner.owner, token.id))
-  // revalidatePath("/dashboard")
-  // return { success: true }
-  // } else {
+  } = task;
+
+  console.log("Logging tasks from server actions", title, startDate, duration, recurrencePattern);
   // Insert a new Task into the database
   try {
-    if (!title || !startDate || !recurrencePattern) {
-      return {
-        error: "Title, Start Date and Recurrence Pattern are required ",
-      };
-    }
-    console.log(
-      "recurrence",
-      recurrenceMonthDays.toString(),
-      typeof recurrenceMonthDays
-    );
+    // console.log(title);
+    if (!title || !startDate || !duration || !recurrencePattern) {
+      if (title) {
+        await db.insert(tasks).values({
+          owner: token.id,
+        title: title,
+        startTime: null,
+        duration: null,
+        description: null,
+        dueDate: null,
+        priority: "low",
+        });
 
-      if (isRecurring) {
-          await db.insert(recurringTasks).values({
-              owner: token.id,
-              title: title,
-              startTime: startTime,
-              duration: duration,
-              description: description,
-              isRecurring: isRecurring,
-              startDate: startDate,
-              endDate: endDate || null,
-              recurrencePattern: recurrencePattern,
-              recurrenceInterval: recurrenceInterval,
-              recurrenceDays: recurrenceDays.toString() || null,
-              recurrenceMonthDays: recurrenceMonthDays.toString() || null,
-              recurrenceYearDays: recurrenceYearDays.toString() || null,
-              priority: priority,
-              customCron: customCron || null,
-          });
+        return { success: true };
       } else {
-          await db.insert(tasks).values({
-                owner: token.id,
-                title: title,
-                startTime: startTime,
-                duration: duration,
-              description: description,
-            dueDate: new Date(),
-            priority: priority,
-          })
+        return {
+          error: "Title, Start Date and Recurrence Pattern are required ",
+        };
       }
-    // console.log("Logging results from server actions", res);
+    }
+
+    if (isRecurring) {
+      await db.insert(recurringTasks).values({
+        owner: token.id,
+        title: title,
+        startTime: startTime,
+        duration: duration,
+        description: description,
+        isRecurring: isRecurring,
+        startDate: startDate,
+        endDate: endDate || null,
+        recurrencePattern: recurrencePattern,
+        recurrenceInterval: recurrenceInterval,
+        recurrenceDays: recurrenceDays.toString() || null,
+        recurrenceMonthDays: recurrenceMonthDays.toString() || null,
+        recurrenceYearDays: recurrenceYearDays.toString() || null,
+        priority: priority,
+        customCron: customCron || null,
+      });
+    } else {
+      await db.insert(tasks).values({
+        owner: token.id,
+        title: title,
+        startTime: startTime,
+        duration: duration,
+        description: description,
+        dueDate: new Date(),
+        priority: priority,
+      });
+    }
+    console.log("Logging results from server actions", title);
 
     //   revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
+    // console.log("Error from AddOrUpdateTasks", error);
     // Return a plain object with a serializable error message
     return {
       error: error.message || "Something Went Wrong",

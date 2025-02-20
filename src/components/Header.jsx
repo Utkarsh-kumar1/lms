@@ -160,7 +160,7 @@ function Header() {
               >
                 {path}
               </span>
-              {index < paths.length - 1 && (
+              {index < paths?.length - 1 && (
                 <ChevronRight className="text-gray-600 dark:text-gray-400" />
               )}
             </span>

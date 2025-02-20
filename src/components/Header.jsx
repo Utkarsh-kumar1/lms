@@ -17,6 +17,7 @@ import {
 import { useTheme } from "next-themes";
 import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
 import axios from "axios";
+import { useSession } from "next-auth/react";
 
 function Header() {
   const pathname = usePathname();
@@ -32,26 +33,30 @@ function Header() {
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [showList, setShowList] = useState(false);
 
+  const { data, status } = useSession();
+
   // Ensures the component is mounted before rendering theme-dependent content
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    // Fetch building blocks
-    const today = "todo";
+    if (status === "authenticated") {
+      // Fetch building blocks
+      const today = "todo";
 
-    const fetchToDos = async () => {
-      try {
-        const { data } = await axios.get("/api/buildingBlocks", {
-          params: { today },
-        });
-        // const data = await response.json()
-        setTodos(data.data);
-        console.log("Data", data.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchToDos();
+      const fetchToDos = async () => {
+        try {
+          const { data } = await axios.get("/api/buildingBlocks", {
+            params: { today },
+          });
+          // const data = await response.json()
+          setTodos(data.data);
+          console.log("Data", data.data);
+        } catch (error) {
+          console.error(error);
+        }
+      };
+      fetchToDos();
+    }
   }, [refreshData]);
 
   const paths = decodeURI(pathname).split("/");
@@ -66,7 +71,7 @@ function Header() {
     }
   };
 
-  // Start timer when input appears, reset it on input change
+  // Start timer when input appears, reset it on input change (Task creation dropdown)
   useEffect(() => {
     if (showInput) {
       resetTimer(); // Only start timer when the input is shown
@@ -210,44 +215,46 @@ function Header() {
         </div>
       )}
 
-      <div className="relative">
-        {/* Clickable ToDo Button with animation */}
-        <div
-          className="flex items-center justify-center mr-6 cursor-pointer select-none  bg-orange-200 hover:bg-orange-300 hover:text-gray-800 shadow-md rounded-lg p-2 focus:ring-2 focus:ring-orange-300"
-          onClick={() => setShowInput(!showInput)}
-          aria-label="Toggle ToDo Input"
-        >
-          <span className="mr-2">ToDo</span>
-          <ClipboardList className="p-0.5 transform transition-transform duration-300 ease-in-out hover:scale-110" />
-        </div>
-
-        {/* Floating Input Field & Submit Button with animation */}
-        {showInput && (
-          <form
-            onSubmit={handleSubmit}
-            className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border shadow-lg rounded-lg p-4 z-50 w-64 transition-all duration-500 ${
-              showInput ? "opacity-100" : "opacity-0 pointer-events-none"
-            }`}
+      {status === "authenticated" && (
+        <div className="relative">
+          {/* Clickable ToDo Button with animation */}
+          <div
+            className="flex items-center justify-center mr-6 cursor-pointer select-none  bg-orange-200 hover:bg-orange-300 hover:text-gray-800 shadow-md rounded-lg p-2 focus:ring-2 focus:ring-orange-300"
+            onClick={() => setShowInput(!showInput)}
+            aria-label="Toggle ToDo Input"
           >
-            <input
-              ref={inputRef}
-              type="text"
-              className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 transition-all duration-200 ease-in-out"
-              value={task}
-              onChange={(e) => setTask(e.target.value)}
-              placeholder="Enter task..."
-              onBlur={resetTimer} // Restart timer if input loses focus
-              onFocus={() => clearTimeout(timerRef.current)} // Stop timer when input is focused
-            />
-            <button
-              type="submit"
-              className="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200"
+            <span className="mr-2">ToDo</span>
+            <ClipboardList className="p-0.5 transform transition-transform duration-300 ease-in-out hover:scale-110" />
+          </div>
+
+          {/* Floating Input Field & Submit Button with animation */}
+          {showInput && (
+            <form
+              onSubmit={handleSubmit}
+              className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border shadow-lg rounded-lg p-4 z-50 w-64 transition-all duration-500 ${
+                showInput ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
             >
-              Submit
-            </button>
-          </form>
-        )}
-      </div>
+              <input
+                ref={inputRef}
+                type="text"
+                className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 transition-all duration-200 ease-in-out"
+                value={task}
+                onChange={(e) => setTask(e.target.value)}
+                placeholder="Enter task..."
+                onBlur={resetTimer} // Restart timer if input loses focus
+                onFocus={() => clearTimeout(timerRef.current)} // Stop timer when input is focused
+              />
+              <button
+                type="submit"
+                className="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200"
+              >
+                Submit
+              </button>
+            </form>
+          )}
+        </div>
+      )}
 
       <div>
         {/* Only render theme icon if component is mounted */}

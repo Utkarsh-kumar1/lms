@@ -56,7 +56,7 @@ function Header() {
       };
       fetchToDos();
     }
-  }, [refreshData]);
+  }, [refreshData, status]);
 
   const paths = decodeURI(pathname).split("/");
 

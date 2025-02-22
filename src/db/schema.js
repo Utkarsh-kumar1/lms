@@ -120,7 +120,7 @@ export const recurringTasks = mysqlTable('recurring_tasks', {
 	  'yearly',
 	  'custom',
 	]).notNull(),
-	recurrenceInterval: int('recurrenceInterval').default(1),
+	recurrenceInterval: int('recurrenceInterval'),
 	recurrenceDays: varchar('recurrenceDays', { length: 255 }),
 	recurrenceMonthDays: varchar('recurrenceMonthDays', { length: 255 }),
 	recurrenceYearDays: varchar('recurrenceYearDays', { length: 255 }),

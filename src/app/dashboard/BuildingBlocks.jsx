@@ -73,6 +73,7 @@ export default function BuildingBlocks() {
 
   return (
     <div>
+      <AddTasks isOpen={isPopupVisible} onClose={togglePopup} />
       <div className="relative flex items-center justify-center mb-2">
         <h1 className="text-xl font-bold text-gray-800 dark:text-gray-200 text-center">
           Building Blocks
@@ -120,7 +121,6 @@ export default function BuildingBlocks() {
         >
           <Plus className="w-5 h-5" />
         </button>
-        <AddTasks isOpen={isPopupVisible} onClose={togglePopup} />
       </div>
 
       <div className="overflow-auto max-h-[400px] border border-gray-200 dark:border-gray-700 rounded-lg p-1 sm:p-4 bg-gray-50 dark:bg-gray-800">

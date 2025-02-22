@@ -2,8 +2,7 @@ import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
 import { Blocks } from "lucide-react";
 import { useState, useEffect } from "react";
 
-const initialTaskState =
-{
+const initialTaskState = {
   title: "",
   startTime: new Date().toLocaleTimeString("en-US", {
     hour: "2-digit",
@@ -18,7 +17,7 @@ const initialTaskState =
   endDate: "",
   recurrencePattern: "daily",
   recurrenceInterval: 1,
-  recurrenceDays: ['Monday'],
+  recurrenceDays: ["Monday"],
   recurrenceMonthDays: [1],
   recurrenceYearDays: "",
   priority: "medium",
@@ -101,8 +100,13 @@ export default function AddTasks({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    if (task.recurrencePattern === "custom" && !isValidCommaSeparatedIntegers()) {
-      alert("Invalid input. Please enter comma-separated integers (e.g., 1,2,3).");
+    if (
+      task.recurrencePattern === "custom" &&
+      !isValidCommaSeparatedIntegers()
+    ) {
+      alert(
+        "Invalid input. Please enter comma-separated integers (e.g., 1,2,3)."
+      );
       return;
     }
     // Trim all
@@ -112,7 +116,7 @@ export default function AddTasks({ isOpen, onClose }) {
       }
     }
     console.log("Task Submitted:", task);
-    const { success, error } = await AddOrUpdateTasks( task );
+    const { success, error } = await AddOrUpdateTasks(task);
     console.log(success, error);
     clearStates();
     onClose();
@@ -123,7 +127,7 @@ export default function AddTasks({ isOpen, onClose }) {
     onClose();
   };
 
-  const clearStates = () => { 
+  const clearStates = () => {
     setTask(initialTaskState);
   };
 
@@ -149,7 +153,9 @@ export default function AddTasks({ isOpen, onClose }) {
       onKeyDown={handleEscapeKeyDown}
     >
       <div className="max-w-lg max-h-screen mx-auto p-6 bg-white shadow-md rounded-lg overflow-y-auto transition-all duration-300 ease-in-out">
-        <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-4">Creating Block <Blocks /></h2>
+        <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-4">
+          Creating Block <Blocks />
+        </h2>
         <form onSubmit={handleSubmit} className="space-y-4">
           <input
             type="text"
@@ -160,6 +166,19 @@ export default function AddTasks({ isOpen, onClose }) {
             className="w-full p-2 border rounded"
             required
           />
+          {!task.isRecurring && (
+            <div>
+              <label className="block mb-2">Date:</label>
+              <input
+                type="date"
+                name="startDate"
+                value={task.startDate}
+                onChange={(e) => handleChange("startDate", e.target.value)}
+                className="w-full p-2 border rounded"
+                required
+              />
+            </div>
+          )}
           <div className="flex flex-col sm:flex-row sm:space-x-4 space-y-4 sm:space-y-0">
             <div className="flex-1">
               <label className="block mb-2">Start Time</label>
@@ -177,7 +196,9 @@ export default function AddTasks({ isOpen, onClose }) {
               <select
                 name="totalTime"
                 value={task.duration}
-                onChange={(e) => handleChange("duration", parseInt(e.target.value, 10))}
+                onChange={(e) =>
+                  handleChange("duration", parseInt(e.target.value, 10))
+                }
                 className="mt-1 block w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
                 {[15, 30, 45, 60, 75, 90, 105, 120].map((minutes) => {
@@ -252,7 +273,10 @@ export default function AddTasks({ isOpen, onClose }) {
                         key={option}
                         type="button"
                         onClick={() =>
-                          handleChange("recurrencePattern", option.toLowerCase())
+                          handleChange(
+                            "recurrencePattern",
+                            option.toLowerCase()
+                          )
                         }
                         className={`px-4 py-2 border rounded ${
                           task.recurrencePattern === option.toLowerCase()
@@ -275,7 +299,10 @@ export default function AddTasks({ isOpen, onClose }) {
                       max="30"
                       value={task.recurrenceInterval}
                       onChange={(e) =>
-                        handleChange("recurrenceInterval", parseInt(e.target.value, 10))
+                        handleChange(
+                          "recurrenceInterval",
+                          parseInt(e.target.value, 10)
+                        )
                       }
                       className="w-full p-2 border rounded"
                     />
@@ -307,13 +334,17 @@ export default function AddTasks({ isOpen, onClose }) {
 
                 {task.recurrencePattern === "monthly" && (
                   <div>
-                    <label className="block mb-2">Select Days of the Month:</label>
+                    <label className="block mb-2">
+                      Select Days of the Month:
+                    </label>
                     <div className="grid grid-cols-6 gap-2">
                       {daysOfMonth.map((day) => (
                         <button
                           key={day}
                           type="button"
-                          onClick={() => toggleSelection("recurrenceMonthDays", day)}
+                          onClick={() =>
+                            toggleSelection("recurrenceMonthDays", day)
+                          }
                           className={`p-2 border rounded ${
                             task.recurrenceMonthDays.includes(day)
                               ? "bg-blue-500 text-white"
@@ -327,16 +358,20 @@ export default function AddTasks({ isOpen, onClose }) {
                   </div>
                 )}
                 {task.recurrencePattern === "yearly" && (
-              <input
-                type="text"
-                name="recurrenceYearDays"
-                placeholder="Enter day numbers (1-365, comma-separated)"
-                value={task.recurrenceYearDays}
-                onChange={e => handleChange("recurrenceYearDays", e.target.value)}
-                className="w-full p-2 border rounded"
-              />
-            )}
-                {task.recurrencePattern === "custom" && (<div>Under development</div>)}
+                  <input
+                    type="text"
+                    name="recurrenceYearDays"
+                    placeholder="Enter day numbers (1-365, comma-separated)"
+                    value={task.recurrenceYearDays}
+                    onChange={(e) =>
+                      handleChange("recurrenceYearDays", e.target.value)
+                    }
+                    className="w-full p-2 border rounded"
+                  />
+                )}
+                {task.recurrencePattern === "custom" && (
+                  <div>Under development</div>
+                )}
                 {/* {task.recurrencePattern === "custom" && (
                   <div>
                     <label className="block mb-2">Custom Cron:</label>
@@ -355,24 +390,24 @@ export default function AddTasks({ isOpen, onClose }) {
           </div>
 
           <div>
-          <label className="block mb-2">Priority:</label>
-          <div className="flex gap-2">
-            {priorityOptions.map((option) => (
-              <button
-                key={option}
-                type="button"
-                onClick={() => handleChange("priority", option.toLowerCase())}
-                className={`px-4 py-2 border rounded ${
-                  task.priority === option.toLowerCase()
-                    ? "bg-blue-500 text-white"
-                    : "bg-gray-100"
-                }`}
-              >
-                {option}
-              </button>
-            ))}
+            <label className="block mb-2">Priority:</label>
+            <div className="flex gap-2">
+              {priorityOptions.map((option) => (
+                <button
+                  key={option}
+                  type="button"
+                  onClick={() => handleChange("priority", option.toLowerCase())}
+                  className={`px-4 py-2 border rounded ${
+                    task.priority === option.toLowerCase()
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-100"
+                  }`}
+                >
+                  {option}
+                </button>
+              ))}
+            </div>
           </div>
-        </div>
 
           <div className="flex justify-end space-x-4">
             <button

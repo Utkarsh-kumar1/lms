@@ -56,6 +56,32 @@ export async function AddOrUpdateTasks(task, id = null) {
     }
 
     if (isRecurring) {
+
+      // const recurrenceOptions = ["Daily", "Weekly", "Monthly", "Yearly", "Custom"];
+      // set other values to null according to the recurrence pattern
+      if (recurrencePattern === "Daily") {
+        recurrenceDays = null;
+        recurrenceMonthDays = null;
+        recurrenceYearDays = null;
+      } else if (recurrencePattern === "Weekly") {
+        recurrenceInterval = null;
+        recurrenceMonthDays = null;
+        recurrenceYearDays = null;
+      } else if (recurrencePattern === "Monthly") {
+        recurrenceInterval = null;
+        recurrenceDays = null;
+        recurrenceYearDays = null;
+      } else if (recurrencePattern === "Yearly") {
+        recurrenceInterval = null;
+        recurrenceDays = null;
+        recurrenceMonthDays = null;
+      } else if (recurrencePattern === "Custom") {
+        recurrenceInterval = null;
+        recurrenceDays = null;
+        recurrenceMonthDays = null;
+        recurrenceYearDays = null;
+      }
+      
       await db.insert(recurringTasks).values({
         owner: token.id,
         title: title,
@@ -80,7 +106,7 @@ export async function AddOrUpdateTasks(task, id = null) {
         startTime: startTime,
         duration: duration,
         description: description,
-        dueDate: new Date(),
+        dueDate: startDate,
         priority: priority,
       });
     }

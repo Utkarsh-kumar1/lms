@@ -1,3 +1,4 @@
+
 import Link from 'next/link'
 import React from 'react'
 
@@ -49,7 +50,7 @@ function page() {
           <div key={index}
             className={`w-full h-[calc(100vh-85px)] sm:h-auto sm:py-10 flex flex-col ${reverse ? 'sm:flex-row-reverse' : 'sm:flex-row'} p-6 sm:p-10 rounded-2xl items-center justify-evenly sm:justify-between gap-6`}
           >
-            <div className='flex flex-col justify-center self-start sm:w-1/2 p-4 gap-4 sm:gap-8 font-serif text-black'>
+            <div className='flex flex-col justify-center self-start sm:self-center sm:w-1/2 p-4 gap-4 sm:gap-8 font-serif text-black'>
               <h2 className='text-3xl sm:text-4xl font-bold'>{title}</h2>
               <p className='text-lg sm:text-xl'>{subtitle}<span className='block font-semibold'>{cta}</span></p>
               {button && link && (

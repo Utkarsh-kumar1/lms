@@ -6,6 +6,8 @@ import Header from "@/components/Header";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeProvider } from "@/context/theme-provider";
+import { getServerSession } from "next-auth";
+import { authOptions } from "./api/auth/[...nextauth]/options";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -26,7 +28,11 @@ export const metadata = {
   ),
 };
 
-export default function RootLayout({ children }) {
+export default async function RootLayout({ children }) {
+  const session = await getServerSession(authOptions);
+  
+  
+
   return (
     <html lang="en" suppressHydrationWarning>
       <link rel="icon" href="/logo.jpeg" sizes="any" />
@@ -39,7 +45,7 @@ export default function RootLayout({ children }) {
         >
           <AuthProvider>
             <SidebarProvider defaultOpen={false}>
-              <AppSidebar />
+              {session && <AppSidebar />}
               <main className=" w-full min-h-screen flex flex-col   bg-gray-100  dark:bg-gray-800">
                 <Header />
 

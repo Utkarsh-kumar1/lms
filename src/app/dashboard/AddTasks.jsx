@@ -201,12 +201,12 @@ export default function AddTasks({ isOpen, onClose }) {
                 }
                 className="mt-1 block w-full px-3 py-2.5 text-sm sm:text-base border border-gray-300 rounded-md shadow-sm focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                {[15, 30, 45, 60, 75, 90, 105, 120].map((minutes) => {
+                {[5, 15, 30, 45, 60, 75, 90, 105, 120].map((minutes) => {
                   const hours = minutes / 60;
                   const label =
                     minutes > 59
-                      ? `${hours.toFixed(2)} hours`
-                      : `${minutes} minutes`;
+                      ? `${parseInt(hours)} hr ${minutes % 60 ? ` ${minutes % 60} min` : ''}`
+                      : `${minutes} min`;
                   return (
                     <option key={minutes} value={minutes}>
                       {label}

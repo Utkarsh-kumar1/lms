@@ -1,7 +1,7 @@
 "use client";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { Crown, Music, Star, Ellipsis, RefreshCw, Trash2, User, Zap } from "lucide-react";
+import { Crown, Music, Star, Ellipsis, RefreshCw, Trash2, User, Zap, Trash, Pencil } from "lucide-react";
 import axios from "axios";
 import { DeleteActivity } from "@/actions/DeleteActivity";
 
@@ -25,6 +25,7 @@ export const ActivityItem = ({ activity, reload }) => {
           setStatus(activity.status);
         });
     }
+    console.log("Activity", activity);
   }, [status, activity.id, activity.status, router]);
 
   useEffect(() => {
@@ -63,6 +64,15 @@ export const ActivityItem = ({ activity, reload }) => {
       console.error("Error deleting:", error);
     }
   };
+
+  function addMinutes(time, minutesToAdd) {
+    let [hours, minutes, seconds] = time.split(":").map(Number);
+    
+    let date = new Date();
+    date.setHours(hours, minutes + minutesToAdd, seconds);
+
+    return date.toTimeString().slice(0, 8); 
+  }
 
   const formatDate = (date) =>
     new Date(date).toLocaleDateString("en-GB", {
@@ -115,25 +125,44 @@ export const ActivityItem = ({ activity, reload }) => {
 
   return (
     <div
-  className={`relative flex flex-col sm:flex-row justify-between items-start sm:items-center p-4 mb-3 rounded-lg shadow-sm transition-all duration-300 
+  className={`relative  py-4 pr-4 mb-3 rounded-lg shadow-sm transition-all duration-300  
     ${getStatusBgColor()}
 `}
+
 >
-    
+      {/* Start Time (Top Left) */}
+      <span className="absolute top-0 left-0 text-sm p-1 bg-yellow-600 text-white rounded-tl-xl rounded-br-xl">{formatTime(activity.startTime)} ({activity.duration} minutes)</span>
+
+      {/* End Time (Bottom Left) */}
+      <span className="absolute bottom-0 left-0 text-sm  p-1 bg-yellow-600 text-white rounded-tr-xl rounded-bl-xl">{formatTime(addMinutes(activity.startTime, activity.duration)) }</span>
+
+      {/* Edit Button (Top Right) */}
+      <button className="absolute top-0 right-0 bg-blue-300 text-white p-1 rounded-full shadow-md">
+        <Pencil size={16} />
+      </button>
+
+      {/* Delete Button (Bottom Right) */}
+      <button className="absolute bottom-0 right-0 bg-red-300 text-white p-1 rounded-full shadow-md"
+        onClick={() => setIsModalOpen(true)}
+      >
+        <Trash size={16} />
+      </button>
+      
+      <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pl-4 border-l-4 border-l-yellow-600 ">
       {/* Activity Details */}
-      <div className="flex flex-col flex-1">
+      <div className="flex flex-col flex-1 my-4 ">
         <span className="text-gray-800 dark:text-gray-200 text-base sm:text-lg font-semibold">
           {activity.title}
         </span>
         <span className="text-sm text-gray-500 dark:text-gray-400">
           {activity.description}
         </span>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
+        {/* <div className="text-sm text-gray-500 dark:text-gray-400">
           {formatTime(activity.startTime)}
         </div>
         <div className="text-sm text-gray-500 dark:text-gray-400">
           Duration: {activity.duration} minutes
-        </div>
+        </div> */}
         {activity.recurringTaskId && (
 
         <div className="flex flex-wrap items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
@@ -141,7 +170,21 @@ export const ActivityItem = ({ activity, reload }) => {
             Streak: {activity.streak} {activity.streak !== 0 ? "🔥" : ""}
             </span>
             
-            {activity.streak > 0 && (activity.streak <= 7 ?
+
+          {activity.isBestStreak > 1 && (
+            <span className="bg-yellow-300 dark:bg-yellow-500 text-yellow-900 dark:text-yellow-100 px-2 py-1 rounded-full font-medium text-xs flex items-center">
+              <Star className="w-4 h-4 mr-1" />
+              Best Streak
+            </span>
+          )}
+          </div>
+        )}
+          
+      </div>
+
+      {/* Actions */}
+      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-3 sm:mt-0 mr-6">
+      {activity.streak > 0 && (activity.streak <= 7 ?
             
             (<span className="bg-green-200 dark:bg-green-400 text-green-800 dark:text-green-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
           <Zap className="w-5 h-5 mr-2 text-green-600 dark:text-green-200" />
@@ -181,22 +224,6 @@ export const ActivityItem = ({ activity, reload }) => {
           Mastery Phase
           <span className="ml-1 font-normal text-xs bg-red-300 text-red-900 dark:bg-red-500 dark:text-red-100 px-2 py-0.5 rounded-full">6+ Months</span>
           </span>))}
-
-
-
-          {activity.isBestStreak > 1 && (
-            <span className="bg-yellow-300 dark:bg-yellow-500 text-yellow-900 dark:text-yellow-100 px-2 py-1 rounded-full font-medium text-xs flex items-center">
-              <Star className="w-4 h-4 mr-1" />
-              Best Streak
-            </span>
-          )}
-          </div>
-        )}
-          
-      </div>
-
-      {/* Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-3 sm:mt-0">
         <button
           className="w-full sm:w-auto px-3 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
           onClick={handleStatusChange}
@@ -206,9 +233,9 @@ export const ActivityItem = ({ activity, reload }) => {
         <span className={`w-full sm:w-auto px-3 py-1 text-sm font-semibold text-white ${getPriorityBgColor()} rounded-lg text-center`}>
           Priority: {activity.priority}
         </span>
-        <button onClick={() => setIsModalOpen(true)} className="text-white">
+        {/* <button onClick={() => setIsModalOpen(true)} className="text-white">
           <Trash2 className="w-5 h-5 text-red-500" />
-        </button>
+        </button> */}
       </div>
 
       {wasUpdatedRecently && (
@@ -216,6 +243,7 @@ export const ActivityItem = ({ activity, reload }) => {
           <Ellipsis /> <div>Updated just now</div>
         </div>
       )}
+      </div>
 
       {/* Delete Confirmation Modal */}
       {isModalOpen && (

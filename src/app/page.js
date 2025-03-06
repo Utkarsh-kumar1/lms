@@ -64,10 +64,11 @@ export default function LandingPage() {
             <p className='text-lg sm:text-xl text-[#d1e8ff]'>{subtitle}<span className='block font-semibold text-[#ffeb3b]'>{cta}</span></p>
             {button && link && (
               <motion.div
-                whileHover={{ scale: 1.1 }}
+                whileHover={{ scale: 1.05 }}
                 whileTap={{ scale: 0.9 }}
+                className='flex'
               >
-                <Link href={link} className='flex self-start px-6 py-3 rounded-full bg-[#ffeb3b] text-gray-900 shadow-md hover:bg-[#fbc02d] transition'>
+                <Link href={link} className='flex  px-6 py-3 rounded-full bg-[#ffeb3b] text-gray-900 shadow-md hover:bg-[#fbc02d] transition'>
                   {button}
                 </Link>
               </motion.div>

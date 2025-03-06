@@ -147,7 +147,7 @@ export const tasks = mysqlTable("tasks", {
 	createdAt: timestamp("createdAt", { mode: "string" }).defaultNow(),
 	updatedAt: timestamp("updatedAt", { mode: "string" }).defaultNow().onUpdateNow(),
 	streak: int("streak"),
-	isBestStreak: tinyint("isBestStreak"),
+	isBestStreak: int("isBestStreak"),
   }, (table) => ({
 	ownerIdx: index("created_by").on(table.owner),
 	recurringTaskIdx: index("FK_tasks_recurring_tasks").on(table.recurringTaskId),

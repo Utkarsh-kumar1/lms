@@ -49,7 +49,6 @@ function Header() {
           });
           // const data = await response.json()
           setTodos(data.data);
-          console.log("Data", data.data);
         } catch (error) {
           console.error(error);
         }
@@ -81,11 +80,9 @@ function Header() {
   const handleSubmit = async (e) => {
     e.preventDefault();
 
-    console.log("Task Submitted:", task);
     const title = task;
 
     const { success, error } = await AddOrUpdateTasks({ title });
-    console.log(success, error);
     if (success) {
       setRefreshData(!refreshData);
     }
@@ -94,12 +91,10 @@ function Header() {
   };
 
   const deleteTodo = async (id) => {
-    console.log("Deleting task with id:", id);
     try {
       const response = await axios.delete("/api/buildingBlocks", {
         data: { id },
       });
-      console.log("Deleted successfully:", response.data);
       setRefreshData(!refreshData);
     } catch (error) {
       console.error("Error deleting:", error);

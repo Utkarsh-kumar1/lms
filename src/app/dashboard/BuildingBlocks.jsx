@@ -43,6 +43,11 @@ export default function BuildingBlocks() {
     fetchBuildingBlocks();
   }, [refreshData, date]);
 
+  // update refreshData state using function props 
+  const handleRefresh = () => {
+    setRefreshData((prev) => !prev);
+  };
+
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
     const now = new Date();

@@ -169,7 +169,6 @@ export default async function ProtectedPage() {
   }
 
   const activity = (await fetchActivity(session.id)).props.finalData;
-  // console.log(activity);
 
   if (!activity || activity.length === 0) {
     return (

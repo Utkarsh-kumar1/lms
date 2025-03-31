@@ -8,7 +8,6 @@ export async function GET(req) {
   const secret = process.env.JWT_SECRET;
   const token = await getToken({ req, secret });
   const today = req.nextUrl.searchParams.get("today");
-  console.log("today", today);
   if (!token) {
     return Response.json(ApiResponse.error(401, "Unauthorized access"), {
       status: 401,
@@ -16,34 +15,35 @@ export async function GET(req) {
   }
 
   try {
-
     if (today === "todo") {
       const data = await db
         .select()
         .from(tasks)
         .where(and(eq(tasks.owner, token.id), isNull(tasks.duration)))
         .orderBy(tasks.createdAt);
-      
-        return Response.json(
-          ApiResponse.success(200, data, "Data fetched successfully"),
-          { status: 200 }
-        );
-    }
-    else {
 
+      return Response.json(
+        ApiResponse.success(200, data, "Data fetched successfully"),
+        { status: 200 }
+      );
+    } else {
       const data = await db
         .select()
         .from(tasks)
-        .where(and(eq(tasks.owner, token.id), eq(tasks.dueDate, today), isNotNull(tasks.duration)))
+        .where(
+          and(
+            eq(tasks.owner, token.id),
+            eq(tasks.dueDate, today),
+            isNotNull(tasks.duration)
+          )
+        )
         .orderBy(tasks.startTime);
-      
-        return Response.json(
-          ApiResponse.success(200, data, "Data fetched successfully"),
-          { status: 200 }
-        );
+
+      return Response.json(
+        ApiResponse.success(200, data, "Data fetched successfully"),
+        { status: 200 }
+      );
     }
-
-
   } catch (error) {
     console.error(error);
 
@@ -57,7 +57,7 @@ export async function GET(req) {
 export async function PATCH(req) {
   const secret = process.env.JWT_SECRET;
   const token = await getToken({ req, secret });
-  const { status, id } = await req.json();
+  const { startTime, duration, status, id } = await req.json();
 
   if (!token) {
     return Response.json(ApiResponse.error(401, "Unauthorized access"), {
@@ -65,11 +65,30 @@ export async function PATCH(req) {
     });
   }
 
-  if (status == null) {
-    return Response.json(ApiResponse.error(400, "status is required"), {
+  if (status == null && !startTime && !duration) {
+    return Response.json(ApiResponse.error(400, " status or starttime or duration is required "), {
       status: 400,
     });
   }
+
+  // Updating startTime and duration
+  if (startTime && duration) {
+    try {
+      const updateResponse = await db
+        .update(tasks)
+        .set({ startTime: startTime, duration: duration })
+        .where(and(eq(tasks.id, id), eq(tasks.owner, token.id)));
+      return Response.json({ status: 200, message: "Update successful" });
+    }
+    catch (error) {
+      console.log(error);
+      return Response.json(
+        ApiResponse.error(500, "Error while updating Building Block "),
+        { status: 500 }
+      );
+    }
+  }
+  
 
   try {
     const updateResponse = await db
@@ -87,13 +106,11 @@ export async function PATCH(req) {
   }
 }
 
-
 export async function DELETE(req) {
   const secret = process.env.JWT_SECRET;
   const token = await getToken({ req, secret });
   const { id } = await req.json();
-  
-  console.log("id in delete from route.js", id);
+
 
   if (!token) {
     return Response.json(ApiResponse.error(401, "Unauthorized access"), {
@@ -109,8 +126,8 @@ export async function DELETE(req) {
 
   try {
     const deleteResponse = await db
-  .delete(tasks)  
-  .where(and(eq(tasks.id, id), eq(tasks.owner, token.id)));
+      .delete(tasks)
+      .where(and(eq(tasks.id, id), eq(tasks.owner, token.id)));
 
     return Response.json({ status: 200, message: "Delete successful" });
   } catch (error) {

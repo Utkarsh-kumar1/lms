@@ -2,10 +2,7 @@
 import React from "react";
 
 import ChartLine from "./ChartLine";
-import DailyActivities from "./DailyActivities";
 import Quotes from "./Quotes";
-import MicroPlanner from "./MicroPlanner";
-import AddTasks from "./AddTasks";
 import BuildingBlocks from "./BuildingBlocks";
 
 export default function Dashboard({ userData }) {

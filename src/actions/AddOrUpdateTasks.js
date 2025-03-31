@@ -7,7 +7,6 @@ import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
 
 export async function AddOrUpdateTasks(task, id = null) {
-  console.log("Logging tasks from server actions");
   const token = await getServerSession(authOptions);
   if (!token) {
     return { error: "Unauthorized request" };
@@ -31,10 +30,8 @@ export async function AddOrUpdateTasks(task, id = null) {
     customCronDescription,
   } = task;
 
-  console.log("Logging tasks from server actions", title, startDate, duration, recurrencePattern);
   // Insert a new Task into the database
   try {
-    // console.log(title);
     if (!title || !startDate || !duration || !recurrencePattern) {
       if (title) {
         await db.insert(tasks).values({
@@ -110,18 +107,11 @@ export async function AddOrUpdateTasks(task, id = null) {
         priority: priority,
       });
     }
-    console.log("Logging results from server actions", title);
 
-    //   revalidatePath("/dashboard");
     return { success: true };
   } catch (error) {
-    // console.log("Error from AddOrUpdateTasks", error);
-    // Return a plain object with a serializable error message
     return {
       error: error.message || "Something Went Wrong",
     };
   }
-  //   }
-
-  // Ensure you return something that is serializable after revalidating
 }

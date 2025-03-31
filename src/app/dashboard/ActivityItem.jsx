@@ -14,6 +14,8 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { DeleteActivity } from "@/actions/DeleteActivity";
+import { set } from "zod";
+import { is } from "drizzle-orm";
 
 export const ActivityItem = ({ activity, reload }) => {
   const [updatedActivity, setUpdatedActivity] = useState(activity);
@@ -22,6 +24,43 @@ export const ActivityItem = ({ activity, reload }) => {
   const [errors, setErrors] = useState({ deleteError: "" });
   const [lastUpdated, setLastUpdated] = useState(null);
   const [editingField, setEditingField] = useState(null);
+  const [timer, setTimer] = useState(null);
+  const [isLongPress, setIsLongPress] = useState(false);
+
+  const handleMouseDown = () => {
+    setIsLongPress(false);
+    const newTimer = setTimeout(() => {
+      setUpdatedActivity((prev) => ({
+        ...prev,
+        status: "Cancelled",
+      }));
+      setIsLongPress(true);
+    }, 2000); // 2 second hold
+    setTimer(newTimer);
+  };
+
+  const handleMouseUp = (e) => {
+    if (timer) {
+      clearTimeout(timer); // Cancel if released early
+      setTimer(null);
+    }
+  };
+
+  const handleStatusChange = (e) => {
+    if (isLongPress) {
+      e.preventDefault(); 
+      return;
+    }
+    setUpdatedActivity((prev) => ({
+      ...prev,
+      status:
+        prev.status === "Pending"
+          ? "In Progress"
+          : prev.status === "In Progress"
+          ? "Completed"
+          : "Pending",
+    }));
+  };
 
   const handleChange = (field, value) => {
     if (field === "startTime") {
@@ -89,18 +128,6 @@ export const ActivityItem = ({ activity, reload }) => {
       return () => clearTimeout(timer);
     }
   }, [lastUpdated]);
-
-  const handleStatusChange = () => {
-    setUpdatedActivity((prev) => ({
-      ...prev,
-      status:
-        prev.status === "Pending"
-          ? "In Progress"
-          : prev.status === "In Progress"
-          ? "Completed"
-          : "Pending",
-    }));
-  };
 
   const handleDelete = async () => {
     const id = updatedActivity.id;
@@ -181,7 +208,7 @@ export const ActivityItem = ({ activity, reload }) => {
   return (
     <div
       className={`relative  py-4 pr-4 mb-3 rounded-lg shadow-sm transition-all duration-300  
-    ${getStatusBgColor()}
+    ${getStatusBgColor()}  ${updatedActivity.status === "Cancelled" && 'opacity-25' }
 `}
     >
       {/* Start Time (Top Left) */}
@@ -259,14 +286,9 @@ export const ActivityItem = ({ activity, reload }) => {
             addMinutes(updatedActivity.startTime, updatedActivity.duration)
           )}
         </div>
-        {
-          updatedActivity.recurringTaskId && (
-          <RefreshCw
-          className="w-3 h-3 text-white"
-          title="Recurring Task"
-            />
-          )
-        }
+        {updatedActivity.recurringTaskId && (
+          <RefreshCw className="w-3 h-3 text-white" title="Recurring Task" />
+        )}
       </span>
 
       {/* Edit Button (Top Right) */}
@@ -365,6 +387,11 @@ export const ActivityItem = ({ activity, reload }) => {
           <button
             className="w-full sm:w-auto px-3 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
             onClick={handleStatusChange}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleMouseDown} // Mobile support
+            onTouchEnd={handleMouseUp} // Mobile support
           >
             {updatedActivity.status}
           </button>
@@ -379,7 +406,7 @@ export const ActivityItem = ({ activity, reload }) => {
         </div>
 
         {wasUpdatedRecently && (
-          <div className="flex items-center justify-center gap-1 absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-400">
+          <div className="flex items-center justify-center gap-1 absolute bottom-0 right-8 text-xs text-gray-500 dark:text-gray-400">
             <Ellipsis /> <div>Updated just now</div>
           </div>
         )}

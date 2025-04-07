@@ -35,7 +35,7 @@ export default async function RootLayout({ children }) {
   return (
     <html lang="en" suppressHydrationWarning>
       <link rel="icon" href="/logo.jpeg" sizes="any" />
-      <body className={`${inter.className}  overflow-x-hidden `}>
+      <body className={`${inter.className}  overflow-x-hidden select-none `}>
         <ThemeProvider
           attribute="class"
           defaultTheme="system"

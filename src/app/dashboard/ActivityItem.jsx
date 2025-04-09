@@ -48,7 +48,7 @@ export const ActivityItem = ({ activity, reload }) => {
 
   const handleStatusChange = (e) => {
     if (isLongPress) {
-      e.preventDefault(); 
+      e.preventDefault();
       return;
     }
     setUpdatedActivity((prev) => ({
@@ -208,7 +208,9 @@ export const ActivityItem = ({ activity, reload }) => {
   return (
     <div
       className={`relative  py-4 pr-4 mb-3 rounded-lg shadow-sm transition-all duration-300  
-    ${getStatusBgColor()}  ${updatedActivity.status === "Cancelled" && 'opacity-25' }
+    ${getStatusBgColor()}  ${
+        updatedActivity.status === "Cancelled" && "opacity-25"
+      }
 `}
     >
       {/* Start Time (Top Left) */}
@@ -317,12 +319,7 @@ export const ActivityItem = ({ activity, reload }) => {
           <span className="text-sm text-gray-500 dark:text-gray-400">
             {updatedActivity.description}
           </span>
-          {/* <div className="text-sm text-gray-500 dark:text-gray-400">
-          {formatTime(updatedActivity.startTime)}
-        </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Duration: {updatedActivity.duration} minutes
-        </div> */}
+          
           {updatedActivity.recurringTaskId && (
             <div className="flex flex-wrap items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
               <span className="mr-2">
@@ -341,7 +338,7 @@ export const ActivityItem = ({ activity, reload }) => {
         </div>
 
         {/* Actions */}
-        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-3 sm:mt-0 mr-6">
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-6 sm:mb-0 mr-6">
           {updatedActivity.streak > 0 &&
             (updatedActivity.streak <= 7 ? (
               <span className="bg-green-200 dark:bg-green-400 text-green-800 dark:text-green-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">

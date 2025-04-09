@@ -39,10 +39,11 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import Image from "next/image";
+import { IoToday, IoTodayOutline } from "react-icons/io5";
 
 export function AppSidebar() {
   const { data, status } = useSession();
-  const router = useRouter()
+  const router = useRouter();
   const pathname = usePathname();
   const {
     state,
@@ -59,6 +60,12 @@ export function AppSidebar() {
       name: "Dashboard",
       url: "/dashboard",
       icon: LayoutDashboardIcon,
+      isActive: status === "authenticated",
+    },
+    {
+      name: "Today",
+      url: "/today",
+      icon: IoTodayOutline,
       isActive: status === "authenticated",
     },
     {
@@ -123,7 +130,6 @@ export function AppSidebar() {
     },
   ];
 
-  
   return (
     <Sidebar
       className="bg-slate-800 text-gray-200 flex flex-col overflow-hidden dark:bg-gray-900 dark:text-gray-200"
@@ -164,12 +170,12 @@ export function AppSidebar() {
           {NAV_OPTIONS.filter((option) => option.isActive).map((option) => (
             <SidebarMenuItem key={option.name} title={option.name}>
               <SidebarMenuButton
-                onClick={() =>{
-                  if(isMobile || open){
-                    
-                    toggleSidebar()
+                onClick={() => {
+                  if (isMobile || open) {
+                    toggleSidebar();
                   }
-                   router.push(option.url)}}
+                  router.push(option.url);
+                }}
                 className={cn(
                   "flex items-center px-3 py-2 rounded transition-colors duration-200",
                   pathname.startsWith(option.url)

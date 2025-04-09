@@ -1,9 +1,7 @@
 "use client"; // This makes the component a client component
 
-import {
-  MoreVertical
-} from "lucide-react";
-import { useReducer, useState } from "react";
+import { MoreVertical, SortAsc, SortAscIcon, SortDesc } from "lucide-react";
+import { useEffect, useReducer, useState } from "react";
 import { BiSortAlt2 } from "react-icons/bi";
 import { IoMdAdd } from "react-icons/io";
 import TaskItem from "./TaskItem";
@@ -33,27 +31,29 @@ const reducer = (tasks, action) => {
 
     case actionTypes.SORT:
       return [...tasks].sort((task1, task2) => {
-        const key = action.payload;
+        const { key, ascending } = action.payload;
         const val1 = task1[key];
         const val2 = task2[key];
 
         const priorityOrder = { High: 1, Medium: 2, Low: 3 };
+        let result = 0;
 
         if (typeof val1 === "number" && typeof val2 === "number") {
-          return val1 - val2;
+          result = val1 - val2;
         } else if (typeof val1 === "string" && typeof val2 === "string") {
           if (
             priorityOrder[val1] !== undefined &&
             priorityOrder[val2] !== undefined
           ) {
-            return priorityOrder[val1] - priorityOrder[val2];
+            result = priorityOrder[val1] - priorityOrder[val2];
+          } else {
+            result = val1.localeCompare(val2);
           }
-          return val1.localeCompare(val2);
         } else if (val1 instanceof Date && val2 instanceof Date) {
-          return val1.getTime() - val2.getTime();
+          result = val1.getTime() - val2.getTime();
         }
 
-        return 0; // Default case
+        return ascending ? result : -result;
       });
 
     default:
@@ -66,27 +66,45 @@ export default function TaskList({ initialTasks }) {
   const [inputTask, setInputTask] = useState(false);
   const [showScheduledAndRecuring, setShowScheduledAndRecuring] =
     useState(false);
+  const [sortingAsc, setSortingAsc] = useState(true);
+  const [sortBy, setSortBy] = useState("startTime");
 
+  const onAdd = (task) =>
+    dispatch({ type: actionTypes.ADD_TASKS, payload: task });
   const onUpdate = (task) =>
     dispatch({ type: actionTypes.UPDATE_TASK, payload: task });
   const onDelete = (task) =>
     dispatch({ type: actionTypes.DELETE_TASK, payload: task });
 
+  useEffect(() => {
+    dispatch({ type: actionTypes.SORT, payload: { key: sortBy, ascending: sortingAsc } });
+  }, [sortingAsc, sortBy]);
+
   return (
     <>
       <div className="flex w-full h-11 justify-end items-center space-x-4">
         <div className="flex items-center space-x-2 border rounded-md px-2 py-1 bg-gray-100 dark:bg-gray-800">
-          <BiSortAlt2 className="text-xl cursor-pointer hover:text-gray-500" />
+          <span
+            className="text-sm"
+            onClick={() => setSortingAsc((sortingAsc) => !sortingAsc)}
+          >
+            {sortingAsc ? (
+              <SortAsc className="text-sm cursor-pointer hover:text-gray-500" />
+            ) : (
+              <SortDesc className="text-sm cursor-pointer hover:text-gray-500" />
+            )}
+          </span>
           <select
             name="sortBy"
             id="sortBy"
             className="bg-transparent outline-none text-sm"
             onChange={(e) => {
-              dispatch({ type: actionTypes.SORT, payload: e.target.value });
+              setSortBy(e.target.value);
+              // dispatch({ type: actionTypes.SORT, payload: { key: sortBy, ascending: sortingAsc } });
             }}
           >
             {[
-              { text: "Start", value: "startTime" },
+              { text: "Time", value: "startTime" },
               { text: "Priority", value: "priority" },
               { text: "Duration", value: "duration" },
             ].map(({ text, value }) => (
@@ -100,18 +118,8 @@ export default function TaskList({ initialTasks }) {
           className="text-2xl cursor-pointer hover:text-gray-500"
           onClick={() => setInputTask(true)}
         />
-        <TaskInput
-          isOpen={inputTask}
-          onClose={() => {
-            setInputTask(false);
-          }}
-        />
 
         <MoreVertical onClick={() => setShowScheduledAndRecuring(true)} />
-        <ScheduledAndRecuringList
-          isOpen={showScheduledAndRecuring}
-          onClose={() => setShowScheduledAndRecuring((prev) => !prev)}
-        />
       </div>
       <div className="mt-4">
         {tasks.length > 0 ? (
@@ -129,6 +137,18 @@ export default function TaskList({ initialTasks }) {
           <p className="text-gray-500 text-center mt-4">No tasks for today!</p>
         )}
       </div>
+      {/* For Adding New Task */}
+      <TaskInput
+        isOpen={inputTask}
+        onClose={(props) => {
+          setInputTask(false);
+          if (props) onAdd(props);
+        }}
+      />
+      <ScheduledAndRecuringList
+        isOpen={showScheduledAndRecuring}
+        onClose={() => setShowScheduledAndRecuring((prev) => !prev)}
+      />
     </>
   );
 }

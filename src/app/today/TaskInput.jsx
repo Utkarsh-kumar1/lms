@@ -20,7 +20,7 @@ const initialTaskState = {
   recurrenceDays: ["Monday"],
   recurrenceMonthDays: [1],
   recurrenceYearDays: "",
-  priority: "medium",
+  priority: "Medium",
   customCron: "",
   customCronDescription: "",
 };
@@ -116,10 +116,15 @@ export default function TaskInput({ isOpen, onClose }) {
       }
     }
     console.log("Task Submitted:", task);
-    const { success, error } = await AddOrUpdateTasks(task);
-    console.log(success, error);
+    const { success, id, error } = await AddOrUpdateTasks(task);
     clearStates();
-    onClose();
+    const newTask = {
+      ...task,
+      id: id,
+      startTime: task.startTime + ":00",
+      status: 'Pending',
+    };
+    onClose(newTask);
   };
 
   const handleCancel = () => {

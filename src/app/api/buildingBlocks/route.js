@@ -79,29 +79,10 @@ export async function PATCH(req) {
     });
   }
 
-  // Updating startTime and duration
-  if (startTime && duration) {
-    try {
-      const updateResponse = await db
-        .update(tasks)
-        .set({ startTime: startTime, duration: duration })
-        .where(and(eq(tasks.id, id), eq(tasks.owner, token.id)));
-      return Response.json({ status: 200, message: "Update successful" });
-    }
-    catch (error) {
-      console.log(error);
-      return Response.json(
-        ApiResponse.error(500, "Error while updating Building Block "),
-        { status: 500 }
-      );
-    }
-  }
-  
-
   try {
     const updateResponse = await db
       .update(tasks)
-      .set({ status: status })
+      .set({ status: status, startTime: startTime, duration: duration })
       .where(and(eq(tasks.id, id), eq(tasks.owner, token.id)));
 
     const updatedTask = await db.query.tasks.findFirst({

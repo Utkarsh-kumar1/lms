@@ -3,9 +3,15 @@
 import { confirmAction } from "@/components/ConfirmAction";
 import { Crown, Music, RefreshCw, Trash, User, Zap } from "lucide-react";
 import { useState } from "react";
+import { set } from "zod";
 
 function TaskItem({ task, onDelete, onUpdate }) {
   const [isProcessing, setIsProcessing] = useState(false);
+  const [editingField, setEditingField] = useState(null);
+  const [newStartTime, setNewStartTime] = useState(task.startTime);
+  const [newDuration, setNewDuration] = useState(task.duration);
+  const [timer, setTimer] = useState(null);
+  const [isLongPress, setIsLongPress] = useState(false);
 
   const priorityColors = {
     High: "bg-red-500 text-white",
@@ -19,18 +25,54 @@ function TaskItem({ task, onDelete, onUpdate }) {
     Pending: "bg-gray-100 dark:bg-gray-500",
   };
 
-  const handleUpdateTask = async () => {
+  const handleMouseDown = () => {
+    setIsLongPress(false);
+    const newTimer = setTimeout(() => {
+      setIsLongPress(true);
+      handleUpdateTask({ editingField: "status" });
+    }, 1200); // 1.2 second hold
+    setTimer(newTimer);
+  };
+
+  const handleMouseUp = (e) => {
+    if (timer) {
+      clearTimeout(timer); // Cancel if released early
+      setTimer(null);
+    }
+  };
+
+  const handleUpdateTask = async ({ editingField, e = null }) => {
     setIsProcessing(true);
     try {
-      const updatedTask = {
-        ...task,
-        status:
-          task.status === "Pending"
-            ? "In Progress"
-            : task.status === "In Progress"
-            ? "Completed"
-            : "Pending",
-      };
+      var updatedTask = {};
+
+      if (editingField === "startTime") {
+        updatedTask = {
+          ...task,
+          startTime: newStartTime,
+          duration: newDuration,
+        };
+        setEditingField(null); // Close the editing field after saving
+      } else if (editingField === "status") {
+        updatedTask = {
+          ...task,
+          status: "Cancelled",
+        };
+      } else {
+        if (isLongPress) {
+          e.preventDefault();
+          return;
+        }
+        updatedTask = {
+          ...task,
+          status:
+            task.status === "Pending"
+              ? "In Progress"
+              : task.status === "In Progress"
+              ? "Completed"
+              : "Pending",
+        };
+      }
 
       const response = await fetch("/api/buildingBlocks", {
         method: "PATCH",
@@ -79,12 +121,76 @@ function TaskItem({ task, onDelete, onUpdate }) {
     <li
       className={`flex flex-col md:flex-row justify-between relative p-5 rounded-lg shadow-md transition-all duration-300 pl-4 border-l-8 border-l-yellow-600 text-sm sm:text-base ${
         statusColors[task.status] || "bg-white dark:bg-gray-700"
-      }`}
+      }
+        ${task.status === "Cancelled" && "opacity-25"}`}
     >
       <div>
         {/* Start Time (Top Left) */}
-        <span className="absolute top-0 left-0 text-sm p-1 bg-yellow-600 text-white rounded-br-xl">
-          {formatTime(task.startTime)} ({task.duration} minutes)
+        <span
+          className="absolute top-0 left-0 text-sm p-1 bg-yellow-600 text-white rounded-br-xl cursor-pointer flex items-center"
+          onDoubleClick={() => setEditingField("startTime")}
+        >
+          {editingField === "startTime" ? (
+            <div className="flex items-center gap-2 bg-yellow-700 p-1 rounded-lg shadow-md">
+              {/* Time Input */}
+              <input
+                type="time"
+                value={newStartTime}
+                onChange={(e) => setNewStartTime(e.target.value)}
+                className="bg-yellow-600 text-white outline-none px-2 py-1 rounded-md "
+                autoFocus
+              />
+
+              {/* Duration Select */}
+              <select
+                name="duration"
+                value={newDuration}
+                onChange={(e) => setNewDuration(e.target.value)}
+                className="bg-yellow-600 text-white px-2 py-1 rounded-md outline-none shadow-md"
+              >
+                {[5, 15, 30, 45, 60, 75, 90, 105, 120].map((minutes) => {
+                  const hours = minutes / 60;
+                  const label =
+                    minutes > 59
+                      ? `${parseInt(hours)} hr ${
+                          minutes % 60 ? ` ${minutes % 60} min` : ""
+                        }`
+                      : `${minutes} min`;
+                  return (
+                    <option key={minutes} value={minutes}>
+                      {label}
+                    </option>
+                  );
+                })}
+              </select>
+
+              {/* Tick Button (Save) */}
+              <button
+                onClick={() => {
+                  handleUpdateTask({ editingField: "startTime" });
+                }}
+                className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition"
+              >
+                ✔
+              </button>
+
+              {/* Close Button (Cancel) */}
+              <button
+                onClick={() => {
+                  setEditingField(null);
+                  setNewStartTime(task.startTime);
+                  setNewDuration(task.duration);
+                }} // Cancels editing
+                className="bg-red-400 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
+              >
+                ❌
+              </button>
+            </div>
+          ) : (
+            <span className="cursor-pointer bg-yellow-600 text-white rounded-md">
+              {formatTime(task.startTime)} ({task.duration} min)
+            </span>
+          )}
         </span>
 
         {/* End Time (Bottom Left) */}
@@ -168,7 +274,12 @@ function TaskItem({ task, onDelete, onUpdate }) {
         </button>
         <button
           className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-          onClick={handleUpdateTask}
+          onClick={(e) => handleUpdateTask({ e })}
+          onMouseDown={handleMouseDown}
+          onMouseUp={handleMouseUp}
+          onMouseLeave={handleMouseUp}
+          onTouchStart={handleMouseDown} // Mobile support
+          onTouchEnd={handleMouseUp} // Mobile support
         >
           {task.status}
         </button>

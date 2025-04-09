@@ -12,6 +12,7 @@ export async function AddOrUpdateTasks(task, id = null) {
   if (!token) {
     return { error: "Unauthorized request" };
   }
+  const uuid = uuidv4();
 
   const {
     title,
@@ -80,7 +81,6 @@ export async function AddOrUpdateTasks(task, id = null) {
         recurrenceYearDays = null;
       }
 
-      const uuid = uuidv4();
       
       await db.insert(recurringTasks).values({
         id: uuid,
@@ -105,6 +105,7 @@ export async function AddOrUpdateTasks(task, id = null) {
 
     } else {
       await db.insert(tasks).values({
+        id: uuid,
         owner: token.id,
         title: title,
         startTime: startTime,
@@ -115,7 +116,7 @@ export async function AddOrUpdateTasks(task, id = null) {
       });
     }
 
-    return { success: true };
+    return { success: true, id: uuid };
   } catch (error) {
     return {
       error: error.message || "Something Went Wrong",

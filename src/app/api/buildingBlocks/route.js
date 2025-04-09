@@ -22,11 +22,17 @@ export async function GET(req) {
         .where(and(eq(tasks.owner, token.id), isNull(tasks.duration)))
         .orderBy(tasks.createdAt);
 
+        
       return Response.json(
         ApiResponse.success(200, data, "Data fetched successfully"),
         { status: 200 }
       );
-    } else {
+    }
+   // return Response.json(
+      //   ApiResponse.success(200, data, "Data fetched successfully"),
+      //   { status: 200 }
+      // );
+     else {
       const data = await db
         .select()
         .from(tasks)
@@ -57,7 +63,9 @@ export async function GET(req) {
 export async function PATCH(req) {
   const secret = process.env.JWT_SECRET;
   const token = await getToken({ req, secret });
+
   const { startTime, duration, status, id } = await req.json();
+
 
   if (!token) {
     return Response.json(ApiResponse.error(401, "Unauthorized access"), {
@@ -71,32 +79,19 @@ export async function PATCH(req) {
     });
   }
 
-  // Updating startTime and duration
-  if (startTime && duration) {
-    try {
-      const updateResponse = await db
-        .update(tasks)
-        .set({ startTime: startTime, duration: duration })
-        .where(and(eq(tasks.id, id), eq(tasks.owner, token.id)));
-      return Response.json({ status: 200, message: "Update successful" });
-    }
-    catch (error) {
-      console.log(error);
-      return Response.json(
-        ApiResponse.error(500, "Error while updating Building Block "),
-        { status: 500 }
-      );
-    }
-  }
-  
-
   try {
     const updateResponse = await db
       .update(tasks)
-      .set({ status: status })
+      .set({ status: status, startTime: startTime, duration: duration })
       .where(and(eq(tasks.id, id), eq(tasks.owner, token.id)));
 
-    return Response.json({ status: 200, message: "Update successful" });
+    const updatedTask = await db.query.tasks.findFirst({
+      where: (task, { eq, and }) => and(eq(task.id, id), eq(tasks.owner, token.id))
+    })
+
+    return Response.json(
+      ApiResponse.success(200, updatedTask, "Updated Successfully")
+    );
   } catch (error) {
     console.log(error);
     return Response.json(

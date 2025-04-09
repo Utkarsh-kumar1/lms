@@ -2,9 +2,10 @@
 import { authOptions } from "@/app/api/auth/[...nextauth]/options";
 import { db } from "@/db/drizzle";
 import { recurringTasks, tasks, users } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { eq, sql } from "drizzle-orm";
 import { getServerSession } from "next-auth";
 import { revalidatePath } from "next/cache";
+const { v4: uuidv4 } = require("uuid");
 
 export async function AddOrUpdateTasks(task, id = null) {
   const token = await getServerSession(authOptions);
@@ -78,8 +79,11 @@ export async function AddOrUpdateTasks(task, id = null) {
         recurrenceMonthDays = null;
         recurrenceYearDays = null;
       }
+
+      const uuid = uuidv4();
       
       await db.insert(recurringTasks).values({
+        id: uuid,
         owner: token.id,
         title: title,
         startTime: startTime,
@@ -96,6 +100,9 @@ export async function AddOrUpdateTasks(task, id = null) {
         priority: priority,
         customCron: customCron || null,
       });
+
+      await db.execute(sql`CALL GenerateIfTodayRecurring(${uuid})`);
+
     } else {
       await db.insert(tasks).values({
         owner: token.id,

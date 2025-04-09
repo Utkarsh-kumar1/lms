@@ -25,7 +25,7 @@ const initialTaskState = {
   customCronDescription: "",
 };
 
-export default function AddTasks({ isOpen, onClose }) {
+export default function AddTasks({ isOpen, onClose}) {
   const [task, setTask] = useState(initialTaskState);
 
   const recurrenceOptions = ["Daily", "Weekly", "Monthly", "Yearly", "Custom"];
@@ -115,9 +115,7 @@ export default function AddTasks({ isOpen, onClose }) {
         task[key] = task[key].trim();
       }
     }
-    console.log("Task Submitted:", task);
     const { success, error } = await AddOrUpdateTasks(task);
-    console.log(success, error);
     clearStates();
     onClose();
   };

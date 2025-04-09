@@ -1,32 +1,126 @@
 "use client";
-import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
-import { Crown, Music, Star, Ellipsis, RefreshCw, Trash2, User, Zap, Trash, Pencil } from "lucide-react";
+import {
+  Crown,
+  Music,
+  Star,
+  Ellipsis,
+  RefreshCw,
+  Trash2,
+  User,
+  Zap,
+  Trash,
+  Pencil,
+} from "lucide-react";
 import axios from "axios";
 import { DeleteActivity } from "@/actions/DeleteActivity";
+import { set } from "zod";
+import { is } from "drizzle-orm";
 
 export const ActivityItem = ({ activity, reload }) => {
-  const [status, setStatus] = useState(activity.status);
+  const [updatedActivity, setUpdatedActivity] = useState(activity);
   const [isProcessing, setIsProcessing] = useState(false);
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [errors, setErrors] = useState({ deleteError: "" });
   const [lastUpdated, setLastUpdated] = useState(null);
-  const router = useRouter();
+  const [editingField, setEditingField] = useState(null);
+  const [timer, setTimer] = useState(null);
+  const [isLongPress, setIsLongPress] = useState(false);
 
-  useEffect(() => {
-    if (status !== activity.status) {
+  const handleMouseDown = () => {
+    setIsLongPress(false);
+    const newTimer = setTimeout(() => {
+      setUpdatedActivity((prev) => ({
+        ...prev,
+        status: "Cancelled",
+      }));
+      setIsLongPress(true);
+    }, 2000); // 2 second hold
+    setTimer(newTimer);
+  };
+
+  const handleMouseUp = (e) => {
+    if (timer) {
+      clearTimeout(timer); // Cancel if released early
+      setTimer(null);
+    }
+  };
+
+  const handleStatusChange = (e) => {
+    if (isLongPress) {
+      e.preventDefault();
+      return;
+    }
+    setUpdatedActivity((prev) => ({
+      ...prev,
+      status:
+        prev.status === "Pending"
+          ? "In Progress"
+          : prev.status === "In Progress"
+          ? "Completed"
+          : "Pending",
+    }));
+  };
+
+  const handleChange = (field, value) => {
+    if (field === "startTime") {
+      setUpdatedActivity((prev) => ({
+        ...prev,
+        [field]: value + ":00",
+      }));
+    } else if (field === "duration") {
+      setUpdatedActivity((prev) => ({
+        ...prev,
+        [field]: value,
+      }));
+    }
+  };
+
+  const handleSave = () => {
+    setEditingField(null);
+    // Check if activity and updatedActivity are different before sending a request
+
+    if (
+      activity.startTime !== updatedActivity.startTime ||
+      activity.duration !== updatedActivity.duration
+    ) {
+      setIsProcessing(true);
       axios
-        .patch(`/api/buildingBlocks`, { status, id: activity.id })
+        .patch(`/api/buildingBlocks`, {
+          startTime: updatedActivity.startTime,
+          duration: updatedActivity.duration,
+          id: updatedActivity.id,
+        })
         .then(() => {
           setLastUpdated(new Date());
-          router.refresh();
+          reload();
         })
         .catch(() => {
-          setStatus(activity.status);
+          setUpdatedActivity(activity);
+        })
+        .finally(() => setIsProcessing(false));
+    }
+  };
+
+  useEffect(() => {
+    if (activity.status !== updatedActivity.status) {
+      axios
+        .patch(`/api/buildingBlocks`, {
+          status: updatedActivity.status,
+          id: updatedActivity.id,
+        })
+        .then(() => {
+          setLastUpdated(new Date());
+          // router.refresh();
+        })
+        .catch(() => {
+          setUpdatedActivity((prev) => ({
+            ...prev,
+            status: prev.status,
+          }));
         });
     }
-    console.log("Activity", activity);
-  }, [status, activity.id, activity.status, router]);
+  }, [updatedActivity.status]);
 
   useEffect(() => {
     if (lastUpdated) {
@@ -35,18 +129,8 @@ export const ActivityItem = ({ activity, reload }) => {
     }
   }, [lastUpdated]);
 
-  const handleStatusChange = () => {
-    setStatus((prev) =>
-      prev === "Pending"
-        ? "In Progress"
-        : prev === "In Progress"
-        ? "Completed"
-        : "Pending"
-    );
-  };
-
   const handleDelete = async () => {
-    const id = activity.id;
+    const id = updatedActivity.id;
     try {
       const response = await axios.delete(`/api/buildingBlocks`, {
         data: { id },
@@ -54,8 +138,6 @@ export const ActivityItem = ({ activity, reload }) => {
       setIsModalOpen(false);
       // router.refresh();
       reload();
-      // console.log("Deleted successfully:", response.data);
-
     } catch (error) {
       // setErrors((prev) => ({
       //   ...prev,
@@ -67,11 +149,11 @@ export const ActivityItem = ({ activity, reload }) => {
 
   function addMinutes(time, minutesToAdd) {
     let [hours, minutes, seconds] = time.split(":").map(Number);
-    
+
     let date = new Date();
     date.setHours(hours, minutes + minutesToAdd, seconds);
 
-    return date.toTimeString().slice(0, 8); 
+    return date.toTimeString().slice(0, 8);
   }
 
   const formatDate = (date) =>
@@ -94,10 +176,10 @@ export const ActivityItem = ({ activity, reload }) => {
 
   const wasUpdatedRecently =
     lastUpdated && (new Date() - lastUpdated) / 1000 < 30;
-  
+
   // Function to determine the background color for status (applied to the entire card)
   const getStatusBgColor = () => {
-    switch (status) {
+    switch (updatedActivity.status) {
       case "Completed":
         return "bg-green-100 dark:bg-green-500";
       case "In Progress":
@@ -111,7 +193,7 @@ export const ActivityItem = ({ activity, reload }) => {
 
   // Function to determine the color for priority (applied to the priority label)
   const getPriorityBgColor = () => {
-    switch (activity.priority) {
+    switch (updatedActivity.priority) {
       case "High":
         return "bg-red-500 text-white";
       case "Medium":
@@ -125,16 +207,91 @@ export const ActivityItem = ({ activity, reload }) => {
 
   return (
     <div
-  className={`relative  py-4 pr-4 mb-3 rounded-lg shadow-sm transition-all duration-300  
-    ${getStatusBgColor()}
+      className={`relative  py-4 pr-4 mb-3 rounded-lg shadow-sm transition-all duration-300  
+    ${getStatusBgColor()}  ${
+        updatedActivity.status === "Cancelled" && "opacity-25"
+      }
 `}
-
->
+    >
       {/* Start Time (Top Left) */}
-      <span className="absolute top-0 left-0 text-sm p-1 bg-yellow-600 text-white rounded-tl-xl rounded-br-xl">{formatTime(activity.startTime)} ({activity.duration} minutes)</span>
+      <span
+        className="absolute top-0 left-0 text-sm p-1 bg-yellow-600 text-white rounded-tl-xl rounded-br-xl cursor-pointer flex items-center"
+        onDoubleClick={() => setEditingField("startTime")}
+      >
+        {editingField === "startTime" ? (
+          <div className="flex items-center gap-2 bg-yellow-700 p-1 rounded-lg shadow-md">
+            {/* Time Input */}
+            <input
+              type="time"
+              value={updatedActivity.startTime}
+              onChange={(e) => handleChange("startTime", e.target.value)}
+              className="bg-yellow-600 text-white outline-none px-2 py-1 rounded-md "
+              autoFocus
+            />
+
+            {/* Duration Select */}
+            <select
+              name="duration"
+              value={updatedActivity.duration}
+              onChange={(e) =>
+                handleChange("duration", parseInt(e.target.value, 10))
+              }
+              className="bg-yellow-600 text-white px-2 py-1 rounded-md outline-none shadow-md"
+            >
+              {[5, 15, 30, 45, 60, 75, 90, 105, 120].map((minutes) => {
+                const hours = minutes / 60;
+                const label =
+                  minutes > 59
+                    ? `${parseInt(hours)} hr ${
+                        minutes % 60 ? ` ${minutes % 60} min` : ""
+                      }`
+                    : `${minutes} min`;
+                return (
+                  <option key={minutes} value={minutes}>
+                    {label}
+                  </option>
+                );
+              })}
+            </select>
+
+            {/* Tick Button (Save) */}
+            <button
+              onClick={handleSave}
+              className="bg-green-500 text-white px-3 py-1 rounded-md hover:bg-green-600 transition"
+            >
+              ✔
+            </button>
+
+            {/* Close Button (Cancel) */}
+            <button
+              onClick={() => {
+                setEditingField(null);
+                setUpdatedActivity(activity);
+              }} // Cancels editing
+              className="bg-red-400 text-white px-3 py-1 rounded-md hover:bg-red-600 transition"
+            >
+              ❌
+            </button>
+          </div>
+        ) : (
+          <span className="cursor-pointer bg-yellow-600 text-white rounded-md">
+            {formatTime(updatedActivity.startTime)} ({updatedActivity.duration}{" "}
+            min)
+          </span>
+        )}
+      </span>
 
       {/* End Time (Bottom Left) */}
-      <span className="absolute bottom-0 left-0 text-sm  p-1 bg-yellow-600 text-white rounded-tr-xl rounded-bl-xl">{formatTime(addMinutes(activity.startTime, activity.duration)) }</span>
+      <span className="absolute bottom-0 left-0 flex gap-2 items-center text-sm  p-1 bg-yellow-600 text-white rounded-tr-xl rounded-bl-xl">
+        <div>
+          {formatTime(
+            addMinutes(updatedActivity.startTime, updatedActivity.duration)
+          )}
+        </div>
+        {updatedActivity.recurringTaskId && (
+          <RefreshCw className="w-3 h-3 text-white" title="Recurring Task" />
+        )}
+      </span>
 
       {/* Edit Button (Top Right) */}
       <button className="absolute top-0 right-0 bg-blue-300 text-white p-1 rounded-full shadow-md">
@@ -142,107 +299,114 @@ export const ActivityItem = ({ activity, reload }) => {
       </button>
 
       {/* Delete Button (Bottom Right) */}
-      <button className="absolute bottom-0 right-0 bg-red-300 text-white p-1 rounded-full shadow-md"
+      <button
+        className="absolute bottom-0 right-0 bg-red-300 text-white p-1 rounded-full shadow-md"
         onClick={() => setIsModalOpen(true)}
       >
         <Trash size={16} />
       </button>
-      
+
       <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center pl-4 border-l-4 border-l-yellow-600 ">
-      {/* Activity Details */}
-      <div className="flex flex-col flex-1 my-4 ">
-        <span className="text-gray-800 dark:text-gray-200 text-base sm:text-lg font-semibold">
-          {activity.title}
-        </span>
-        <span className="text-sm text-gray-500 dark:text-gray-400">
-          {activity.description}
-        </span>
-        {/* <div className="text-sm text-gray-500 dark:text-gray-400">
-          {formatTime(activity.startTime)}
-        </div>
-        <div className="text-sm text-gray-500 dark:text-gray-400">
-          Duration: {activity.duration} minutes
-        </div> */}
-        {activity.recurringTaskId && (
-
-        <div className="flex flex-wrap items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
-          <span className="mr-2">
-            Streak: {activity.streak} {activity.streak !== 0 ? "🔥" : ""}
-            </span>
-            
-
-          {activity.isBestStreak > 1 && (
-            <span className="bg-yellow-300 dark:bg-yellow-500 text-yellow-900 dark:text-yellow-100 px-2 py-1 rounded-full font-medium text-xs flex items-center">
-              <Star className="w-4 h-4 mr-1" />
-              Best Streak
-            </span>
-          )}
-          </div>
-        )}
-          
-      </div>
-
-      {/* Actions */}
-      <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mt-3 sm:mt-0 mr-6">
-      {activity.streak > 0 && (activity.streak <= 7 ?
-            
-            (<span className="bg-green-200 dark:bg-green-400 text-green-800 dark:text-green-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
-          <Zap className="w-5 h-5 mr-2 text-green-600 dark:text-green-200" />
-          Spark Phase
-          <span className="ml-1 font-normal text-xs bg-green-300 text-green-900 dark:bg-green-500 dark:text-green-100 px-2 py-0.5 rounded-full">
-            Days 1–7</span>
-          </span>)
-            
-            : activity.streak <= 28 ?
-
-           (<span className="bg-blue-200 dark:bg-blue-400 text-blue-800 dark:text-blue-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
-          <RefreshCw className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-200" />
-          Momentum Phase
-          <span className="ml-1 font-normal text-xs bg-blue-300 text-blue-900 dark:bg-blue-500 dark:text-blue-100 px-2 py-0.5 rounded-full">Week 2–4</span>
-          </span>) :
-
-              activity.streak <= 90 ?
-          
-                (<span className="bg-purple-200 dark:bg-purple-400 text-purple-800 dark:text-purple-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
-          <Music className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-200" />
-          Rhythm Phase
-          <span className="ml-1 font-normal text-xs bg-purple-300 text-purple-900 dark:bg-purple-500 dark:text-purple-100 px-2 py-0.5 rounded-full">Month 2–3</span>
-                </span>)
-                :
-                activity.streak <= 180 ?
-          
-          (<span className="bg-yellow-200 dark:bg-yellow-400 text-yellow-800 dark:text-yellow-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
-          <User className="w-5 h-5 mr-2 text-yellow-600 dark:text-yellow-200" />
-          Identity Phase
-          <span className="ml-1 font-normal text-xs bg-yellow-300 text-yellow-900 dark:bg-yellow-500 dark:text-yellow-100 px-2 py-0.5 rounded-full">Month 4–6</span>
-                  </span>)
-                  :
-                  
-          
-          (<span className="bg-red-200 dark:bg-red-400 text-red-800 dark:text-red-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
-          <Crown className="w-5 h-5 mr-2 text-red-600 dark:text-red-200" />
-          Mastery Phase
-          <span className="ml-1 font-normal text-xs bg-red-300 text-red-900 dark:bg-red-500 dark:text-red-100 px-2 py-0.5 rounded-full">6+ Months</span>
-          </span>))}
-        <button
-          className="w-full sm:w-auto px-3 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
-          onClick={handleStatusChange}
+        {/* updatedActivity Details */}
+        <div
+          className={`flex flex-col flex-1 my-4  ${
+            editingField === "startTime" && "mt-8"
+          } `}
         >
-          {status}
-        </button>
-        <span className={`w-full sm:w-auto px-3 py-1 text-sm font-semibold text-white ${getPriorityBgColor()} rounded-lg text-center`}>
-          Priority: {activity.priority}
-        </span>
-        {/* <button onClick={() => setIsModalOpen(true)} className="text-white">
+          <span className="text-gray-800 dark:text-gray-200 text-base sm:text-lg font-semibold">
+            {updatedActivity.title}
+          </span>
+          <span className="text-sm text-gray-500 dark:text-gray-400">
+            {updatedActivity.description}
+          </span>
+          
+          {updatedActivity.recurringTaskId && (
+            <div className="flex flex-wrap items-center mt-1 text-sm text-gray-500 dark:text-gray-400">
+              <span className="mr-2">
+                Streak: {updatedActivity.streak}{" "}
+                {updatedActivity.streak !== 0 ? "🔥" : ""}
+              </span>
+
+              {updatedActivity.isBestStreak > 1 && (
+                <span className="bg-yellow-300 dark:bg-yellow-500 text-yellow-900 dark:text-yellow-100 px-2 py-1 rounded-full font-medium text-xs flex items-center">
+                  <Star className="w-4 h-4 mr-1" />
+                  Best Streak
+                </span>
+              )}
+            </div>
+          )}
+        </div>
+
+        {/* Actions */}
+        <div className="flex flex-col sm:flex-row items-start sm:items-center gap-2 sm:gap-4 mb-6 sm:mb-0 mr-6">
+          {updatedActivity.streak > 0 &&
+            (updatedActivity.streak <= 7 ? (
+              <span className="bg-green-200 dark:bg-green-400 text-green-800 dark:text-green-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
+                <Zap className="w-5 h-5 mr-2 text-green-600 dark:text-green-200" />
+                Spark Phase
+                <span className="ml-1 font-normal text-xs bg-green-300 text-green-900 dark:bg-green-500 dark:text-green-100 px-2 py-0.5 rounded-full">
+                  Days 1–7
+                </span>
+              </span>
+            ) : updatedActivity.streak <= 28 ? (
+              <span className="bg-blue-200 dark:bg-blue-400 text-blue-800 dark:text-blue-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
+                <RefreshCw className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-200" />
+                Momentum Phase
+                <span className="ml-1 font-normal text-xs bg-blue-300 text-blue-900 dark:bg-blue-500 dark:text-blue-100 px-2 py-0.5 rounded-full">
+                  Week 2–4
+                </span>
+              </span>
+            ) : updatedActivity.streak <= 90 ? (
+              <span className="bg-purple-200 dark:bg-purple-400 text-purple-800 dark:text-purple-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
+                <Music className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-200" />
+                Rhythm Phase
+                <span className="ml-1 font-normal text-xs bg-purple-300 text-purple-900 dark:bg-purple-500 dark:text-purple-100 px-2 py-0.5 rounded-full">
+                  Month 2–3
+                </span>
+              </span>
+            ) : updatedActivity.streak <= 180 ? (
+              <span className="bg-yellow-200 dark:bg-yellow-400 text-yellow-800 dark:text-yellow-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
+                <User className="w-5 h-5 mr-2 text-yellow-600 dark:text-yellow-200" />
+                Identity Phase
+                <span className="ml-1 font-normal text-xs bg-yellow-300 text-yellow-900 dark:bg-yellow-500 dark:text-yellow-100 px-2 py-0.5 rounded-full">
+                  Month 4–6
+                </span>
+              </span>
+            ) : (
+              <span className="bg-red-200 dark:bg-red-400 text-red-800 dark:text-red-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
+                <Crown className="w-5 h-5 mr-2 text-red-600 dark:text-red-200" />
+                Mastery Phase
+                <span className="ml-1 font-normal text-xs bg-red-300 text-red-900 dark:bg-red-500 dark:text-red-100 px-2 py-0.5 rounded-full">
+                  6+ Months
+                </span>
+              </span>
+            ))}
+          <button
+            className="w-full sm:w-auto px-3 py-1 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+            onClick={handleStatusChange}
+            onMouseDown={handleMouseDown}
+            onMouseUp={handleMouseUp}
+            onMouseLeave={handleMouseUp}
+            onTouchStart={handleMouseDown} // Mobile support
+            onTouchEnd={handleMouseUp} // Mobile support
+          >
+            {updatedActivity.status}
+          </button>
+          <span
+            className={`w-full sm:w-auto px-3 py-1 text-sm font-semibold text-white ${getPriorityBgColor()} rounded-lg text-center`}
+          >
+            Priority: {updatedActivity.priority}
+          </span>
+          {/* <button onClick={() => setIsModalOpen(true)} className="text-white">
           <Trash2 className="w-5 h-5 text-red-500" />
         </button> */}
-      </div>
-
-      {wasUpdatedRecently && (
-        <div className="flex items-center justify-center gap-1 absolute bottom-2 right-2 text-xs text-gray-500 dark:text-gray-400">
-          <Ellipsis /> <div>Updated just now</div>
         </div>
-      )}
+
+        {wasUpdatedRecently && (
+          <div className="flex items-center justify-center gap-1 absolute bottom-0 right-8 text-xs text-gray-500 dark:text-gray-400">
+            <Ellipsis /> <div>Updated just now</div>
+          </div>
+        )}
       </div>
 
       {/* Delete Confirmation Modal */}

@@ -6,6 +6,7 @@ import { ChevronLeft, ChevronRight, Plus } from "lucide-react";
 import AddTasks from "./AddTasks";
 
 export default function BuildingBlocks() {
+  const [showMore, setShowMore] = useState(false);
   const [buildingBlocks, setBuildingBlocks] = useState([]);
   const [isPopupVisible, setPopupVisible] = useState(false);
   const [refreshData, setRefreshData] = useState(false);
@@ -42,6 +43,11 @@ export default function BuildingBlocks() {
     };
     fetchBuildingBlocks();
   }, [refreshData, date]);
+
+  // update refreshData state using function props
+  const handleRefresh = () => {
+    setRefreshData((prev) => !prev);
+  };
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
@@ -135,6 +141,56 @@ export default function BuildingBlocks() {
           />
         ))}
       </div>
+
+      {/* Heading and Show More Button for Streak Details */}
+      <div className="flex items-center gap-2 m-2">
+        <h3 className="text-xs font-semibold text-gray-900 dark:text-gray-100">
+          Habit Timeline
+        </h3>
+        <button
+          onClick={() => setShowMore(!showMore)}
+          className="text-blue-500 hover:underline text-[9px]"
+        >
+          {showMore ? "Show Less" : "Show More"}
+        </button>
+      </div>
+
+      {/* Streak */}
+      {showMore && (
+        <div className="text-sm space-y-1 m-2">
+        <div>
+          <span className=" text-green-600 dark:text-green-400">
+            Spark (Days 1–7):
+          </span>{" "}
+          Start small to ignite change
+        </div>
+        <div>
+          <span className=" text-blue-600 dark:text-blue-400">
+            Momentum (Week 2–4):
+          </span>{" "}
+          Build consistency with tiny wins
+        </div>
+        <div>
+          <span className=" text-purple-600 dark:text-purple-400">
+            Rhythm (Month 2–3):
+          </span>{" "}
+          Integrate habits into your flow
+        </div>
+        <div>
+          <span className=" text-yellow-600 dark:text-yellow-400">
+            Identity (Month 4–6):
+          </span>{" "}
+          Become the person your habits reflect
+        </div>
+        <div>
+          <span className=" text-red-600 dark:text-red-400">
+            Mastery (6+ Months):
+          </span>{" "}
+          Expand and reinforce lasting success
+        </div>
+      </div>
+      
+      )}
     </div>
   );
 }

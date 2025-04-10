@@ -12,7 +12,7 @@ import { authOptions } from "./api/auth/[...nextauth]/options";
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "LMS",
+  title: "Ignify",
   description: "Goals Management System",
   head: (
     <>

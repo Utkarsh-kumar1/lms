@@ -150,6 +150,7 @@ export default function TaskList({ initialTasks }) {
   return (
     <>
       <div className="flex flex-col sm:flex-row  w-full  justify-items-end items-center space-x-4">
+        {/* Date change section */}
         <div className="mx-2 w-full">
           <div className="flex items-center justify-center sm:justify-between space-x-4 rounded-lg">
             <div className="flex items-center justify-between space-x-4">
@@ -186,7 +187,8 @@ export default function TaskList({ initialTasks }) {
             </div>
           </div>
         </div>
-        <div className="flex w-full h-11 justify-end items-center space-x-4">
+        <div className="flex h-11 justify-end items-center space-x-4 overflow-x-scroll max-w-full ">
+          {/* Showing count based on status for today's tasks */}
           {tasks.filter((task) => task.status === "Pending").length > 0 ? (
             <div
               className={`flex items-center justify-center gap-2 ${

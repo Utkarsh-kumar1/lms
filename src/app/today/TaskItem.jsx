@@ -4,6 +4,12 @@ import { confirmAction } from "@/components/ConfirmAction";
 import { Crown, Music, RefreshCw, Trash, User, Zap } from "lucide-react";
 import { useState } from "react";
 import { set } from "zod";
+import {
+  FaHourglassStart,
+  FaSpinner,
+  FaCheckCircle,
+  FaTimesCircle,
+} from "react-icons/fa";
 
 function TaskItem({ task, onDelete, onUpdate }) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -24,6 +30,8 @@ function TaskItem({ task, onDelete, onUpdate }) {
     "In Progress": "bg-yellow-100 dark:bg-yellow-500",
     Pending: "bg-gray-100 dark:bg-gray-500",
   };
+
+  const getTextColor = (bgColor) => bgColor?.replace(/bg-/g, "text-");
 
   const handleMouseDown = () => {
     setIsLongPress(false);
@@ -194,8 +202,11 @@ function TaskItem({ task, onDelete, onUpdate }) {
         </span>
 
         {/* End Time (Bottom Left) */}
-        <span className="absolute bottom-0 left-0 text-sm p-1 bg-yellow-600 text-white rounded-tr-xl ">
-          {formatTime(task.startTime, task.duration)}
+        <span className="absolute bottom-0 left-0 flex gap-2 items-center text-sm  p-1 bg-yellow-600 text-white rounded-tr-xl ">
+          <div>{formatTime(task.startTime, task.duration)}</div>
+          {task.recurringTaskId && (
+            <RefreshCw className="w-3 h-3 text-white" title="Recurring Task" />
+          )}
         </span>
 
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center ">
@@ -273,7 +284,10 @@ function TaskItem({ task, onDelete, onUpdate }) {
           {task.priority} Priority
         </button>
         <button
-          className="px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600"
+          className={`px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 flex items-center gap-1 ${
+            getTextColor(statusColors[task.status]) ||
+            "text-green-100 dark:text-gray-700"
+          } `}
           onClick={(e) => handleUpdateTask({ e })}
           onMouseDown={handleMouseDown}
           onMouseUp={handleMouseUp}
@@ -281,7 +295,19 @@ function TaskItem({ task, onDelete, onUpdate }) {
           onTouchStart={handleMouseDown} // Mobile support
           onTouchEnd={handleMouseUp} // Mobile support
         >
-          {task.status}
+          <div className={``}>
+            {task.status === "In Progress" ? (
+              <FaSpinner title="In Progress" />
+            ) : task.status === "Completed" ? (
+              <FaCheckCircle title="Completed" />
+            ) : task.status === "Pending" ? (
+              <FaHourglassStart title="Pending" />
+            ) : (
+              <FaTimesCircle title="Cancelled" />
+            )}
+          </div>
+
+          <div>{task.status}</div>
         </button>
         <button
           className="text-red-500 hover:text-red-700"

@@ -187,7 +187,7 @@ export default function TaskList({ initialTasks }) {
             </div>
           </div>
         </div>
-        <div className="flex h-11 justify-end items-center space-x-4 overflow-x-scroll max-w-full ">
+        <div className="flex h-11 justify-end items-center space-x-4  max-w-full ">
           {/* Showing count based on status for today's tasks */}
           {tasks.filter((task) => task.status === "Pending").length > 0 ? (
             <div

@@ -7,7 +7,7 @@ import { and, eq, isNotNull, isNull, lte, ne } from "drizzle-orm";
 export async function GET(req) {
   const secret = process.env.JWT_SECRET;
   const token = await getToken({ req, secret });
-  const today = req.nextUrl.searchParams.get("today");
+  const today = req.nextUrl.searchParams.get("date");
   if (!token) {
     return Response.json(ApiResponse.error(401, "Unauthorized access"), {
       status: 401,

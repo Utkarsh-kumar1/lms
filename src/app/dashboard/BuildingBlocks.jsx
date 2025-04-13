@@ -32,7 +32,7 @@ export default function BuildingBlocks() {
     const fetchBuildingBlocks = async () => {
       try {
         const { data } = await axios.get("/api/buildingBlocks", {
-          params: { today },
+          params: { date: today },
         });
         // const data = await response.json()
         setBuildingBlocks(data.data);

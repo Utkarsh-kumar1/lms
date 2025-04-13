@@ -115,7 +115,7 @@ export default function TaskInput({ isOpen, onClose }) {
         task[key] = task[key].trim();
       }
     }
-    console.log("Task Submitted:", task);
+    // console.log("Task Submitted:", task);
     const { success, id, error } = await AddOrUpdateTasks(task);
     clearStates();
     const newTask = {

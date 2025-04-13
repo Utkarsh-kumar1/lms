@@ -22,6 +22,7 @@ import {
 } from "react-icons/fa";
 
 const actionTypes = {
+  SET_TASKS: "SET_TASKS",
   ADD_TASKS: "ADD_TASKS",
   UPDATE_TASK: "UPDATE_TASK",
   DELETE_TASK: "DELETE_TASK",
@@ -31,6 +32,9 @@ const actionTypes = {
 // Reducer function
 const reducer = (tasks, action) => {
   switch (action.type) {
+    case actionTypes.SET_TASKS:
+      return action.payload;
+
     case actionTypes.ADD_TASKS:
       return [...tasks, action.payload];
 
@@ -74,7 +78,7 @@ const reducer = (tasks, action) => {
   }
 };
 
-export default function TaskList({ initialTasks }) {
+export default function TaskList({ initialTasks, changeDate }) {
   const [tasks, dispatch] = useReducer(reducer, initialTasks);
   const [inputTask, setInputTask] = useState(false);
   const [showScheduledAndRecuring, setShowScheduledAndRecuring] =
@@ -97,13 +101,17 @@ export default function TaskList({ initialTasks }) {
     Cancelled: "text-red-500",
   };
 
-  const changeDate = (days) => {
+  const setChangeDate = (days) => {
     setDate((prev) => {
       const newDate = new Date(prev);
       newDate.setDate(prev.getDate() + days);
       return newDate;
     });
   };
+
+  useEffect(() => {
+    changeDate(date);
+  }, [date]);
 
   const isToday = () => {
     const today = new Date();
@@ -114,6 +122,8 @@ export default function TaskList({ initialTasks }) {
     );
   };
 
+  const onSetTasks = (tasks) =>
+    dispatch({ type: actionTypes.SET_TASKS, payload: tasks });
   const onAdd = (task) =>
     dispatch({ type: actionTypes.ADD_TASKS, payload: task });
   const onUpdate = (task) =>
@@ -122,11 +132,13 @@ export default function TaskList({ initialTasks }) {
     dispatch({ type: actionTypes.DELETE_TASK, payload: task });
 
   useEffect(() => {
+    if (!initialTasks) return;
+    dispatch({ type: actionTypes.SET_TASKS, payload: initialTasks });
     dispatch({
       type: actionTypes.SORT,
       payload: { key: sortBy, ascending: sortingAsc },
     });
-  }, [sortingAsc, sortBy]);
+  }, [sortingAsc, sortBy, initialTasks]);
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);
@@ -156,7 +168,7 @@ export default function TaskList({ initialTasks }) {
             <div className="flex items-center justify-between space-x-4">
               {/* Left Arrow */}
               <button
-                onClick={() => changeDate(-1)}
+                onClick={() => setChangeDate(-1)}
                 className="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
               >
                 <ChevronLeft />
@@ -169,7 +181,7 @@ export default function TaskList({ initialTasks }) {
 
               {/* Right Arrow */}
               <button
-                onClick={() => changeDate(1)}
+                onClick={() => setChangeDate(1)}
                 className="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
               >
                 <ChevronRight />
@@ -189,7 +201,7 @@ export default function TaskList({ initialTasks }) {
         </div>
         <div className="flex h-11 justify-end items-center space-x-4  max-w-full ">
           {/* Showing count based on status for today's tasks */}
-          {tasks.filter((task) => task.status === "Pending").length > 0 ? (
+          {tasks?.filter((task) => task.status === "Pending").length > 0 ? (
             <div
               className={`flex items-center justify-center gap-2 ${
                 textStatusColors["Pending"] ||
@@ -197,13 +209,13 @@ export default function TaskList({ initialTasks }) {
               }`}
             >
               <FaHourglassStart title="Pending" />
-              {tasks.filter((task) => task.status === "Pending").length}
+              {tasks?.filter((task) => task.status === "Pending").length}
             </div>
           ) : (
             <></>
           )}
 
-          {tasks.filter((task) => task.status === "In Progress").length > 0 ? (
+          {tasks?.filter((task) => task.status === "In Progress").length > 0 ? (
             <div
               className={`flex items-center justify-center gap-2 ${
                 textStatusColors["In Progress"] ||
@@ -211,13 +223,13 @@ export default function TaskList({ initialTasks }) {
               }`}
             >
               <FaSpinner title="In Progress" />
-              {tasks.filter((task) => task.status === "In Progress").length}
+              {tasks?.filter((task) => task.status === "In Progress").length}
             </div>
           ) : (
             <></>
           )}
 
-          {tasks.filter((task) => task.status === "Completed").length > 0 ? (
+          {tasks?.filter((task) => task.status === "Completed").length > 0 ? (
             <div
               className={`flex items-center justify-center gap-2 ${
                 textStatusColors["Completed"] ||
@@ -225,13 +237,13 @@ export default function TaskList({ initialTasks }) {
               }`}
             >
               <FaCheckCircle title="Completed" />
-              {tasks.filter((task) => task.status === "Completed").length}
+              {tasks?.filter((task) => task.status === "Completed").length}
             </div>
           ) : (
             <></>
           )}
 
-          {tasks.filter((task) => task.status === "Cancelled").length > 0 ? (
+          {tasks?.filter((task) => task.status === "Cancelled").length > 0 ? (
             <div
               className={`flex items-center justify-center gap-2 ${
                 textStatusColors["Cancelled"] ||
@@ -239,7 +251,7 @@ export default function TaskList({ initialTasks }) {
               }`}
             >
               <FaTimesCircle title="Cancelled" />
-              {tasks.filter((task) => task.status === "Cancelled").length}
+              {tasks?.filter((task) => task.status === "Cancelled").length}
             </div>
           ) : (
             <></>
@@ -286,7 +298,7 @@ export default function TaskList({ initialTasks }) {
       </div>
 
       <div className="mt-4">
-        {tasks.length > 0 ? (
+        {tasks?.length > 0 ? (
           <ul className="space-y-2">
             {tasks.map((task) => (
               <TaskItem

@@ -24,7 +24,7 @@ export async function GetRecuringAndSceduledList() {
         });
 
 
-        console.log(recurringTasks);
+        // console.log(recurringTasks);
 
         return { success: true, data: recurringTasks }
 

@@ -1,26 +1,41 @@
-import { db } from "@/db/drizzle";
-import React from "react";
-import TaskList from "./TaskList";
-import { getServerSession } from "next-auth";
-import { authOptions } from "../api/auth/[...nextauth]/options";
+"use client";
 
-async function Today() {
-  const token = await getServerSession(authOptions)
-  const tasks = await db.query.tasks.findMany({
-    where: (task, { eq, and }) =>
-      and(
-        eq(task.owner, token.id),
-        eq(task.dueDate, new Date().toISOString().split("T")[0])
-      ),
-    orderBy: (task, { asc }) => asc(task.startTime),
-  });
+import { useEffect, useState } from "react";
+import TaskList from "./TaskList";
+import axios from "axios";
+
+function Today({ token }) {
+  const [tasks, setTasks] = useState([]);
+  const [selectedDate, setSelectedDate] = useState(new Date());
+
+  useEffect(() => {
+    // Fetch building blocks
+    const date = selectedDate.toISOString().split("T")[0];
+
+    const fetchBuildingBlocks = async () => {
+      try {
+        const { data } = await axios.get("/api/buildingBlocks", {
+          params: { date },
+        });
+        // const data = await response.json()
+        setTasks(data.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchBuildingBlocks();
+  }, [selectedDate]);
+  // console.log(token.id);
 
   return (
     <div className="w-full h-full rounded-md p-4">
       {/* Header */}
 
       {/* Tasks Section */}
-      <TaskList initialTasks={tasks} />
+      <TaskList
+        initialTasks={tasks}
+        changeDate={(newDate) => setSelectedDate(newDate)}
+      />
     </div>
   );
 }

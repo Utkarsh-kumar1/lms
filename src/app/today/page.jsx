@@ -1,13 +1,17 @@
-import React from "react";
+import { getServerSession } from "next-auth";
 import Today from "./Today";
+import { authOptions } from "../api/auth/[...nextauth]/options";
 
 
 
-export default function Page() {
+export default async function Page() {
+  const token = await getServerSession(authOptions)
+
   return (
     <div>
       {/* tasks section */}
-      <Today/>
+      {/* {console.log("MY token",token)} */}
+      <Today token={token} />
       
     </div>
   );

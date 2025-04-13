@@ -3,7 +3,7 @@ import Dashboard from "./Dashboard";
 import { authOptions } from "../api/auth/[...nextauth]/options";
 import { db } from "@/db/drizzle";
 import { asc, isNull, or, sql } from "drizzle-orm";
-import { microPlanner, quotes } from "@/db/schema";
+import { quotes } from "@/db/schema";
 
 async function fetchChartLineData(id) {
   // Fetch activities and revisions for the last 6 days for chart data

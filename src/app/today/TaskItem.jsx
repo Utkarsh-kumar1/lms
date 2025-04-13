@@ -112,6 +112,7 @@ function TaskItem({ task, onDelete, onUpdate }) {
       onUpdate(response.data.data[0]); // Update the task in the parent component
     } catch (error) {
       console.error(error);
+      alert("Error: " + error.message);
     } finally {
       setIsProcessing(false);
     }

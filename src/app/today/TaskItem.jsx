@@ -3,13 +3,13 @@
 import { confirmAction } from "@/components/ConfirmAction";
 import { Crown, Music, RefreshCw, Trash, User, Zap } from "lucide-react";
 import { useState } from "react";
-import { set } from "zod";
 import {
   FaHourglassStart,
   FaSpinner,
   FaCheckCircle,
   FaTimesCircle,
 } from "react-icons/fa";
+import api from "@/axios";
 
 function TaskItem({ task, onDelete, onUpdate }) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -49,7 +49,20 @@ function TaskItem({ task, onDelete, onUpdate }) {
     }
   };
 
+  // Return true if the task is older than 7 days
+  const canNotEdit = (date2) => {
+    const timeDifference = new Date() - date2;
+    const daysDifference = Math.floor(timeDifference / (1000 * 60 * 60 * 24));
+    return daysDifference > 7; // Allow editing if the task is not more than 7 days old
+  };
+
   const handleUpdateTask = async ({ editingField, e = null }) => {
+    // Check if dueDate of the task is not more than 7 days ago
+
+    if (canNotEdit(new Date(task.dueDate))) {
+      return;
+    }
+
     setIsProcessing(true);
     try {
       var updatedTask = {};
@@ -82,12 +95,20 @@ function TaskItem({ task, onDelete, onUpdate }) {
         };
       }
 
-      const response = await fetch("/api/buildingBlocks", {
-        method: "PATCH",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify(updatedTask),
+      const updatedTaskWithExtra = {
+        ...updatedTask,
+        oldStatus: task.status,
+        userId: task.owner,
+      };
+
+      const response = await api.patch("updateTask", updatedTaskWithExtra, {
+        headers: {
+          "Content-Type": "application/json",
+        },
       });
-      onUpdate((await response.json()).data);
+
+      // const result = await response.json();
+      onUpdate(response.data.data[0]); // Update the task in the parent component
     } catch (error) {
       console.error(error);
     } finally {
@@ -287,6 +308,10 @@ function TaskItem({ task, onDelete, onUpdate }) {
           className={`px-4 py-2 text-white bg-blue-500 rounded-lg hover:bg-blue-600 flex items-center gap-1 ${
             getTextColor(statusColors[task.status]) ||
             "text-green-100 dark:text-gray-700"
+          } ${
+            !canNotEdit(new Date(task.dueDate))
+              ? " "
+              : "opacity-70 cursor-default"
           } `}
           onClick={(e) => handleUpdateTask({ e })}
           onMouseDown={handleMouseDown}
@@ -307,7 +332,7 @@ function TaskItem({ task, onDelete, onUpdate }) {
             )}
           </div>
 
-          <div>{task.status}</div>
+          <div className={` `}>{task.status}</div>
         </button>
         <button
           className="text-red-500 hover:text-red-700"

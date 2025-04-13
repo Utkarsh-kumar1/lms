@@ -13,9 +13,9 @@ export default function Dashboard({ userData }) {
         <Quotes quote={userData?.quote?.[0]} />
       </div>
 
-      <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-3 sm:p-6">
+      {/* <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-3 sm:p-6">
         <BuildingBlocks />
-      </div>
+      </div> */}
       
       {/* <div className="bg-white dark:bg-gray-900 shadow-md rounded-lg p-3 sm:p-6">
         <MicroPlanner userData={userData.microPlannerTasks} />

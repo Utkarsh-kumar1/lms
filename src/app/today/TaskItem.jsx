@@ -58,6 +58,8 @@ function TaskItem({ task, onDelete, onUpdate }) {
 
   const handleUpdateTask = async ({ editingField, e = null }) => {
     // Check if dueDate of the task is not more than 7 days ago
+    alert("Error should be logged");
+
 
     if (canNotEdit(new Date(task.dueDate))) {
       return;
@@ -111,6 +113,7 @@ function TaskItem({ task, onDelete, onUpdate }) {
       onUpdate(response.data.data[0]); // Update the task in the parent component
     } catch (error) {
       console.error(error);
+      alert("Error: " + error.message);
     } finally {
       setIsProcessing(false);
     }

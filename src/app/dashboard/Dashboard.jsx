@@ -3,7 +3,6 @@ import React from "react";
 
 import ChartLine from "./ChartLine";
 import Quotes from "./Quotes";
-import BuildingBlocks from "./BuildingBlocks";
 
 export default function Dashboard({ userData }) {
   return (

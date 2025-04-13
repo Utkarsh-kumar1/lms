@@ -19,6 +19,7 @@ export async function middleware(req) {
 
     if (!token && (
         url.pathname.startsWith('/dashboard') ||
+        url.pathname.startsWith('/today') ||
         url.pathname.startsWith('/activity') ||
         url.pathname.startsWith('/subTopics') ||
         url.pathname.startsWith('/topics') ||
@@ -34,18 +35,18 @@ export async function middleware(req) {
 }
 
 // Middleware matcher
-export const config = {
-    matcher: [
-        '/sign-in',
-        '/sign-up',
-        '/',
-        '/dashboard/:path*',
-        '/verify/:path*',
-        '/subjects/:path*',
-        '/courses/:path*',
-        '/topic/:path*',
-        '/subTopics/:path*',
-        '/revision',
-        '/activity'
-    ],
-};
+// export const config = {
+//     matcher: [
+//         '/sign-in',
+//         '/sign-up',
+//         '/',
+//         '/dashboard/:path*',
+//         '/verify/:path*',
+//         '/subjects/:path*',
+//         '/courses/:path*',
+//         '/topic/:path*',
+//         '/subTopics/:path*',
+//         '/revision',
+//         '/activity'
+//     ],
+// };

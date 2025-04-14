@@ -9,7 +9,6 @@ config({ path: ".env.local" }); // or .env.local
 const SocketContext = createContext(null);
 export const useSocket = () => useContext(SocketContext);
 
-// const SOCKET_URL = "http://localhost:5000"; // ✅ Use correct port
 
 export const SocketProvider = ({ children }) => {
   const { data: session, status } = useSession();

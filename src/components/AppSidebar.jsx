@@ -238,7 +238,11 @@ export function AppSidebar() {
                   </DropdownMenuItem>
                   <DropdownMenuItem className="hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 px-4 py-2 flex items-center">
                     <button
-                      onClick={() => signOut()}
+                      onClick={() => {
+                        // Trigger a custom logout event
+                        window.dispatchEvent(new Event("logout"));
+                        signOut();
+                      }}
                       className="flex items-center text-gray-300 hover:text-red-400 transition-colors duration-200 w-full"
                     >
                       <LogOutIcon className="mr-3 w-5 h-5 text-red-500" />

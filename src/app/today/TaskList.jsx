@@ -118,15 +118,16 @@ export default function TaskList({ initialTasks, changeDate }) {
   }, [date]);
 
   useEffect(() => {
-    console.log("In Tasklist socket", socket);
+    // console.log("In Tasklist socket", socket);
     if (socket) {
       socket.on('taskUpdated', (data) => {
-        console.log("getting update from websocket", data.updatedTask);
+        // console.log("getting update from websocket", data.updatedTask);
         onUpdate(data.updatedTask[0]);
       });
 
       return () => {
-        // socket.off('taskUpdated');
+        // console.log("Cleaning up socket listener for taskUpdated");
+        socket.off('taskUpdated');
       };
     }
   }, [socket]);

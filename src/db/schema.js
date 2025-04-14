@@ -285,6 +285,7 @@ export const userData = mysqlTable("userData", {
 export const users = mysqlTable("users", {
 	id: char("id", { length: 36 }).notNull().$defaultFn(() => uuidv4()),
 	created: timestamp("created", { mode: 'string' }).defaultNow().notNull(),
+	lastUpdated: timestamp("lastUpdated", { mode: 'string' }).defaultNow().notNull().onUpdateNow(),
 	username: varchar("username", { length: 255 }).notNull(),
 	email: varchar("email", { length: 255 }).notNull(),
 	firstName: varchar("firstName", { length: 255 }).notNull(),

@@ -9,7 +9,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
 } from "react-icons/fa";
-import api from "@/axios";
+import api from "../../axios";
 
 function TaskItem({ task, onDelete, onUpdate }) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -109,7 +109,7 @@ function TaskItem({ task, onDelete, onUpdate }) {
       });
 
       // const result = await response.json();
-      onUpdate(response.data.data[0]); // Update the task in the parent component
+      // onUpdate(response.data.data[0]); // Update the task in the parent component
     } catch (error) {
       console.error(error);
     } finally {

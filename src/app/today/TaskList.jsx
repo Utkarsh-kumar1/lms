@@ -20,6 +20,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
 } from "react-icons/fa";
+import { useSocket } from "@/context/SocketContext";
 
 const actionTypes = {
   SET_TASKS: "SET_TASKS",
@@ -88,6 +89,8 @@ export default function TaskList({ initialTasks, changeDate }) {
   const [date, setDate] = useState(new Date());
   const [showMore, setShowMore] = useState(false);
 
+  const socket = useSocket();
+
   // Todo: statusColors and getTextColor can be reused from TaskItem
   const statusColors = {
     Completed: "bg-green-100 dark:bg-green-500",
@@ -113,6 +116,20 @@ export default function TaskList({ initialTasks, changeDate }) {
   useEffect(() => {
     changeDate(date);
   }, [date]);
+
+  useEffect(() => {
+    console.log("In Tasklist socket", socket);
+    if (socket) {
+      socket.on('taskUpdated', (data) => {
+        console.log("getting update from websocket", data.updatedTask);
+        onUpdate(data.updatedTask[0]);
+      });
+
+      return () => {
+        // socket.off('taskUpdated');
+      };
+    }
+  }, [socket]);
 
   const isToday = () => {
     const today = new Date();

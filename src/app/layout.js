@@ -8,6 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeProvider } from "@/context/theme-provider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/options";
+import { SocketProvider } from "@/context/SocketContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
@@ -30,7 +31,6 @@ export const metadata = {
 
 export default async function RootLayout({ children }) {
   const session = await getServerSession(authOptions);
-  
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -43,16 +43,18 @@ export default async function RootLayout({ children }) {
           disableTransitionOnChange
         >
           <AuthProvider>
-            <SidebarProvider defaultOpen={false}>
-              {session && <AppSidebar />}
-              <main className=" w-full min-h-screen flex flex-col   bg-gray-100  dark:bg-gray-800">
-                <Header />
+            <SocketProvider>
+              <SidebarProvider defaultOpen={false}>
+                {session && <AppSidebar />}
+                <main className=" w-full min-h-screen flex flex-col   bg-gray-100  dark:bg-gray-800">
+                  <Header />
 
-                {children}
-              </main>
-            </SidebarProvider>
+                  {children}
+                </main>
+              </SidebarProvider>
 
-            <Toaster />
+              <Toaster />
+            </SocketProvider>
           </AuthProvider>
         </ThemeProvider>
       </body>

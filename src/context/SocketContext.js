@@ -11,7 +11,6 @@ const SOCKET_URL = "http://localhost:5000"; // ✅ Use correct port
 export const SocketProvider = ({ children }) => {
   const { data: session, status } = useSession();
   const socketRef = useRef(null);
-  const [socket, setSocket] = useState(null);
 
   useEffect(() => {
     // Avoid multiple connections
@@ -21,12 +20,11 @@ export const SocketProvider = ({ children }) => {
         path: "/socket.io",
       });
 
-      socketRef.current = socketInstance;
-
+      
       socketInstance.on("connect", () => {
         console.log("✅ Socket connected:", socketInstance.id);
         socketInstance.emit("register", session.id);
-        setSocket(socketInstance);
+        socketRef.current = socketInstance;
       });
 
       socketInstance.on("connect_error", (err) => {
@@ -34,18 +32,15 @@ export const SocketProvider = ({ children }) => {
       });
 
       socketInstance.on("disconnect", (reason) => {
+        socketRef.current = null;
         console.log("🔌 Socket disconnected:", reason);
       });
 
-      // return () => {
-      //   console.log("🧹 Cleaning up socket connection");
-      //   socketInstance.disconnect();
-      // };
     }
   }, [session, status]);
 
   return (
-    <SocketContext.Provider value={socket}>
+    <SocketContext.Provider value={socketRef.current}>
       {children}
     </SocketContext.Provider>
   );

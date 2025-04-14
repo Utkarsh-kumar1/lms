@@ -8,7 +8,7 @@ import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeProvider } from "@/context/theme-provider";
 import { getServerSession } from "next-auth";
 import { authOptions } from "./api/auth/[...nextauth]/options";
-import { SocketProvider } from "@/SocketContext";
+import { SocketProvider } from "@/context/SocketContext";
 
 const inter = Inter({ subsets: ["latin"] });
 

@@ -20,7 +20,7 @@ import {
   FaCheckCircle,
   FaTimesCircle,
 } from "react-icons/fa";
-import { useSocket } from "@/SocketContext";
+import { useSocket } from "@/context/SocketContext";
 
 const actionTypes = {
   SET_TASKS: "SET_TASKS",
@@ -126,7 +126,7 @@ export default function TaskList({ initialTasks, changeDate }) {
       });
 
       return () => {
-        socket.off('taskUpdated');
+        // socket.off('taskUpdated');
       };
     }
   }, [socket]);

@@ -3,7 +3,7 @@ import Mindmap from './Mindmap'
 
 export default function Page() {
   return (
-    <div>
+    <div className='w-full h-full'>
       <Mindmap />
     </div>
   )

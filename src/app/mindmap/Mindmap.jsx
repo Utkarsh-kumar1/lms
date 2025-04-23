@@ -7,7 +7,7 @@ import Toolbar from "../../components/Toolabar";
 
 export default function Mindmap() {
   const centerX = window.innerWidth / 2 - 60; // 60 is half of the width of the rectangle
-const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the rectangle
+  const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the rectangle
 
   const [rectangles, setRectangles] = useState([
     {
@@ -111,8 +111,9 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
 
   useEffect(() => {
     reflowLayout();
-  }, [layout]);
+  }, [layout, rectangles]);
 
+  // To update the flow view
   const reflowLayout = () => {
     const newRects = [...rectangles];
     const rootRects = newRects.filter((r) => r.parentId === null);
@@ -138,7 +139,12 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
       updateChildren(root);
     });
 
-    setRectangles(newRects);
+    console.log("refreshing");
+    // Only update if layout has changed
+    if (JSON.stringify(newRects) !== JSON.stringify(rectangles)) {
+      setRectangles(newRects);
+      console.log("refreshing really");
+    }
   };
 
   const handleAddRectangle = (parentId) => {
@@ -193,9 +199,9 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       >
-        <Layer>
-          {/* Background Grid */}
-          {/* {[...Array(200)].map((_, i) => (
+        {/* <Layer> */}
+        {/* Background Grid */}
+        {/* {[...Array(200)].map((_, i) => (
             <Line
               key={"v" + i}
               points={[i * 50, 0, i * 50, 10000]}
@@ -211,7 +217,7 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
               strokeWidth={1}
             />
           ))} */}
-        </Layer>
+        {/* </Layer> */}
 
         <Layer>
           {rectangles.map((rect) => {
@@ -239,19 +245,18 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
 
                 //   setRectangles(updated);
                 // }}
-                
-                // TODO: Implement targeted UI reflesh to counter laggy redenring                
+
+                // TODO: Implement targeted UI reflesh to counter laggy redenring
                 onDragMove={(e) => {
                   const newX = e.target.x();
                   const newY = e.target.y();
-              
+
                   setRectangles((prev) =>
                     prev.map((r) =>
                       r.id === rect.id ? { ...r, x: newX, y: newY } : r
                     )
                   );
                 }}
-
                 onMouseEnter={() => {
                   setRectangles((prev) =>
                     prev.map((r) =>

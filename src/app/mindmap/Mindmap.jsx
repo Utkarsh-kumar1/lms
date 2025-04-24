@@ -2,13 +2,10 @@
 "use client";
 
 import React, { useState, useRef, useEffect } from "react";
-import { Stage, Layer, Rect, Text, Line, Group } from "react-konva";
+import { Stage, Layer, Rect, Text, Line, Group, Path } from "react-konva";
 import Toolbar from "../../components/Toolabar";
 
 export default function Mindmap() {
-  const centerX = window.innerWidth / 2 - 60; // 60 is half of the width of the rectangle
-const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the rectangle
-
   const [rectangles, setRectangles] = useState([
     {
       id: "1",
@@ -21,6 +18,39 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
       isHovered: false,
       parentId: null,
     },
+    {
+      id: "2",
+      text: "Start",
+      x: 100,
+      y: 400,
+      width: 120,
+      height: 60,
+      fill: "#e0f2fe",
+      isHovered: false,
+      parentId: "1",
+    },
+    {
+      id: "4",
+      text: "Start",
+      x: 100,
+      y: 400,
+      width: 120,
+      height: 60,
+      fill: "#e0f2fe",
+      isHovered: false,
+      parentId: "1",
+    },
+    {
+      id: "3",
+      text: "Start",
+      x: 100,
+      y: 400,
+      width: 120,
+      height: 60,
+      fill: "#e0f2fe",
+      isHovered: false,
+      parentId: "1",
+    },
   ]);
   const [selectedId, setSelectedId] = useState(null);
   const stageRef = useRef(null);
@@ -32,6 +62,8 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
   const [layout, setLayout] = useState("horizontal");
   const [mode, setMode] = useState("edit");
   const [tool, setTool] = useState(""); // Optional: for UI feedback
+
+  const subtreeSizes = new Map();
 
   const handleToolSelect = (selected) => {
     switch (selected) {
@@ -110,33 +142,133 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
   };
 
   useEffect(() => {
+    if (layout === "horizontal")
+      setPosition({
+        x: 0,
+        y: 200,
+      });
+    else {
+      setPosition({
+        y: 0,
+        x: 500,
+      });
+    }
+
     reflowLayout();
   }, [layout]);
 
+  useEffect(() => {
+    reflowLayout();
+  }, [rectangles.length]);
+
   const reflowLayout = () => {
     const newRects = [...rectangles];
-    const rootRects = newRects.filter((r) => r.parentId === null);
+    subtreeSizes.clear(); // reset map
 
-    const updateChildren = (parent, level = 0) => {
-      const children = newRects.filter((r) => r.parentId === parent.id);
-      children.forEach((child, index) => {
-        if (layout === "horizontal") {
-          child.x = parent.x + parent.width + 100;
-          child.y = parent.y + index * (parent.height + spacing);
-        } else {
-          child.x = parent.x + index * (parent.width + spacing);
-          child.y = parent.y + parent.height + 100;
-        }
-        updateChildren(child, level + 1);
-      });
-    };
+    const roots = newRects.filter((r) => r.parentId === null);
 
-    rootRects.forEach((root, rootIndex) => {
-      // You can optionally reposition roots too
-      root.x = 50 + (layout === "horizontal" ? 0 : rootIndex * 200);
-      root.y = 50 + (layout === "horizontal" ? rootIndex * 150 : 0);
-      updateChildren(root);
+    roots.forEach((root) => measureSubtree(root));
+
+    roots.forEach((root, i) => {
+      const rootSize = subtreeSizes.get(root.id);
+      const x =
+        layout === "horizontal" ? 100 : 100 + i * (rootSize.width + 150);
+      const y =
+        layout === "horizontal" ? 100 + i * (rootSize.height + 150) : 100;
+      positionSubtree(root, x, y);
     });
+
+    setRectangles(newRects);
+  };
+
+  const measureSubtree = (node) => {
+    const children = rectangles.filter((r) => r.parentId === node.id);
+    if (children.length === 0) {
+      const size = { width: node.width, height: node.height };
+      subtreeSizes.set(node.id, size);
+      return size;
+    }
+
+    let totalWidth = 0;
+    let totalHeight = 0;
+
+    const childSizes = children.map((child) => {
+      const size = measureSubtree(child);
+      if (layout === "horizontal") {
+        totalHeight += size.height + spacing;
+        totalWidth = Math.max(totalWidth, size.width);
+      } else {
+        totalWidth += size.width + spacing;
+        totalHeight = Math.max(totalHeight, size.height);
+      }
+      return size;
+    });
+
+    if (layout === "horizontal") totalHeight -= spacing;
+    else totalWidth -= spacing;
+
+    const size = { width: totalWidth, height: totalHeight };
+    subtreeSizes.set(node.id, size);
+    return size;
+  };
+
+  const positionSubtree = (node, x, y) => {
+    node.x = x;
+    node.y = y;
+
+    const children = rectangles.filter((r) => r.parentId === node.id);
+    if (children.length === 0) return;
+
+    let offsetX = x;
+    let offsetY = y;
+
+    const parentSize = subtreeSizes.get(node.id);
+
+    if (layout === "horizontal") {
+      offsetX += node.width + 100;
+      offsetY -= parentSize.height / 2;
+    } else {
+      offsetY += node.height + 100;
+      offsetX -= parentSize.width / 2;
+    }
+
+    children.forEach((child) => {
+      const size = subtreeSizes.get(child.id);
+      if (layout === "horizontal") {
+        positionSubtree(child, offsetX, offsetY + size.height / 2);
+        offsetY += size.height + spacing;
+      } else {
+        positionSubtree(child, offsetX + size.width / 2, offsetY);
+        offsetX += size.width + spacing;
+      }
+    });
+  };
+
+  const centerLayout = () => {
+    if (!stageRef.current || rectangles.length === 0) return;
+
+    const stage = stageRef.current;
+    const stageWidth = stage.width();
+    const stageHeight = stage.height();
+
+    const padding = 50;
+
+    const minX = Math.min(...rectangles.map((r) => r.x));
+    const maxX = Math.max(...rectangles.map((r) => r.x + r.width));
+    const minY = Math.min(...rectangles.map((r) => r.y));
+    const maxY = Math.max(...rectangles.map((r) => r.y + r.height));
+
+    const contentWidth = maxX - minX;
+    const contentHeight = maxY - minY;
+
+    const offsetX = (stageWidth - contentWidth) / 2 - minX + padding;
+    const offsetY = (stageHeight - contentHeight) / 2 - minY + padding;
+
+    const newRects = rectangles.map((rect) => ({
+      ...rect,
+      x: rect.x + offsetX,
+      y: rect.y + offsetY,
+    }));
 
     setRectangles(newRects);
   };
@@ -178,6 +310,7 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
         onToolSelect={handleToolSelect}
         layout={layout}
         mode={mode}
+        centerLayout={centerLayout}
       />
 
       <Stage
@@ -193,26 +326,6 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
         onMouseMove={handleMouseMove}
         onMouseUp={handleMouseUp}
       >
-        <Layer>
-          {/* Background Grid */}
-          {/* {[...Array(200)].map((_, i) => (
-            <Line
-              key={"v" + i}
-              points={[i * 50, 0, i * 50, 10000]}
-              stroke="#eee"
-              strokeWidth={1}
-            />
-          ))}
-          {[...Array(200)].map((_, i) => (
-            <Line
-              key={"h" + i}
-              points={[0, i * 50, 10000, i * 50]}
-              stroke="#eee"
-              strokeWidth={1}
-            />
-          ))} */}
-        </Layer>
-
         <Layer>
           {rectangles.map((rect) => {
             const isSelected = rect.id === selectedId;
@@ -239,19 +352,18 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
 
                 //   setRectangles(updated);
                 // }}
-                
-                // TODO: Implement targeted UI reflesh to counter laggy redenring                
+
+                // TODO: Implement targeted UI reflesh to counter laggy redenring
                 onDragMove={(e) => {
                   const newX = e.target.x();
                   const newY = e.target.y();
-              
+
                   setRectangles((prev) =>
                     prev.map((r) =>
                       r.id === rect.id ? { ...r, x: newX, y: newY } : r
                     )
                   );
                 }}
-
                 onMouseEnter={() => {
                   setRectangles((prev) =>
                     prev.map((r) =>
@@ -284,8 +396,9 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
                   align="center"
                   verticalAlign="middle"
                 />
-                {mode === "edit" && rect.isHovered && (
+                {mode === "edit" && (
                   <Group
+                    // className={rect.isHovered ? "hidden" : "block"}
                     x={
                       layout === "vertical"
                         ? rect.width / 2 - 10
@@ -297,9 +410,10 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
                         : rect.height / 2 - 10
                     }
                     onClick={(e) => {
-                      handleAddRectangle(rect.id);
                       e.cancelBubble = true;
+                      handleAddRectangle(rect.id);
                     }}
+                    visible={rect.isHovered}
                   >
                     <Rect
                       width={20}
@@ -327,26 +441,28 @@ const centerY = window.innerHeight / 2 - 30; // 30 is half of the height of the 
             const parent = rectangles.find((p) => p.id === child.parentId);
             if (!parent) return null;
             return (
-              <Line
-                key={child.id + "-line"}
-                points={
+              <Path
+                key={child.id + "-path"}
+                data={
                   layout === "vertical"
-                    ? [
-                        parent.x + parent.width / 2,
-                        parent.y + parent.height,
-                        child.x + child.width / 2,
-                        child.y,
-                      ]
-                    : [
-                        parent.x + parent.width,
-                        parent.y + parent.height / 2,
-                        child.x,
-                        child.y + child.height / 2,
-                      ]
+                    ? `M ${parent.x + parent.width / 2},${
+                        parent.y + parent.height
+                      }
+         Q ${child.x + child.width / 2},${
+                        (parent.y + parent.height + child.y) / 2
+                      }
+           ${child.x + child.width / 2},${child.y}`
+                    : `M ${parent.x + parent.width},${
+                        parent.y + parent.height / 2
+                      }
+         Q ${(parent.x + parent.width + child.x) / 2},${
+                        child.y + child.height / 2
+                      }
+           ${child.x},${child.y + child.height / 2}`
                 }
                 stroke="#888"
                 strokeWidth={2}
-                // dash={[4, 2]}
+                fill="transparent"
               />
             );
           })}

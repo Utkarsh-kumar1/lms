@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { MdOutlineFilterCenterFocus } from "react-icons/md";
 import {
   Undo2,
   Rows3,
@@ -8,7 +9,7 @@ import {
 } from "lucide-react";
 import { cn } from "@/lib/utils";
 
-export default function Toolbar({ onToolSelect, activeTool, layout, mode }) {
+export default function Toolbar({ onToolSelect, activeTool, layout, mode, centerLayout }) {
   const tools = [
     // { name: "recenter", icon: Undo2, tooltip: "Recenter" },
     {
@@ -21,6 +22,11 @@ export default function Toolbar({ onToolSelect, activeTool, layout, mode }) {
       icon: mode === "edit" ? Pencil : Eye,
       tooltip: `Switch to ${mode === "edit" ? "View" : "Edit"} Mode`,
     },
+    // {
+    //   name: "centerLayout",
+    //   icon: MdOutlineFilterCenterFocus,
+    //   tooltip: "Center chart",
+    // }
   ];
 
   return (

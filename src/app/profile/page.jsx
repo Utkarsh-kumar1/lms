@@ -1,5 +1,5 @@
 "use client";
-import { UserRound } from "lucide-react";
+import { LoaderCircle, UserRound } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
 
@@ -7,6 +7,11 @@ function ProfilePage() {
   const [profile, setProfile] = useState(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState(null);
+  const [editMode, setEditMode] = useState(false);
+  const [editableReps, setEditableReps] = useState([]);
+  const [originalReps, setOriginalReps] = useState([]);
+
+
 
   useEffect(() => {
     const fetchProfile = async () => {
@@ -15,8 +20,10 @@ function ProfilePage() {
         const data = await response.json();
         console.log(data);
         
-        if (data.success) setProfile(data.data);
-        else setError(data.message);
+       if (data.success) {
+         setProfile(data.data);
+         setEditableReps(data.data.spaceRepetition || []);
+       } else setError(data.message);
       } catch {
         setError("An error occurred while fetching the profile.");
       } finally {
@@ -27,8 +34,51 @@ function ProfilePage() {
     fetchProfile();
   }, []);
 
+  const startEditing = () => {
+    setOriginalReps([...editableReps]); // save a copy
+    setEditMode(true);
+  };
+
+  const cancelEditing = () => {
+    setEditableReps([...originalReps]); // restore original
+    setEditMode(false);
+  };
+
+  const addNewGap = () => {
+    setEditableReps([...editableReps, editableReps[editableReps.length - 1] + 1]);
+  };
+
+  const saveSpacedRepetition = async () => {
+    try {
+      const response = await fetch("/api/spaceRepetation", {
+        method: "POST",
+        body : JSON.stringify({ spaceRepetation: editableReps }),
+        headers: {
+          "Content-Type": "application/json",
+        },
+      });
+      const data = await response.json();
+      if (data.success) {
+        setProfile((prev) => ({ ...prev, spaceRepetition: editableReps }));
+        setOriginalReps([...editableReps]); // save the new state as original
+      } else {
+        setError(data.message);
+      }
+      setEditMode(false);
+
+    }
+    catch(error){
+      console.error("Error saving spaced repetition:", error);
+      setError("An error occurred while saving the spaced repetition.");
+    }
+  }
+
   if (loading)
-    return <div className="text-center text-gray-500">Loading...</div>;
+    return (
+      <div className="text-center text-gray-500  w-full h-full flex items-center justify-center">
+        <LoaderCircle className=" animate-spin" />
+      </div>
+    );
   if (error) return <div className="text-center text-red-500">{error}</div>;
 
   return (
@@ -102,26 +152,90 @@ function ProfilePage() {
               {profile.activityScheduleCount}
             </p>
             <div className="text-gray-700 mb-2">
-              <span className="font-medium block mb-1">
-                📈 Spaced Repetition Journey:
-              </span>
-              {Array.isArray(profile.spaceRepetition) &&
-              profile.spaceRepetition.length > 0 ? (
-                <div className="flex flex-wrap gap-2 mt-2">
-                  {profile.spaceRepetition.map((gap, index) => (
-                    <div
-                      key={index}
-                      className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm shadow-sm hover:bg-blue-200 transition"
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  📈 Spaced Repetition Journey:
+                </h2>
+                <div className="flex gap-4 mt-4">
+                  {editMode ? (
+                    <>
+                      <button
+                        onClick={addNewGap}
+                        className="text-sm text-green-600 hover:underline"
+                      >
+                        ➕ Add Revision Gap
+                      </button>
+                      <button
+                        onClick={saveSpacedRepetition}
+                        className="text-sm text-blue-600 hover:underline"
+                      >
+                        💾 Save
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        className="text-sm text-gray-600 hover:underline"
+                      >
+                        ❌ Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={startEditing}
+                      className="text-sm text-blue-600 hover:underline"
                     >
-                      <span className="text-gray-600">{gap}d + </span>
-                      <span className="font-semibold">Rev {index + 1}</span>
+                      ✏️ Edit
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {editMode ? (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {editableReps.map((gap, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        value={gap}
+                        onChange={(e) => {
+                          const updated = [...editableReps];
+                          updated[index] = parseInt(e.target.value) || 0;
+                          setEditableReps(updated);
+                        }}
+                        className="w-20 px-3 py-1 rounded-full border text-sm shadow focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      />
+                      <span className="text-gray-500 text-sm">
+                        Rev {index + 1}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const updated = [...editableReps];
+                          updated.splice(index, 1);
+                          setEditableReps(updated);
+                        }}
+                        className="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        ❌
+                      </button>
                     </div>
                   ))}
                 </div>
               ) : (
-                <p className="text-gray-500 ml-1">
-                  No revision data available.
-                </p>
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {editableReps.length > 0 ? (
+                    editableReps.map((gap, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm shadow-sm"
+                      >
+                        <span className="text-gray-600">{gap}d +</span>
+                        <span className="font-semibold">Rev {index + 1}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No revision data available.</p>
+                  )}
+                </div>
               )}
             </div>
           </div>

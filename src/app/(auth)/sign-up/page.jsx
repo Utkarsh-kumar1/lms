@@ -25,11 +25,19 @@ export default function ProfileForm() {
   
 
   return (
-    <Card className=" w-[18rem] sm:w-[30rem]">
-      <CardHeader>
-        <CardTitle>{isOtpSended ? "Submit OTP" : "Sign Up"}</CardTitle>
+    <Card className="w-full max-w-sm sm:max-w-md rounded-xl bg-white/30 dark:bg-gray-900/80 backdrop-blur-xl shadow-2xl border border-white/50 dark:border-gray-700 transition-all">
+      <CardHeader className="text-center py-3">
+        <CardTitle className="text-xl sm:text-2xl font-bold text-gray-900 dark:text-white">
+          {isOtpSended ? "Enter OTP" : "Create an Account"}
+        </CardTitle>
+        <p className="text-sm text-gray-700 dark:text-gray-300">
+          {isOtpSended
+            ? "We’ve sent a verification code to your email."
+            : "Start your productivity journey with Ignify."}
+        </p>
       </CardHeader>
-      <CardContent>
+
+      <CardContent className="px-5 py-2 sm:px-6">
         <div className="transition-opacity duration-1000 ease-in">
           {!isOtpSended && (
             <Suspense fallback={<SkeletonFallback />}>
@@ -49,7 +57,16 @@ export default function ProfileForm() {
           )}
         </div>
       </CardContent>
-      <CardFooter>{/* Add any footer content here if needed */}</CardFooter>
+
+      <CardFooter className="flex flex-col items-center gap-2 py-1 text-sm text-gray-700 dark:text-gray-300">
+        <span>Already have an account?</span>
+        <a
+          href="/sign-in"
+          className="text-blue-600 hover:underline dark:text-blue-400 font-medium"
+        >
+          Login here
+        </a>
+      </CardFooter>
     </Card>
   );
 }

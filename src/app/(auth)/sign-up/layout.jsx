@@ -9,7 +9,7 @@ export const metadata = {
 
 export default function SignUp({ children }) {
   return (
-    <div className=" w-full h-full  flex items-center justify-center">
+    <div className="w-full h-full flex items-center justify-center dark:bg-gray-900 bg-[url(/bgSignIn.svg)] bg-cover bg-no-repeat bg-center">
       {children}
     </div>
   );

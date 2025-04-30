@@ -14,7 +14,7 @@ export async function AddOrUpdateTasks(task, id = null) {
   }
   const uuid = uuidv4();
 
-  const {
+  let {
     title,
     startTime,
     duration,

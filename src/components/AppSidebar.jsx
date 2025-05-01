@@ -68,12 +68,12 @@ export function AppSidebar() {
       icon: IoTodayOutline,
       isActive: status === "authenticated",
     },
-    {
-      name: "MindMap",
-      url: "/mindmap",
-      icon: Brain,
-      isActive: status === "authenticated",
-    },
+    // {
+    //   name: "MindMap",
+    //   url: "/mindmap",
+    //   icon: Brain,
+    //   isActive: status === "authenticated",
+    // },
     {
       name: "Activity",
       url: "/activity",
@@ -98,18 +98,18 @@ export function AppSidebar() {
       icon: BookIcon,
       isActive: status === "authenticated",
     },
-    {
-      name: "Topics",
-      url: "/topics",
-      icon: BookIcon,
-      isActive: status === "authenticated",
-    },
-    {
-      name: "Sub Topics",
-      url: "/subTopics",
-      icon: BookIcon,
-      isActive: status === "authenticated",
-    },
+    // {
+    //   name: "Topics",
+    //   url: "/topics",
+    //   icon: BookIcon,
+    //   isActive: status === "authenticated",
+    // },
+    // {
+    //   name: "Sub Topics",
+    //   url: "/subTopics",
+    //   icon: BookIcon,
+    //   isActive: status === "authenticated",
+    // },
     {
       name: "Home",
       url: "/",

@@ -1,7 +1,16 @@
 "use client";
 import React, { useState } from "react";
 import clsx from "clsx";
-import { X, Check, Pencil, Trash2, FilePlus2, NotebookPen } from "lucide-react";
+import {
+  X,
+  Check,
+  Pencil,
+  Trash2,
+  FilePlus2,
+  NotebookPen,
+  Minus,
+  Plus,
+} from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import { DeleteCourse } from "@/actions/DeleteCourse";
@@ -16,11 +25,41 @@ const CourseCard = ({ course, subjectId }) => {
     fileError: "",
     savingError: "",
     deletionError: "",
+    repsArrError: "",
   });
   const [isProcessing, setIsProcessing] = useState(false);
   const [isDeleteModalOpen, setIsDeleteModalOpen] = useState(false);
   const [wantRevision, setwantRevision] = useState(course.wantRevision);
   const [isActive, setIsActive] = useState(course.isActive);
+  const [scheduleCount, setScheduleCount] = useState(
+    course.activityScheduleCount
+  );
+  const [editMode, setEditMode] = useState(false);
+  const [editableReps, setEditableReps] = useState(course.spaceRepetition);
+  const [originalReps, setOriginalReps] = useState(course.spaceRepetition);
+
+  const startEditing = () => {
+    setOriginalReps([...editableReps]); // save a copy
+    setEditMode(true);
+  };
+
+  const cancelEditing = () => {
+    setEditableReps([...originalReps]); // restore original
+    setEditMode(false);
+  };
+
+  const addNewGap = () => {
+   
+      if (editableReps.length <= 0) {
+        setEditableReps([1]); // start with 1 day gap if no gaps exist
+        return;
+      }
+    
+    setEditableReps([
+      ...editableReps,
+      editableReps[editableReps.length - 1] + 1,
+    ]);
+  };
 
   const router = useRouter();
 
@@ -42,7 +81,9 @@ const CourseCard = ({ course, subjectId }) => {
     if (
       course.courseName !== newCourseName ||
       isActive !== course.isActive ||
-      wantRevision != course.wantRevision
+      wantRevision != course.wantRevision ||
+      scheduleCount != course.scheduleCount ||
+      JSON.stringify(originalReps) != JSON.stringify(editableReps)
     ) {
       reqArray.push(
         axios.patch("/api/updateCourse", {
@@ -50,6 +91,8 @@ const CourseCard = ({ course, subjectId }) => {
           newCourseName,
           isActive,
           wantRevision,
+          spaceRepetition: editableReps,
+          activityScheduleCount : scheduleCount,
         })
       );
     }
@@ -188,6 +231,19 @@ const CourseCard = ({ course, subjectId }) => {
             <button
               className="absolute top-4 right-4 text-gray-500 dark:text-gray-400 hover:text-gray-800 dark:hover:text-gray-300"
               onClick={() => {
+                //reset the changes
+                setNewCourseName(course.courseName);
+                setFile(null);
+                setErrors({
+                  fileError: "",
+                  savingError: "",
+                  deletionError: "",
+                });
+                setIsActive(course.isActive);
+                setwantRevision(course.wantRevision);
+                setScheduleCount(course.activityScheduleCount);
+                setIsDeleteModalOpen(false);
+
                 if (!isProcessing) {
                   setIsEditing(false);
                 }
@@ -261,6 +317,114 @@ const CourseCard = ({ course, subjectId }) => {
                 />
                 Do You Want Revision
               </label>
+            </div>
+            <div className="mb-4 flex items-center gap-3 text-sm sm:text-base">
+              <p className="text-gray-800 dark:text-gray-200 font-medium">
+                Schedule Count:
+              </p>
+
+              <button
+                onClick={() =>
+                  setScheduleCount((pre) => (pre > 0 ? pre - 1 : 0))
+                }
+                className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                aria-label="Decrease count"
+              >
+                <Minus className="w-4 h-4 text-gray-800 dark:text-white" />
+              </button>
+
+              <span className="px-4 text-lg font-semibold text-gray-800 dark:text-gray-100">
+                {scheduleCount}
+              </span>
+
+              <button
+                onClick={() => setScheduleCount((pre) => pre + 1)}
+                className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
+                aria-label="Increase count"
+              >
+                <Plus className="w-4 h-4 text-gray-800 dark:text-white" />
+              </button>
+            </div>
+            <div className="text-gray-700 mb-2">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold text-gray-800">
+                  📈 Spaced Repetition Journey:
+                </h2>
+                <div className="flex gap-4 mt-4">
+                  {editMode ? (
+                    <>
+                      <button
+                        onClick={addNewGap}
+                        className="text-sm text-green-600 hover:underline"
+                      >
+                        ➕ Add Revision Gap
+                      </button>
+                      <button
+                        onClick={cancelEditing}
+                        className="text-sm text-gray-600 hover:underline"
+                      >
+                        ❌ Cancel
+                      </button>
+                    </>
+                  ) : (
+                    <button
+                      onClick={startEditing}
+                      className="text-sm text-blue-600 hover:underline"
+                    >
+                      ✏️ Edit
+                    </button>
+                  )}
+                </div>
+              </div>
+
+              {editMode ? (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {editableReps.map((gap, index) => (
+                    <div key={index} className="flex items-center gap-2">
+                      <input
+                        type="number"
+                        min={1}
+                        value={gap}
+                        onChange={(e) => {
+                          const updated = [...editableReps];
+                          updated[index] = parseInt(e.target.value) || 0;
+                          setEditableReps(updated);
+                        }}
+                        className="w-20 px-3 py-1 rounded-full border text-sm shadow focus:outline-none focus:ring-2 focus:ring-blue-300"
+                      />
+                      <span className="text-gray-500 text-sm">
+                        Rev {index + 1}
+                      </span>
+                      <button
+                        onClick={() => {
+                          const updated = [...editableReps];
+                          updated.splice(index, 1);
+                          setEditableReps(updated);
+                        }}
+                        className="text-red-500 hover:text-red-700 text-sm"
+                      >
+                        ❌
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              ) : (
+                <div className="flex flex-wrap gap-2 mt-2">
+                  {editableReps.length > 0 ? (
+                    editableReps.map((gap, index) => (
+                      <div
+                        key={index}
+                        className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm shadow-sm"
+                      >
+                        <span className="text-gray-600">{gap}d +</span>
+                        <span className="font-semibold">Rev {index + 1}</span>
+                      </div>
+                    ))
+                  ) : (
+                    <p className="text-gray-500">No revision data available.</p>
+                  )}
+                </div>
+              )}
             </div>
 
             {errors.fileError && (

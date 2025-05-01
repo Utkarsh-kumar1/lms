@@ -44,7 +44,7 @@ export default function ProfileForm() {
       description: response.ok ? "Sign In Successfully" : response.error,
     });
     if (response.ok) {
-      router.push("/dashboard");
+      router.refresh();
     }
   }
 

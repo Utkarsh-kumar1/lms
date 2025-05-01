@@ -57,81 +57,121 @@ export default function SignUpForm({ setIsOtpSended, FormData, setFormData }) {
   }
 
   return (
-    <Form {...form} >
+    <Form {...form}>
       <form
         onSubmit={form.handleSubmit(onSubmit)}
-        className=" space-y-4 md:space-y-6 "
+        className=" px-2 sm:px-4 py-4 "
       >
         <FormField
           control={form.control}
           name="firstName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>First Name</FormLabel>
+              <FormLabel className="text-sm font-semibold text-gray-800 dark:text-gray-200 ">
+                First Name
+              </FormLabel>
               <FormControl>
-                <Input placeholder="First Name" {...field} />
+                <Input
+                  className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-400"
+                  placeholder="First Name"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="lastName"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>last Name</FormLabel>
+              <FormLabel className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                Last Name
+              </FormLabel>
               <FormControl>
-                <Input placeholder="lastName" {...field} />
+                <Input
+                  className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-400"
+                  placeholder="Last Name"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="username"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Username</FormLabel>
+              <FormLabel className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                Username
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Username" {...field} />
+                <Input
+                  className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-400"
+                  placeholder="Username"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="email"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Email</FormLabel>
+              <FormLabel className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                Email
+              </FormLabel>
               <FormControl>
-                <Input placeholder="sample@gmail.com" {...field} />
+                <Input
+                  className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-400"
+                  placeholder="sample@gmail.com"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
+
         <FormField
           control={form.control}
           name="password"
           render={({ field }) => (
             <FormItem>
-              <FormLabel>Password</FormLabel>
+              <FormLabel className="text-sm font-semibold text-gray-800 dark:text-gray-200">
+                Password
+              </FormLabel>
               <FormControl>
-                <Input placeholder="Password" type="password" {...field} />
+                <Input
+                  type="password"
+                  className="rounded-xl border border-gray-300 dark:border-gray-700 bg-white/80 dark:bg-gray-800 placeholder-gray-400 dark:placeholder-gray-500 focus:ring-2 focus:ring-indigo-400"
+                  placeholder="Password"
+                  {...field}
+                />
               </FormControl>
               <FormMessage />
             </FormItem>
           )}
         />
-        <Button className="bg-indigo-500" type="submit" disabled={isLogging}>
+
+        <Button
+          className="w-full bg-indigo-600 hover:bg-indigo-700 transition text-white py-2 rounded-xl shadow-md font-semibold text-sm mt-5 "
+          type="submit"
+          disabled={isLogging}
+        >
           {isLogging ? (
             <>
               <svg
-                className="animate-spin h-5 w-5 mr-3 text-white"
+                className="animate-spin h-5 w-5 mr-2 text-white"
                 xmlns="http://www.w3.org/2000/svg"
                 fill="none"
                 viewBox="0 0 24 24"

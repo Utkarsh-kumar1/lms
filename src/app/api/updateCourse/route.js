@@ -13,11 +13,22 @@ export async function PATCH(req) {
     const {
         newCourseName: courseName,
         id, isActive,
-        wantRevision } = await req.json();
+        wantRevision,
+        spaceRepetition,
+        activityScheduleCount } = await req.json();
+
+    console.log(courseName,
+        id, isActive,
+        wantRevision,
+        spaceRepetition,
+        activityScheduleCount);
+
 
     if (!courseName && !id) {
         return Response.json(ApiResponse.error(400, "newCourseName and course Id is requried"), { status: 401 });
-
+    }
+    if (spaceRepetition != null && !Array.isArray(spaceRepetition)) {
+        return Response.json(ApiResponse.error(400, "spaceRepetation should be an array"), { status: 400 });
     }
 
     try {
@@ -26,7 +37,7 @@ export async function PATCH(req) {
                 subjects: {
                     with: {
                         courses: {
-                            where: (mycourse, {eq}) => eq(mycourse.id, id)
+                            where: (mycourse, { eq }) => eq(mycourse.id, id)
                         }
                     },
                 }
@@ -54,15 +65,18 @@ export async function PATCH(req) {
 
 
 
-            if (courseData.isActive===isActive && courseData.wantRevision===wantRevision && courseData.courseName === courseName) {
+            if (courseData.isActive === isActive && courseData.wantRevision === wantRevision && courseData.courseName === courseName && JSON.stringify(courseData.spaceRepetition) === JSON.stringify(spaceRepetition) && courseData.activityScheduleCount === activityScheduleCount) {
                 return Response.json(ApiResponse.success("200", null, "Updated Successfully"), { status: 200 })
             }
+
             await db
                 .update(course)
                 .set({
                     courseName,
                     wantRevision: wantRevision ?? courseData.wantRevision,
-                    isActive: isActive ?? courseData.isActive
+                    isActive: isActive ?? courseData.isActive,
+                    spaceRepetition: spaceRepetition ?? courseData.spaceRepetition,
+                    activityScheduleCount: activityScheduleCount ?? courseData.activityScheduleCount,
                 })
                 .where(eq(course.id, id));
         }

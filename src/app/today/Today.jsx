@@ -3,8 +3,9 @@
 import { useEffect, useState } from "react";
 import TaskList from "./TaskList";
 import axios from "axios";
+import CalendarView from "@/components/CalendarView";
 
-function Today({ token }) {
+function Today({ token}) {
   const [tasks, setTasks] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -30,12 +31,12 @@ function Today({ token }) {
   return (
     <div className="w-full h-full rounded-md p-4">
       {/* Header */}
-
       {/* Tasks Section */}
       <TaskList
         initialTasks={tasks}
         changeDate={(newDate) => setSelectedDate(newDate)}
       />
+      
     </div>
   );
 }

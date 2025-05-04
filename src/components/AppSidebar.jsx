@@ -239,10 +239,10 @@ export function AppSidebar() {
                     <HomeIcon className="mr-3 w-5 h-5 text-gray-400" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 px-4 py-2 flex items-center">
+                  {/* <DropdownMenuItem className="hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 px-4 py-2 flex items-center">
                     <Settings className="mr-3 w-5 h-5 text-gray-400" />
                     <span>Settings</span>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuItem className="hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 px-4 py-2 flex items-center">
                     <button
                       onClick={() => {

@@ -21,6 +21,7 @@ import {
   FaTimesCircle,
 } from "react-icons/fa";
 import { useSocket } from "@/context/SocketContext";
+import CalendarView from "@/components/CalendarView";
 
 const actionTypes = {
   SET_TASKS: "SET_TASKS",
@@ -88,6 +89,8 @@ export default function TaskList({ initialTasks, changeDate }) {
   const [sortBy, setSortBy] = useState("startTime");
   const [date, setDate] = useState(new Date());
   const [showMore, setShowMore] = useState(false);
+  const [showCalendar, setShowCalendar] = useState(false);
+
 
   const socket = useSocket();
 
@@ -218,6 +221,7 @@ export default function TaskList({ initialTasks, changeDate }) {
             </div>
           </div>
         </div>
+
         <div className="flex h-11 justify-end items-center space-x-4  max-w-full ">
           {/* Showing count based on status for today's tasks */}
           {tasks?.filter((task) => task.status === "Pending").length > 0 ? (
@@ -261,7 +265,12 @@ export default function TaskList({ initialTasks, changeDate }) {
           ) : (
             <></>
           )}
-
+          <button
+            onClick={() => setShowCalendar((prev) => !prev)}
+            className="px-2 py-1 text-sm bg-gray-200 rounded-md hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
+          >
+            {showCalendar ? "Hide Calendar" : "Show Calendar"}
+          </button>
           {tasks?.filter((task) => task.status === "Cancelled").length > 0 ? (
             <div
               className={`flex items-center justify-center gap-2 ${
@@ -340,6 +349,20 @@ export default function TaskList({ initialTasks, changeDate }) {
           if (props) onAdd(props);
         }}
       />
+      {showCalendar && (
+        <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center">
+          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg relative">
+            <button
+              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
+              onClick={() => setShowCalendar(false)}
+            >
+              ✕
+            </button>
+              <CalendarView />
+          
+          </div>
+        </div>
+      )}
       <ScheduledAndRecuringList
         isOpen={showScheduledAndRecuring}
         onClose={() => setShowScheduledAndRecuring((prev) => !prev)}
@@ -360,38 +383,37 @@ export default function TaskList({ initialTasks, changeDate }) {
       {/* Streak */}
       {showMore && (
         <div className="text-sm space-y-1 m-2">
-        <div>
-          <span className=" text-green-600 dark:text-green-400">
-            Spark (Days 1–7):
-          </span>{" "}
-          Start small to ignite change
+          <div>
+            <span className=" text-green-600 dark:text-green-400">
+              Spark (Days 1–7):
+            </span>{" "}
+            Start small to ignite change
+          </div>
+          <div>
+            <span className=" text-blue-600 dark:text-blue-400">
+              Momentum (Week 2–4):
+            </span>{" "}
+            Build consistency with tiny wins
+          </div>
+          <div>
+            <span className=" text-purple-600 dark:text-purple-400">
+              Rhythm (Month 2–3):
+            </span>{" "}
+            Integrate habits into your flow
+          </div>
+          <div>
+            <span className=" text-yellow-600 dark:text-yellow-400">
+              Identity (Month 4–6):
+            </span>{" "}
+            Become the person your habits reflect
+          </div>
+          <div>
+            <span className=" text-red-600 dark:text-red-400">
+              Mastery (6+ Months):
+            </span>{" "}
+            Expand and reinforce lasting success
+          </div>
         </div>
-        <div>
-          <span className=" text-blue-600 dark:text-blue-400">
-            Momentum (Week 2–4):
-          </span>{" "}
-          Build consistency with tiny wins
-        </div>
-        <div>
-          <span className=" text-purple-600 dark:text-purple-400">
-            Rhythm (Month 2–3):
-          </span>{" "}
-          Integrate habits into your flow
-        </div>
-        <div>
-          <span className=" text-yellow-600 dark:text-yellow-400">
-            Identity (Month 4–6):
-          </span>{" "}
-          Become the person your habits reflect
-        </div>
-        <div>
-          <span className=" text-red-600 dark:text-red-400">
-            Mastery (6+ Months):
-          </span>{" "}
-          Expand and reinforce lasting success
-        </div>
-      </div>
-      
       )}
     </>
   );

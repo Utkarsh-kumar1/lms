@@ -1,41 +1,38 @@
-import { authOptions } from "../api/auth/[...nextauth]/options";
-import { getServerSession } from "next-auth";
-import { db } from "@/db/drizzle";
-import dynamic from "next/dynamic";
-import { LoaderCircle } from "lucide-react";
-const SubjectContent = dynamic(() => import("./SubjectContent"), {
-  loading: () => (
-    <div className="fixed inset-0 flex items-center justify-center bg-gray-800 bg-opacity-50 z-50">
-      <div className="flex flex-col items-center gap-4 p-6 bg-white rounded-lg shadow-lg">
-        <LoaderCircle className="animate-spin text-blue-600" size={36} />
-      </div>
-    </div>
-  ),
-});
-
-async function fetchSubject(id) {
-  try {
-    const subjects = await db.query.subject.findMany({
-      with: {
-        notes: true,
-      },
-      where: (subject, { eq }) => eq(subject.owner, id),
-      orderBy: (subject, { asc }) => [asc(subject.subjectName)],
-    });
-
-    return subjects;
-  } catch (error) {
-    throw new Error("Error while fetching Data");
-  }
-}
+"use client";
+import { useEffect, useState } from "react";
+import api from "@/axios";
+import Loader from "@/components/Loader";
 
 export default async function Page() {
-  const session = await getServerSession(authOptions);
-  let subjects = null;
-  try {
-    subjects = await fetchSubject(session.id);
-  } catch (error) {
-    return <div>{error.message}</div>;
+
+  const [subjects, setSubjects] = useState([]);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    // Fetch activity data from the API and send id in body
+    // console.log("Fetching activity data for user ID:", user.id);
+    api
+      .get(
+        "/subjects",
+        {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        }
+      )
+      .then((response) => {
+        console.log("Subjects data fetched:", response.data.data);
+        setSubjects(response.data.data);
+        setLoading(false);
+      })
+      .catch((error) => {
+        console.error("Error fetching activity:", error);
+      });
+  }, []);
+
+  // Check if the data is still loading
+  if (loading) {
+    return <Loader />;
   }
 
   return <SubjectContent subjects={subjects} />;

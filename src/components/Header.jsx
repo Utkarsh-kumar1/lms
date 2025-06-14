@@ -15,9 +15,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
 import axios from "axios";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/context/AuthContext";
 
 function Header() {
   const pathname = usePathname();
@@ -32,13 +31,14 @@ function Header() {
   const [todos, setTodos] = useState([]);
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [showList, setShowList] = useState(false);
-  const { data, status } = useSession();
+  // const { data, status } = useSession();
+  const { user } = useAuth();
 
   // Ensures the component is mounted before rendering theme-dependent content
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (user) {
       // Fetch building blocks
       const today = "todo";
 
@@ -53,9 +53,9 @@ function Header() {
           console.error(error);
         }
       };
-      fetchToDos();
+      // fetchToDos();
     }
-  }, [refreshData, status]);
+  }, [refreshData, user]);
 
   const paths = decodeURI(pathname).split("/");
 
@@ -82,7 +82,8 @@ function Header() {
 
     const title = task;
 
-    const { success, error } = await AddOrUpdateTasks({ title });
+    // TODO: Add task
+    // const { success, error } = await AddOrUpdateTasks({ title });
     if (success) {
       setRefreshData(!refreshData);
     }
@@ -213,7 +214,7 @@ function Header() {
       <div className="absolute top-full right-4 shadow-lg rounded-lg md:static">{showTodo}</div>
       
       
-      {status === "authenticated" && (
+      {user && (
         <div className="relative">
           {/* Clickable ToDo Button with animation */}
           <div

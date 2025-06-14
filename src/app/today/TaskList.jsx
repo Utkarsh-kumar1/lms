@@ -125,9 +125,15 @@ export default function TaskList({ initialTasks, changeDate }) {
         onUpdate(data.updatedTask[0]);
       });
 
+      socket.on('taskCreated', (data) => {
+        // console.log("getting update from websocket", data.updatedTask);
+        onAdd(data.createdTask[0]);
+      });
+
       return () => {
         // console.log("Cleaning up socket listener for taskUpdated");
         socket.off('taskUpdated');
+        socket.off('taskCreated');
       };
     }
   }, [socket]);
@@ -335,9 +341,8 @@ export default function TaskList({ initialTasks, changeDate }) {
       {/* For Adding New Task */}
       <TaskInput
         isOpen={inputTask}
-        onClose={(props) => {
+        onClose={() => {
           setInputTask(false);
-          if (props) onAdd(props);
         }}
       />
       <ScheduledAndRecuringList

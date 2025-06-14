@@ -2,9 +2,9 @@
 
 import { useEffect, useState } from "react";
 import TaskList from "./TaskList";
-import axios from "axios";
+import api from "@/axios";
 
-function Today({ token }) {
+function Today() {
   const [tasks, setTasks] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
@@ -14,11 +14,11 @@ function Today({ token }) {
 
     const fetchBuildingBlocks = async () => {
       try {
-        const { data } = await axios.get("/api/buildingBlocks", {
-          params: { date },
+        const data = await api.get("/tasks", {
+          params: { today: date },
         });
         // const data = await response.json()
-        setTasks(data.data);
+        setTasks(data.data.data);
       } catch (error) {
         console.error(error);
       }

@@ -18,6 +18,8 @@ function TaskItem({ task, onDelete, onUpdate }) {
   const [newDuration, setNewDuration] = useState(task.duration);
   const [timer, setTimer] = useState(null);
   const [isLongPress, setIsLongPress] = useState(false);
+  const [newTitle, setNewTitle] = useState(task.title);
+
 
   const priorityColors = {
     High: "bg-red-500 text-white",
@@ -74,13 +76,23 @@ function TaskItem({ task, onDelete, onUpdate }) {
           startTime: newStartTime,
           duration: newDuration,
         };
+        
+
         setEditingField(null); // Close the editing field after saving
       } else if (editingField === "status") {
         updatedTask = {
           ...task,
           status: "Cancelled",
         };
-      } else {
+      }
+      else if (editingField === "title") {
+        updatedTask = {
+          ...task,
+          title: newTitle,
+        };
+        setEditingField(null); // Close the editing field after saving
+      }
+       else {
         if (isLongPress) {
           e.preventDefault();
           return;
@@ -112,6 +124,7 @@ function TaskItem({ task, onDelete, onUpdate }) {
       // onUpdate(response.data.data[0]); // Update the task in the parent component
     } catch (error) {
       console.error(error);
+      alert("Error: " + error);
     } finally {
       setIsProcessing(false);
     }
@@ -234,9 +247,40 @@ function TaskItem({ task, onDelete, onUpdate }) {
         <div className="flex flex-col sm:flex-row justify-between items-start sm:items-center ">
           {/* Task Details */}
           <div className="flex flex-col flex-1 my-4">
-            <h3 className="text-lg font-semibold text-gray-800 dark:text-gray-200">
-              {task.title}
-            </h3>
+            {editingField === "title" ? (
+              <div className="flex gap-2 items-center">
+                <input
+                  type="text"
+                  value={newTitle}
+                  onChange={(e) => setNewTitle(e.target.value)}
+                  className="text-lg font-semibold px-2 py-1 bg-white dark:bg-gray-700 text-gray-800 dark:text-white rounded shadow outline-none"
+                  autoFocus
+                />
+                <button
+                  onClick={() => handleUpdateTask({ editingField: "title" })}
+                  className="bg-green-500 text-white px-2 py-1 rounded hover:bg-green-600"
+                >
+                  ✔
+                </button>
+                <button
+                  onClick={() => {
+                    setEditingField(null);
+                    setNewTitle(task.title);
+                  }}
+                  className="bg-red-400 text-white px-2 py-1 rounded hover:bg-red-600"
+                >
+                  ❌
+                </button>
+              </div>
+            ) : (
+              <h3
+                className="text-lg font-semibold text-gray-800 dark:text-gray-200 cursor-pointer"
+                onDoubleClick={() => setEditingField("title")}
+              >
+                {task.title}
+              </h3>
+            )}
+
             <p className="text-sm text-gray-500 dark:text-gray-400">
               {task.description}
             </p>

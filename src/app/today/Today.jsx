@@ -30,12 +30,12 @@ function Today() {
   return (
     <div className="w-full h-full rounded-md p-4">
       {/* Header */}
-
       {/* Tasks Section */}
       <TaskList
         initialTasks={tasks}
         changeDate={(newDate) => setSelectedDate(newDate)}
       />
+      
     </div>
   );
 }

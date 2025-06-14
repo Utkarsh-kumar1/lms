@@ -2,11 +2,9 @@
 import { useEffect, useState } from "react";
 import api from "@/axios";
 import Loader from "@/components/Loader";
-import SubTopicContent from "./SubTopicContent";
+import CurriculumTree from "./CurriculumTree";
 
 export default function page() {
-  
-
   const [subjects, setSubjects] = useState(null);
   const [loading, setLoading] = useState(true);
 
@@ -14,14 +12,11 @@ export default function page() {
     // Fetch activity data from the API and send id in body
     // console.log("Fetching activity data for user ID:", user.id);
     api
-      .get(
-        "/allSubjects",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      .get("/allSubjects", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
       .then((response) => {
         console.log("all subjects data fetched:", response.data.data);
         setSubjects(response.data.data);
@@ -37,7 +32,9 @@ export default function page() {
     return <Loader />;
   }
 
-  return <SubTopicContent subjects={subjects} />;
-
-
+  return (
+    <main className=" bg-gray-100">
+      <CurriculumTree data={subjects} />
+    </main>
+  );
 }

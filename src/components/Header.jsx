@@ -1,5 +1,5 @@
 "use client";
-import { motion } from "framer-motion";
+
 import React, { useEffect, useRef, useState } from "react";
 import Image from "next/image";
 import Link from "next/link";
@@ -15,9 +15,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
 import axios from "axios";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/context/AuthContext";
 
 function Header() {
   const pathname = usePathname();
@@ -32,16 +31,14 @@ function Header() {
   const [todos, setTodos] = useState([]);
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [showList, setShowList] = useState(false);
-  const { data, status } = useSession();
-
-  console.log(data, status);
-  
+  // const { data, status } = useSession();
+  const { user } = useAuth();
 
   // Ensures the component is mounted before rendering theme-dependent content
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (user) {
       // Fetch building blocks
       const today = "todo";
 
@@ -56,9 +53,9 @@ function Header() {
           console.error(error);
         }
       };
-      fetchToDos();
+      // fetchToDos();
     }
-  }, [refreshData, status]);
+  }, [refreshData, user]);
 
   const paths = decodeURI(pathname).split("/");
 
@@ -85,7 +82,8 @@ function Header() {
 
     const title = task;
 
-    const { success, error } = await AddOrUpdateTasks({ title });
+    // TODO: Add task
+    // const { success, error } = await AddOrUpdateTasks({ title });
     if (success) {
       setRefreshData(!refreshData);
     }
@@ -182,177 +180,105 @@ function Header() {
         </div>
       )}
     </div>
-  );
-  if (status === "loading") {
-    return (
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="min-h-12 sticky top-0 bg-gradient-to-r from-[#6a11cb]/80 via-[#2575fc]/80 to-[#6a11cb]/80 backdrop-blur-md flex items-center justify-between px-6 py-3 shadow-lg z-50 "
-      >
-        <div className="font-bold tracking-tight text-white drop-shadow-md flex gap-4 items-center justify-center">
-          <div>
-            <Image
-              src="/logo.jpeg"
-              alt="Logo"
-              width={28}
-              height={28}
-              className="rounded-full object-cover cursor-pointer transition duration-200 hover:scale-105 hover:shadow-md"
-            />
+  )
+
+  return (
+    <header className="min-h-12 sticky top-0 bg-white/30 backdrop-blur-md flex items-center justify-between px-4 shadow-sm z-50 dark:bg-transparent gap-3">
+      {/* Sidebar Trigger */}
+      <div>
+        {isMobile && (
+          <SidebarTrigger className="text-black hover:text-gray-600 transition duration-200 dark:text-white dark:hover:text-gray-400" />
+        )}
+      </div>
+
+      {/* Breadcrumb Navigation */}
+      <nav className="flex items-center gap-1 mr-auto overflow-hidden">
+        {paths
+          .filter((value, index) => index < 2)
+          .map((path, index) => (
+            <span className="flex items-center" key={index}>
+              <span
+                title={path}
+                className="capitalize font-medium text-sm sm:text-base truncate max-w-[100px] sm:max-w-[400px] lg:max-w-full overflow-hidden whitespace-nowrap dark:text-white"
+              >
+                {path}
+              </span>
+              {index < paths?.length - 1 && (
+                <ChevronRight className="text-gray-600 dark:text-gray-400" />
+              )}
+            </span>
+          ))}
+      </nav>
+
+      {/* Todo show only for tablet and laptop screen */}
+      <div className="absolute top-full right-4 shadow-lg rounded-lg md:static">{showTodo}</div>
+      
+      
+      {user && (
+        <div className="relative">
+          {/* Clickable ToDo Button with animation */}
+          <div
+            className="flex items-center justify-center mr-6 cursor-pointer select-none  bg-orange-200 hover:bg-orange-300 hover:text-gray-800 shadow-md rounded-lg p-1 focus:ring-2 focus:ring-orange-300 hover:scale-105"
+            onClick={() => setShowInput(!showInput)}
+            aria-label="Toggle ToDo Input"
+          >
+            <span className="mr-2 dark:text-slate-400 ">ToDo</span>
+            <ClipboardList className="p-0.5 transform transition-transform duration-300 ease-in-out hover:scale-110 dark:text-slate-400" />
           </div>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl font-semibold">
-            Ignify
-          </p>
-        </div>
-      </motion.header>
-    );
-  }
-  if (status === "unauthenticated") {
-    return (
-      <motion.header
-        initial={{ opacity: 0, y: -20 }}
-        animate={{ opacity: 1, y: 0 }}
-        transition={{ duration: 0.6 }}
-        className="min-h-12 sticky top-0 bg-gradient-to-r from-[#6a11cb]/80 via-[#2575fc]/80 to-[#6a11cb]/80 backdrop-blur-md flex items-center justify-between px-6 py-3 shadow-lg z-50 "
-      >
-        {/* Logo / Brand Name */}
-        <div className=" font-bold tracking-tight text-white drop-shadow-md flex gap-4 items-center justify-center">
-          <div>
-            <Link href="/">
-              <Image
-                src="/logo.jpeg"
-                alt="Logo"
-                width={28}
-                height={28}
-                className="rounded-full object-cover cursor-pointer transition duration-200 hover:scale-105 hover:shadow-md"
+
+          {/* Floating Input Field & Submit Button with animation */}
+          {showInput && (
+            <form
+              onSubmit={handleSubmit}
+              className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border shadow-lg rounded-lg p-4 z-50 w-64 transition-all duration-500 dark:bg-slate-700 ${
+                showInput ? "opacity-100" : "opacity-0 pointer-events-none"
+              }`}
+            >
+              <input
+                ref={inputRef}
+                type="text"
+                className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 transition-all duration-200 ease-in-out"
+                value={task}
+                onChange={(e) => setTask(e.target.value)}
+                placeholder="Enter task..."
+                onBlur={resetTimer} // Restart timer if input loses focus
+                onFocus={() => clearTimeout(timerRef.current)} // Stop timer when input is focused
               />
-            </Link>
-          </div>
-          <p className="text-base sm:text-lg md:text-xl lg:text-2xl  font-semibold">
-            Ignify
-          </p>
-        </div>
-
-        {/* Action Buttons */}
-        <div className="flex items-center gap-3">
-          <Link
-            href="/sign-in"
-            className=" px-3 py-1 sm:px-4  sm:py-1.5  rounded-full text-white border border-white/50 hover:bg-white/20 transition duration-200 backdrop-blur-md shadow-md text-sm sm:text-base"
-          >
-            Login
-          </Link>
-          <Link
-            href="/sign-up"
-            className=" px-2 py-1 sm:px-4 sm:py-1.5 rounded-full bg-[#ffeb3b] text-gray-900 hover:bg-[#fbc02d] font-semibold transition shadow-md text-sm sm:text-base"
-          >
-            Get Started
-          </Link>
-        </div>
-      </motion.header>
-    );
-  }
-
-  if (status == "authenticated") {
-    return (
-      <header className="min-h-12 sticky top-0 bg-white/30 backdrop-blur-md flex items-center justify-between px-4 shadow-sm z-50 dark:bg-transparent gap-3">
-        {/* Sidebar Trigger */}
-        <div>
-          {isMobile && (
-            <SidebarTrigger className="text-black hover:text-gray-600 transition duration-200 dark:text-white dark:hover:text-gray-400" />
+              <button
+                type="submit"
+                className="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200"
+              >
+                Submit
+              </button>
+            </form>
           )}
         </div>
+      )}
 
-        {/* Breadcrumb Navigation */}
-        <nav className="flex items-center gap-1 mr-auto overflow-hidden">
-          {paths
-            .filter((value, index) => index < 2)
-            .map((path, index) => (
-              <span className="flex items-center" key={index}>
-                <span
-                  title={path}
-                  className="capitalize font-medium text-sm sm:text-base truncate max-w-[100px] sm:max-w-[400px] lg:max-w-full overflow-hidden whitespace-nowrap dark:text-white"
-                >
-                  {path}
-                </span>
-                {index < paths?.length - 1 && (
-                  <ChevronRight className="text-gray-600 dark:text-gray-400" />
-                )}
-              </span>
-            ))}
-        </nav>
+      <div>
+        {/* Only render theme icon if component is mounted */}
+        {mounted &&
+          (theme === "dark" ? (
+            <Sun onClick={() => setTheme("light")} />
+          ) : (
+            <Moon onClick={() => setTheme("dark")} />
+          ))}
+      </div>
 
-        {/* Todo show only for tablet and laptop screen */}
-        <div className="absolute top-full right-4 shadow-lg rounded-lg md:static">
-          {showTodo}
-        </div>
-
-        {status === "authenticated" && (
-          <div className="relative">
-            {/* Clickable ToDo Button with animation */}
-            <div
-              className="flex items-center justify-center mr-6 cursor-pointer select-none  bg-orange-200 hover:bg-orange-300 hover:text-gray-800 shadow-md rounded-lg p-1 focus:ring-2 focus:ring-orange-300 hover:scale-105"
-              onClick={() => setShowInput(!showInput)}
-              aria-label="Toggle ToDo Input"
-            >
-              <span className="mr-2 dark:text-slate-400 ">ToDo</span>
-              <ClipboardList className="p-0.5 transform transition-transform duration-300 ease-in-out hover:scale-110 dark:text-slate-400" />
-            </div>
-
-            {/* Floating Input Field & Submit Button with animation */}
-            {showInput && (
-              <form
-                onSubmit={handleSubmit}
-                className={`absolute top-full left-1/2 transform -translate-x-1/2 mt-2 bg-white border shadow-lg rounded-lg p-4 z-50 w-64 transition-all duration-500 dark:bg-slate-700 ${
-                  showInput ? "opacity-100" : "opacity-0 pointer-events-none"
-                }`}
-              >
-                <input
-                  ref={inputRef}
-                  type="text"
-                  className="w-full border rounded-lg p-2 text-sm focus:ring-2 focus:ring-blue-400 transition-all duration-200 ease-in-out"
-                  value={task}
-                  onChange={(e) => setTask(e.target.value)}
-                  placeholder="Enter task..."
-                  onBlur={resetTimer} // Restart timer if input loses focus
-                  onFocus={() => clearTimeout(timerRef.current)} // Stop timer when input is focused
-                />
-                <button
-                  type="submit"
-                  className="mt-4 w-full bg-blue-500 text-white px-4 py-2 rounded-lg hover:bg-blue-600 transition-colors duration-200"
-                >
-                  Submit
-                </button>
-              </form>
-            )}
-          </div>
-        )}
-
-        <div>
-          {/* Only render theme icon if component is mounted */}
-          {mounted &&
-            (theme === "dark" ? (
-              <Sun onClick={() => setTheme("light")} />
-            ) : (
-              <Moon onClick={() => setTheme("dark")} />
-            ))}
-        </div>
-
-        {/* Logo */}
-        <div>
-          <Link href="/">
-            <Image
-              src="/logo.jpeg"
-              alt="Logo"
-              width={28}
-              height={28}
-              className="rounded-full object-cover cursor-pointer transition duration-200 hover:scale-105 hover:shadow-md"
-            />
-          </Link>
-        </div>
-      </header>
-    );
-  }
+      {/* Logo */}
+      <div>
+        <Link href="/">
+          <Image
+            src="/logo.jpeg"
+            alt="Logo"
+            width={28}
+            height={28}
+            className="rounded-full object-cover cursor-pointer transition duration-200 hover:scale-105 hover:shadow-md"
+          />
+        </Link>
+      </div>
+    </header>
+  );
 }
 
 export default Header;

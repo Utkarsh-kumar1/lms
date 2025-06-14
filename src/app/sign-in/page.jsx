@@ -6,7 +6,6 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { useToast } from "@/components/ui/use-toast";
 import SignInSchema from "@/Schema/signInSchema";
-import { signIn } from "next-auth/react";
 import {
   Card,
   CardHeader,
@@ -17,6 +16,7 @@ import {
 import { useRouter } from "next/navigation";
 import { useState } from "react";
 import Image from "next/image";
+import { useAuth } from "@/context/AuthContext";
 
 export default function ProfileForm() {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -29,22 +29,23 @@ export default function ProfileForm() {
     },
   });
   const { toast } = useToast();
+  const { login, user } = useAuth();
 
   async function onSubmit(data) {
     setIsProcessing(true);
-    const response = await signIn("credentials", {
-      redirect: false,
-      usernameOrEmail: data.usernameOrEmail,
-      password: data.password,
-    });
+    console.log("user details", data);
+    const response = await login(data.usernameOrEmail, data.password);
+    console.log("Response in fronteend", response);
     setIsProcessing(false);
+    // Check if the response based on code and show a toast message accordingly
+
     toast({
-      variant: !response.ok ? "destructive" : "success",
-      title: response.ok ? "Success" : "Error",
-      description: response.ok ? "Sign In Successfully" : response.error,
+      variant: response.status!==200 ? "destructive" : "success",
+      title: response.status===200 ? "Success" : "Error",
+      description: response.status===200 ? "Sign In Successfully" : response.error,
     });
-    if (response.ok) {
-      router.refresh();
+    if (response.status===200) {
+      router.push("/dashboard");
     }
   }
 

@@ -2,10 +2,10 @@
 import { useEffect, useState } from "react";
 import { TableRow, TableCell } from "@/components/ui/table";
 import { Switch } from "@/components/ui/switch";
-import axios from "axios";
 import { useRouter } from "next/navigation";
-import { CreateActivity } from "@/actions/CreateActivity";
-import { Loader, Loader2Icon, LoaderCircle, LucideLoaderCircle } from "lucide-react";
+import { Loader2Icon, LoaderCircle, LucideLoaderCircle } from "lucide-react";
+import api from "@/axios";
+import Loader from "@/components/Loader";
 
 function formatDate(inputDate) {
   const dateObj = new Date(inputDate);
@@ -35,19 +35,22 @@ export default function DataRow({ subtopic, subIndex }) {
   const router = useRouter();
 
   const handleCreateActivity = async () => {
-    const { error, success } = await CreateActivity(
-      subtopic.subtopicId,
-      subtopic.courseSession
-    );
+    // TODO: Create activity is working but refresh is required for the changes to appear on the screen
+    await api.post(`/createActivity`, {
+      subtopicId: subtopic.subtopicId,
+      subtopicSession: subtopic.courseSession
+    })
+      .then(() => {
+        router.refresh();
+      })
   };
 
   const handleChange = (status) => {
     setIsUpdating(true);
-    axios
-      .patch("/api/updateActivity", {
+    console.log("Updating status to:", status);
+    api
+      .patch(`/updateActivity/${subtopic.activityId}`, {
         status: status,
-        activityId: subtopic.activityId,
-        subtopicId: subtopic.subtopicId,
       })
       .then((result) => {
         setIsUpdating(false);

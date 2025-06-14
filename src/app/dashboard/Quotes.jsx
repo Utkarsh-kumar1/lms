@@ -1,17 +1,51 @@
+"use client";
+import api from "@/axios";
+import Loader from "@/components/Loader";
+import React, { useEffect, useState } from "react";
 
-export default function Quotes({quote}) {
-    
+export default function Quotes() {
+  const [quote, setQuote] = useState(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const getQuote = async () => {
+      try {
+        const response = await api.get("/quoteOfDay", {
+          headers: {
+            "Content-Type": "application/json",
+          },
+        });
+
+        if (response.status === 200) {
+          setQuote(response?.data?.data);
+        }
+      } catch (error) {
+        console.error("Error fetching quote:", error);
+      } finally {
+        setLoading(false);
+      }
+    };
+    getQuote();
+  }, []);
+
+  if (loading) {
+    return <Loader />;
+  }
 
   return (
     <div className="">
       <div
-        className="text-center text-lg md:text-xl text-gray-800 dark:text-gray-100"
-        style={{ fontFamily: '"Delius", serif', fontWeight: 400 }}
+        className=" text-center"
+        style={{
+          fontFamily: '"Delius", serif',
+          fontWeight: 400,
+          fontStyle: "normal",
+        }}
       >
-        “ {quote?.quote ?? "No Quotes Available"} ”
+        {quote?.quote ?? "No Quotes Available"}
       </div>
-      <div className="text-right font-semibold italic mt-3 text-red-600 dark:text-red-400 underline underline-offset-4 decoration-red-400">
-        — {quote?.author ?? "Unknown"}
+      <div className="font-semibold italic mt-2 underline decoration-red-500 underline-offset-3">
+        {quote?.author}
       </div>
     </div>
   );

@@ -70,7 +70,7 @@ export default function SubTopicContent({ subjects = [] }) {
           subjects
             .flatMap((subject) => subject.courses)
             .map((course, courseIndex) => {
-              return course.topics?.length > 0 ? (
+              return course?.topics?.length > 0 ? (
                 <div
                   key={courseIndex}
                   className="border border-gray-200 dark:border-gray-700 bg-white dark:bg-gray-800 rounded-md shadow-md p-4"

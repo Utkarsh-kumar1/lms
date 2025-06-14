@@ -1,8 +1,8 @@
 "use client";
 
-import { GetRecuringAndSceduledList } from "@/actions/GetRecuringAndSceduledList";
 import { useEffect, useState } from "react";
 import { X, Loader2 } from "lucide-react"; // Loader2 for loading animation
+import api from "@/axios";
 
 function ScheduledAndRecuringList({ isOpen, onClose }) {
   const [recurringTasks, setRecurringTasks] = useState([]);
@@ -10,14 +10,20 @@ function ScheduledAndRecuringList({ isOpen, onClose }) {
 
   useEffect(() => {
     if (!isOpen) return;
-
     setLoading(true);
-    GetRecuringAndSceduledList().then(({ data, error, success }) => {
-      if (success) {
-        setRecurringTasks(data);
-      }
-      setLoading(false);
-    });
+    
+    api
+      .get(`/getRecurringTasks`)
+      .then((result) => {
+        console.log(result);
+        setRecurringTasks(result.data.data);
+      })
+      .catch((err) => {
+        
+      })
+      .finally(() => {
+        setLoading(false);
+    })
   }, [isOpen]);
 
   if (!isOpen) return null;

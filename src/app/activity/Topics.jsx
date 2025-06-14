@@ -19,7 +19,7 @@ import {
 import DataRow from "./DataRow";
 import FileUploadModal from "./FileUploadModal";
 import clsx from "clsx";
-import axios from "axios";
+import api from "@/axios";
 function Topics({ topicIndex, topics }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFileViewOpen, setIsFileViewOpen] = useState(false);
@@ -29,7 +29,12 @@ function Topics({ topicIndex, topics }) {
     const fetchNotes = async() => {
       const {
         data: { data },
-      } = await axios.get(`/api/notesInActivity?topic=${topics[0].topicId}`)
+      } = await api.get(`/notesFromTopic`, {
+        params: {
+          topicId: topics[0].topicId,
+        },
+      }
+      )
       setNotes(data);
     };
     fetchNotes();
@@ -125,7 +130,8 @@ function Topics({ topicIndex, topics }) {
 
             <TableBody>
               {/* Render each subtopic using DataRow */}
-              {topics?.map((subtopic, subIndex) => (
+              {topics?.sort((a, b) => a.subTopicIndex - b.subTopicIndex)
+                .map((subtopic, subIndex) => (
                 <DataRow
                   key={subIndex}
                   subtopic={subtopic}

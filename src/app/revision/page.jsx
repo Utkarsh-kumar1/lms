@@ -1,12 +1,8 @@
-import { getServerSession } from "next-auth";
-import { redirect } from "next/navigation";
-import { authOptions } from "../api/auth/[...nextauth]/options";
-// import Topics from "./Topics";
-import { db } from "@/db/drizzle";
+"use client";
+import api from "@/axios";
 import { LoaderCircle } from "lucide-react";
 import dynamic from "next/dynamic";
-import { course, revision, subtopics } from "@/db/schema";
-import { eq } from "drizzle-orm";
+import { useEffect, useState } from "react";
 
 const Topics = dynamic(() => import("./Topics"), {
   loading: () => (
@@ -18,102 +14,58 @@ const Topics = dynamic(() => import("./Topics"), {
   ),
 });
 
-async function fetchRevision(id) {
-  try {
-    const revisionData = await db.query.subject.findMany({
-      with: {
-        courses: {
-          with: {
-            topics: {
-              where: (topic, { exists }) =>
-                exists(
-                  db
-                    .select()
-                    .from(subtopics)
-                    .where(eq(subtopics.topic, topic.id))
-                ),
-              with: {
-                notes: true,
-                subtopics: {
-                  orderBy: (subtopic, { asc }) => [asc(subtopic.subTopicIndex)],
-                  where: (st, { exists, eq, or, isNull, and, sql }) =>
-                    exists(
-                      db
-                        .select()
-                        .from(revision)
-                        .where(
-                          and(
-                            eq(revision.subtopic, st.id),
-                            or(
-                              isNull(revision.end),
-                              sql`DATE(${revision.start}) = CURDATE()`,
-                              sql`DATE(${revision.end}) = CURDATE()`
-                            )
-                          )
-                        )
-                    ),
-                  with: {
-                    revisions: {
-                      where: (revision, { or, isNull, sql }) =>
-                        or(
-                          isNull(revision.end),
-                          sql`DATE(${revision.start}) = CURDATE()`,
-                          sql`DATE(${revision.end}) = CURDATE()`
-                        ),
-                    },
-                  },
-                },
-              },
-              orderBy: (topic, { asc }) => [asc(topic.topicIndex)],
-            },
-          },
+export default function Page() {
+  const [revision, setRevision] = useState(null);
+
+  useEffect(() => {
+    console.log(
+      "filter",
+      revision?.filter((course, index, self) => {
+        self.findIndex((c) => c.courseId === course.courseId) === index;
+      })
+    );
+    console.log(
+      "filter",
+      revision?.filter(
+        (course, index, self) =>
+          self.findIndex((c) => c.courseId === course.courseId) === index
+      )
+    );
+  }, [revision]);
+
+  useEffect(() => {
+    api
+      .get("/revision", {
+        headers: {
+          "Content-Type": "application/json",
         },
-      },
-      where: (subject, { exists, and, eq }) =>
-        and(
-          eq(subject.owner, id),
-          exists(db.select().from(course).where(eq(course.subject, subject.id)))
-        ),
-    });
+      })
+      .then((response) => {
+        console.log("Revision data fetched:", response.data.data);
+        setRevision(response.data.data);
+      })
+      .catch((error) => {
+        console.error("Error fetching revision:", error);
+      });
+  }, []);
 
-    return revisionData;
-  } catch (error) {
-    throw new Error("Error while fetching the Revison Data");
-  }
-}
-
-export default async function ProtectedPage() {
-  const session = await getServerSession(authOptions);
-
-  if (!session) {
-    redirect("/sign-in");
-  }
-  try {
-    const revision = await fetchRevision(session.id);
-
-    if (!revision || revision.length <= 0) {
-      return (
-        <p className="text-center text-gray-500">No revision data available.</p>
-      );
-    }
-
-    const data = revision
-      .flatMap((data) => data.courses)
-      .map((course) => ({
-        ...course,
-        topics: course.topics.filter((topic) => topic.subtopics.length > 0),
-      }))
-      .filter((course) => course.topics.length > 0);
-
-    if (data.length <= 0)
-      return (
-        <p className="text-center text-gray-500">No Revision data available.</p>
-      );
+  if (!revision || revision.length <= 0)
     return (
-      <div className="container mx-auto p-4  dark:bg-gray-800">
-        {data?.map((course, courseIndex) => {
-          const topics = course.topics;
-          if (course.topics == null) return null;
+      <p className="text-center text-gray-500">No Revision data available.</p>
+    );
+  return (
+    <div className="container mx-auto p-4  dark:bg-gray-800">
+      {revision
+        ?.filter(
+          (course, index, self) =>
+            self.findIndex((c) => c.courseId === course.courseId) === index
+        )
+        .map((course, courseIndex) => {
+          // Filter topics related to the current course
+          const topics = revision.filter(
+            (revision) => revision.courseId === course.courseId
+          );
+
           return (
             <div
               key={`course-${courseIndex}`}
@@ -122,19 +74,32 @@ export default async function ProtectedPage() {
               <h2 className="text-3xl font-extrabold mb-4 text-blue-600 dark:text-darkBlueText  ">
                 {course.courseName}
               </h2>
-              {topics?.map((topic, topicIndex) => (
-                <Topics
-                  topic={topic}
-                  topicIndex={topicIndex}
-                  key={topicIndex}
-                />
-              ))}
+              {topics
+                ?.sort((a, b) => a.topicIndex - b.topicIndex)
+                .filter(
+                  (topic, index, self) =>
+                    self.findIndex((t) => t.topicId === topic.topicId) === index
+                )
+                .map((topic, topicIndex) => {
+                  // Filter subtopics for the current topic
+                  const topics = revision?.filter(
+                    (revision) =>
+                      revision.courseId === course.courseId &&
+                      revision.topicId === topic.topicId
+                  );
+                  console.log("logging topics", topics);
+
+                  return (
+                    <Topics
+                      key={topicIndex}
+                      topics={topics}
+                      topicIndex={topicIndex}
+                    />
+                  );
+                })}
             </div>
           );
         })}
-      </div>
-    );
-  } catch (error) {
-    return <div>{error ? error.message : "Something Went Wrong"}</div>;
-  }
+    </div>
+  );
 }

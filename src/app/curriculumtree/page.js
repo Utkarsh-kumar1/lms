@@ -4,7 +4,7 @@ import api from "@/axios";
 import Loader from "@/components/Loader";
 import CurriculumTree from "./CurriculumTree";
 
-export default function page() {
+export default function Page() {
   const [subjects, setSubjects] = useState(null);
   const [loading, setLoading] = useState(true);
 

@@ -4,6 +4,7 @@ import {
   ChevronRight,
   FilePlus2,
   Loader2,
+  NotebookPen,
   Pencil,
   X,
 } from "lucide-react";

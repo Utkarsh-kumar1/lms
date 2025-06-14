@@ -21,7 +21,6 @@ import {
   FaTimesCircle,
 } from "react-icons/fa";
 import { useSocket } from "@/context/SocketContext";
-import CalendarView from "@/components/CalendarView";
 
 const actionTypes = {
   SET_TASKS: "SET_TASKS",
@@ -89,7 +88,6 @@ export default function TaskList({ initialTasks, changeDate }) {
   const [sortBy, setSortBy] = useState("startTime");
   const [date, setDate] = useState(new Date());
   const [showMore, setShowMore] = useState(false);
-  const [showCalendar, setShowCalendar] = useState(false);
 
 
   const socket = useSocket();
@@ -189,10 +187,10 @@ export default function TaskList({ initialTasks, changeDate }) {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row  w-full  justify-items-end items-center space-x-4">
+      <div className="flex flex-col sm:flex-row  w-full h-auto  justify-items-end items-center space-x-4 fixed z-10 ">
         {/* Date change section */}
-        <div className="mx-2 w-full">
-          <div className="flex items-center justify-center sm:justify-between space-x-4 rounded-lg">
+        <div className="mx-2 w-full ">
+          <div className="flex items-center justify-center sm:justify-between space-x-4 rounded-lg ">
             <div className="flex items-center justify-between space-x-4">
               {/* Left Arrow */}
               <button
@@ -271,12 +269,7 @@ export default function TaskList({ initialTasks, changeDate }) {
           ) : (
             <></>
           )}
-          <button
-            onClick={() => setShowCalendar((prev) => !prev)}
-            className="px-2 py-1 text-sm bg-gray-200 rounded-md hover:bg-gray-300 dark:bg-gray-700 dark:hover:bg-gray-600"
-          >
-            {showCalendar ? "Hide Calendar" : "Show Calendar"}
-          </button>
+
           {tasks?.filter((task) => task.status === "Cancelled").length > 0 ? (
             <div
               className={`flex items-center justify-center gap-2 ${
@@ -331,7 +324,7 @@ export default function TaskList({ initialTasks, changeDate }) {
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 pt-20 md:pt-10 lg:pt-25">
         {tasks?.length > 0 ? (
           <ul className="space-y-2">
             {tasks.map((task) => (
@@ -354,20 +347,7 @@ export default function TaskList({ initialTasks, changeDate }) {
           setInputTask(false);
         }}
       />
-      {showCalendar && (
-        <div className="fixed inset-0 z-50 bg-black bg-opacity-40 flex justify-center items-center">
-          <div className="bg-white dark:bg-gray-800 p-4 rounded-lg shadow-lg relative">
-            <button
-              className="absolute top-2 right-2 text-gray-500 hover:text-gray-700 dark:text-gray-300 dark:hover:text-white"
-              onClick={() => setShowCalendar(false)}
-            >
-              ✕
-            </button>
-              <CalendarView />
-          
-          </div>
-        </div>
-      )}
+
       <ScheduledAndRecuringList
         isOpen={showScheduledAndRecuring}
         onClose={() => setShowScheduledAndRecuring((prev) => !prev)}

@@ -11,7 +11,7 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import SubTopicCard from "./SubTopicCard";
-import { AddSubTopics } from "@/actions/AddSubTopics";
+// import { AddSubTopics } from "@/actions/AddSubTopics";
 
 export default function SubTopicContent({ subjects = [] }) {
   const [isAddingTopic, setIsAddingTopic] = useState(false);
@@ -130,31 +130,31 @@ export default function SubTopicContent({ subjects = [] }) {
         <div className="fixed inset-0 bg-black bg-opacity-30 dark:bg-opacity-60 flex items-center justify-center z-50 p-2">
           <form
             className="p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 max-w-lg w-full flex flex-col gap-6"
-            action={async (e) => {
-              const subtopicNames = e
-                .get("subtopicName")
-                .split(";")
-                .map((topic) => topic.trim());
-              const subjectId = e.get("subjectId");
-              const courseId = e.get("courseId");
-              const topicId = e.get("topicId");
-              const { error, success } = await AddSubTopics(
-                subtopicNames,
-                subjectId,
-                courseId,
-                topicId
-              );
+            // action={async (e) => {
+            //   const subtopicNames = e
+            //     .get("subtopicName")
+            //     .split(";")
+            //     .map((topic) => topic.trim());
+            //   const subjectId = e.get("subjectId");
+            //   const courseId = e.get("courseId");
+            //   const topicId = e.get("topicId");
+            //   const { error, success } = await AddSubTopics(
+            //     subtopicNames,
+            //     subjectId,
+            //     courseId,
+            //     topicId
+            //   );
 
-              if (success) {
-                setIsAddingTopic(false);
-                setTopicName("");
-                selectedCourse("");
-                selectedSubject("");
-              }
-              if (error) {
-                setErrors((prev) => ({ ...prev, errorWhileSavingData: error }));
-              }
-            }}
+            //   if (success) {
+            //     setIsAddingTopic(false);
+            //     setTopicName("");
+            //     selectedCourse("");
+            //     selectedSubject("");
+            //   }
+            //   if (error) {
+            //     setErrors((prev) => ({ ...prev, errorWhileSavingData: error }));
+            //   }
+            // }}
           >
             <h3 className="text-lg font-bold mb-4 text-gray-800 dark:text-gray-100">
               Add SubTopic

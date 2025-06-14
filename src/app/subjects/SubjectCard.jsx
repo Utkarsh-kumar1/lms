@@ -4,7 +4,7 @@ import clsx from "clsx";
 import { X, Pencil, FilePlus2, NotebookPen } from "lucide-react";
 import { useRouter } from "next/navigation";
 import axios from "axios";
-import { DeleteSubjectAction } from "@/actions/DeleteSubjectAction";
+// import { DeleteSubjectAction } from "@/actions/DeleteSubjectAction";
 
 const SubjectCard = ({ subject }) => {
   const [newSubjectName, setNewSubjectName] = useState(subject.subjectName);
@@ -88,7 +88,7 @@ const getColor = () => {
   };
 
   const handleDeleteClick = async () => {
-    const { success, error } = await DeleteSubjectAction(subject.id);
+    // const { success, error } = await DeleteSubjectAction(subject.id);
     if (success) {
       setIsModalOpen(false);
       setIsEditModalOpen(false);
@@ -277,7 +277,7 @@ const getColor = () => {
                 Cancel
               </button>
               <button
-                onClick={handleDeleteClick}
+                // onClick={handleDeleteClick}
                 className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition duration-200"
               >
                 Delete

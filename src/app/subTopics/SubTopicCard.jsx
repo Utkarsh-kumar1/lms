@@ -1,6 +1,5 @@
 "use client";
-import { DeleteSubTopic } from "@/actions/DeleteSubTopics";
-import { DeleteTopic } from "@/actions/DeleteTopic";
+// import { DeleteSubTopic } from "@/actions/DeleteSubTopics";
 import axios from "axios";
 import { useRouter } from "next/navigation";
 import React, { useEffect, useState } from "react";
@@ -79,7 +78,7 @@ export default function SubtopicCard({
 
   const handleDeleteClick = async (e) => {
     setIsProcessing(true);
-    const { error, success } = await DeleteSubTopic(subtopic.id);
+    // const { error, success } = await DeleteSubTopic(subtopic.id);
     if (success) {
       setIsDeleteModalOpen(false);
       setIsEditing(false);
@@ -248,7 +247,7 @@ export default function SubtopicCard({
                 Cancel
               </button>
               <button
-                onClick={handleDeleteClick}
+                // onClick={handleDeleteClick}
                 className="px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-800 transition duration-200 disabled:cursor-progress"
                 disabled={isProcessing}
               >

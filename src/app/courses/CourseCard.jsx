@@ -13,7 +13,7 @@ import {
 } from "lucide-react";
 import axios from "axios";
 import { useRouter } from "next/navigation";
-import { DeleteCourse } from "@/actions/DeleteCourse";
+// import { DeleteCourse } from "@/actions/DeleteCourse";
 import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
 
 const CourseCard = ({ course, subjectId }) => {
@@ -63,16 +63,16 @@ const CourseCard = ({ course, subjectId }) => {
 
   const router = useRouter();
 
-  const handleDeleteClick = async () => {
-    setIsProcessing(true);
-    const { error, success } = await DeleteCourse(course.id);
-    if (success) {
-      setIsDeleteModalOpen(false);
-    } else if (error) {
-      setErrors((prev) => ({ ...prev, deletionError: error }));
-    }
-    setIsProcessing(false);
-  };
+  // const handleDeleteClick = async () => {
+  //   setIsProcessing(true);
+  //   const { error, success } = await DeleteCourse(course.id);
+  //   if (success) {
+  //     setIsDeleteModalOpen(false);
+  //   } else if (error) {
+  //     setErrors((prev) => ({ ...prev, deletionError: error }));
+  //   }
+  //   setIsProcessing(false);
+  // };
 
   const handleSaveClick = async () => {
     setIsProcessing(true);
@@ -484,7 +484,7 @@ const CourseCard = ({ course, subjectId }) => {
                 Cancel
               </button>
               <button
-                onClick={handleDeleteClick}
+                // onClick={handleDeleteClick}
                 className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded-md"
                 disabled={isProcessing}
               >

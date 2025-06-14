@@ -4,7 +4,7 @@ import React, { useState } from "react";
 import SubjectCard from "./SubjectCard";
 import { Check, X } from "lucide-react";
 import { IoAddCircleSharp } from "react-icons/io5";
-import { AddNewSubjectAction } from "@/actions/AddNewSubjectAction";
+// import { AddNewSubjectAction } from "@/actions/AddNewSubjectAction";
 import { useOptimistic } from "react";
 
 export default function SubjectContent({ subjects }) {
@@ -38,7 +38,7 @@ export default function SubjectContent({ subjects }) {
 
     addOptimisticSubject(subjects);
 
-    const { error, success } = await AddNewSubjectAction(subjectNameArray);
+    // const { error, success } = await AddNewSubjectAction(subjectNameArray);
     if (success) {
       setIsAddingSubject(false);
       setSubjectInput("");
@@ -83,7 +83,9 @@ export default function SubjectContent({ subjects }) {
             <h2 className="text-2xl font-bold mb-6 text-center text-gray-800 dark:text-gray-200">
               Add New Subject
             </h2>
-            <form onSubmit={handleAddSubject} className="space-y-5">
+            <form
+              // onSubmit={handleAddSubject}
+              className="space-y-5">
               <textarea
                 autoFocus
                 required

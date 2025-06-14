@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AddTopics } from "@/actions/AddTopics";
+// import { AddTopics } from "@/actions/AddTopics";
 
 export default function TopicContent({ subjects = [] }) {
   const [isAddingTopic, setIsAddingTopic] = useState(false);
@@ -115,29 +115,29 @@ export default function TopicContent({ subjects = [] }) {
         <div className="fixed inset-0 bg-black bg-opacity-30 dark:bg-opacity-60 flex items-center justify-center z-50 p-2">
           <form
             className="p-6 rounded-lg shadow-lg bg-white dark:bg-gray-800 max-w-lg w-full flex flex-col gap-6"
-            action={async (e) => {
-              const topicNameArray = e
-                .get("topicName")
-                .split(";")
-                .map((topic) => topic.trim());
-              const subjectId = e.get("subjectId");
-              const courseId = e.get("courseId");
-              const { error, success } = await AddTopics(
-                topicNameArray,
-                subjectId,
-                courseId
-              );
+            // action={async (e) => {
+            //   const topicNameArray = e
+            //     .get("topicName")
+            //     .split(";")
+            //     .map((topic) => topic.trim());
+            //   const subjectId = e.get("subjectId");
+            //   const courseId = e.get("courseId");
+            //   const { error, success } = await AddTopics(
+            //     topicNameArray,
+            //     subjectId,
+            //     courseId
+            //   );
 
-              if (success) {
-                setIsAddingTopic(false);
-                setTopicName("");
-                selectedCourse("");
-                selectedSubject("");
-              }
-              if (error) {
-                setErrors((prev) => ({ ...prev, errorWhileSavingData: error }));
-              }
-            }}
+            //   if (success) {
+            //     setIsAddingTopic(false);
+            //     setTopicName("");
+            //     selectedCourse("");
+            //     selectedSubject("");
+            //   }
+            //   if (error) {
+            //     setErrors((prev) => ({ ...prev, errorWhileSavingData: error }));
+            //   }
+            // }}
           >
             <h3 className="text-lg font-bold text-gray-800 dark:text-gray-200 mb-4">
               Add Topic

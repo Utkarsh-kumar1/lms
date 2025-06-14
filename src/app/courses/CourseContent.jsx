@@ -10,7 +10,7 @@ import {
   SelectTrigger,
   SelectValue,
 } from "@/components/ui/select";
-import { AddCourse } from "@/actions/AddCourse";
+// import { AddCourse } from "@/actions/AddCourse";
 import { useOptimistic } from "react";
 
 export default function CourseContent({ subjects , isShowSubjectName = true }) {
@@ -31,54 +31,54 @@ export default function CourseContent({ subjects , isShowSubjectName = true }) {
   );
 
   // Function to handle the addition of new courses
-  async function handleAddCourse(e) {
-    e.preventDefault();
-    const formData = new FormData(e.target);
-    const subjectId = formData.get("SubjectId");
-    const courseNames = formData
-      .get("CourseName")
-      .split(";")
-      .map((name) => name.trim())
-      .filter((name) => name);
+  // async function handleAddCourse(e) {
+  //   e.preventDefault();
+  //   const formData = new FormData(e.target);
+  //   const subjectId = formData.get("SubjectId");
+  //   const courseNames = formData
+  //     .get("CourseName")
+  //     .split(";")
+  //     .map((name) => name.trim())
+  //     .filter((name) => name);
 
-    if (!subjectId || courseNames.length === 0) {
-      setErrors((prev) => ({
-        ...prev,
-        errorWhileSavingData: "Please provide both subject and course names.",
-      }));
-      return;
-    }
+  //   if (!subjectId || courseNames.length === 0) {
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       errorWhileSavingData: "Please provide both subject and course names.",
+  //     }));
+  //     return;
+  //   }
 
-    try {
-      // Optimistically add the new courses to the state
-      startTransition(() => {
-        addOptimisticSubjects({
-          subjectId,
-          courses: courseNames.map((courseName) => ({
-            id: Math.random().toString(36), // Temporary ID for optimistic UI
-            courseName,
-            isCompleted: false,
-          })),
-        });
-      });
+  //   try {
+  //     // Optimistically add the new courses to the state
+  //     startTransition(() => {
+  //       addOptimisticSubjects({
+  //         subjectId,
+  //         courses: courseNames.map((courseName) => ({
+  //           id: Math.random().toString(36), // Temporary ID for optimistic UI
+  //           courseName,
+  //           isCompleted: false,
+  //         })),
+  //       });
+  //     });
 
-      // Perform the actual server request
-      const { error, success } = await AddCourse(subjectId, courseNames);
-      if (error) {
-        setErrors((prev) => ({ ...prev, errorWhileSavingData: error }));
-      }
-      if (success) {
-        setIsAddingCourse(false);
-        setErrors((prev) => ({ ...prev, errorWhileSavingData: "" }));
-      }
-    } catch (err) {
+  //     // Perform the actual server request
+  //     const { error, success } = await AddCourse(subjectId, courseNames);
+  //     if (error) {
+  //       setErrors((prev) => ({ ...prev, errorWhileSavingData: error }));
+  //     }
+  //     if (success) {
+  //       setIsAddingCourse(false);
+  //       setErrors((prev) => ({ ...prev, errorWhileSavingData: "" }));
+  //     }
+  //   } catch (err) {
       
-      setErrors((prev) => ({
-        ...prev,
-        errorWhileSavingData: "Error while saving data.",
-      }));
-    }
-  }
+  //     setErrors((prev) => ({
+  //       ...prev,
+  //       errorWhileSavingData: "Error while saving data.",
+  //     }));
+  //   }
+  // }
 
   // Filter subjects to only show those with courses
   const subjectsWithCourses = optimisticSubjects.filter(
@@ -136,7 +136,7 @@ export default function CourseContent({ subjects , isShowSubjectName = true }) {
       {/* Add Course Form Modal */}
       {isAddingCourse && (
         <form
-          onSubmit={handleAddCourse}
+          // onSubmit={handleAddCourse}
           className="fixed inset-0 bg-gray-800 dark:bg-black bg-opacity-75 dark:bg-opacity-90 flex items-center justify-center z-50"
         >
           <div className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-md w-full">

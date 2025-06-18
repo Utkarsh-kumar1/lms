@@ -3,23 +3,24 @@ import Topics from "./Topics";
 import { useEffect, useState } from "react";
 import api from "@/axios";
 import Loader from "@/components/Loader";
+import { useSocket } from "@/context/SocketContext";
 
 export default function Page() {
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
 
+  const socket = useSocket();
+  console.log("topcis", activity);
+
   useEffect(() => {
     // Fetch activity data from the API and send id in body
     // console.log("Fetching activity data for user ID:", user.id);
     api
-      .get(
-        "/activity",
-        {
-          headers: {
-            "Content-Type": "application/json",
-          },
-        }
-      )
+      .get("/activity", {
+        headers: {
+          "Content-Type": "application/json",
+        },
+      })
       .then((response) => {
         // console.log("Activity data fetched:", response.data.data);
         setActivity(response.data.data);
@@ -29,6 +30,29 @@ export default function Page() {
         console.error("Error fetching activity:", error);
       });
   }, []);
+
+  // Get updated topics from websocket
+  useEffect(() => {
+    if (!socket) return;
+    console.log("Socket connected for activity updates");
+    socket.on("activityUpdated", (data) => {
+      console.log("Activity updated:", data);
+      setActivity((prevActivity) => {
+        return prevActivity.map((item) =>
+          item?.subtopicId === data?.updatedActivity?.[0]?.subtopicId
+            ? data?.updatedActivity?.[0]
+            : item
+        );
+      });
+
+      // Add coursesAndTopicsToSchedule to activity
+      setActivity((prevActivity) => [
+        ...prevActivity,
+        ...(data?.coursesAndTopicsToSchedule || []),
+      ]);
+
+    });
+  }, [socket]);
 
   // Check if the data is still loading
   if (loading) {

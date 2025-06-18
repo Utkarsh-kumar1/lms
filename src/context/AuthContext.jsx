@@ -42,7 +42,7 @@ export const AuthProvider = ({ children }) => {
       return;
     }
     try {
-      const res = await api.get("/auth/me"); // You should create this endpoint
+      const res = await api.get("/auth/me"); 
       setUser(res.data.data);
     } catch {
       setUser(null);

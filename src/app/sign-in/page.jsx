@@ -31,6 +31,12 @@ export default function ProfileForm() {
   const { toast } = useToast();
   const { login, user } = useAuth();
 
+  if (user) {
+    // If user is logged in, redirect to dashboard
+    router.push("/dashboard");
+    return null; // Prevent rendering the landing page
+  }
+
   async function onSubmit(data) {
     setIsProcessing(true);
     console.log("user details", data);

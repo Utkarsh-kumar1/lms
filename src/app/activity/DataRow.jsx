@@ -35,14 +35,11 @@ export default function DataRow({ subtopic, subIndex }) {
   const router = useRouter();
 
   const handleCreateActivity = async () => {
-    // TODO: Create activity is working but refresh is required for the changes to appear on the screen
     await api.post(`/createActivity`, {
       subtopicId: subtopic.subtopicId,
       subtopicSession: subtopic.courseSession
     })
-      .then(() => {
-        router.refresh();
-      })
+    
   };
 
   const handleChange = (status) => {

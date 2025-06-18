@@ -20,10 +20,12 @@ import DataRow from "./DataRow";
 import FileUploadModal from "./FileUploadModal";
 import clsx from "clsx";
 import api from "@/axios";
+import { useSocket } from "@/context/SocketContext";
 function Topics({ topicIndex, topics }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [isFileViewOpen, setIsFileViewOpen] = useState(false);
   const [notes, setNotes] = useState(null);
+
 
   useEffect(() => {
     const fetchNotes = async() => {

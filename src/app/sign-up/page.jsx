@@ -10,6 +10,8 @@ import {
   CardFooter,
 } from "@/components/ui/card";
 import SkeletonFallback from "./SkeletonFallback";
+import { useRouter } from "next/navigation";
+import { useAuth } from "@/context/AuthContext";
 const SignUpForm = React.lazy(() => import("@/components/SignUpForm"));
 const OTPForm = React.lazy(() => import("@/components/OtpForm"));
 
@@ -22,6 +24,13 @@ export default function ProfileForm() {
     firstName: "",
     lastName: "",
   });
+    const router = useRouter();
+    const { user } = useAuth();
+    if (user) {
+      // If user is logged in, redirect to dashboard
+      router.push("/dashboard");
+      return null; // Prevent rendering the landing page
+    }
   
 
   return (

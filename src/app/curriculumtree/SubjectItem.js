@@ -143,7 +143,7 @@ export default function SubjectItem({ subject }) {
     try {
       console.log("Deleting subject:", subject.id);
       const response = await api.delete(`deleteSubject/${subject.id}`);
-      console.log("Subject deleted successfully:", response);
+      // console.log("Subject deleted successfully:", response);
 
       setIsModalOpen(false);
       setIsEditModalOpen(false);

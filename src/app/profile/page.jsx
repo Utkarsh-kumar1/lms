@@ -1,4 +1,5 @@
 "use client";
+import api from "@/axios";
 import { LoaderCircle, UserRound } from "lucide-react";
 import Image from "next/image";
 import React, { useEffect, useState } from "react";
@@ -11,14 +12,14 @@ function ProfilePage() {
   useEffect(() => {
     const fetchProfile = async () => {
       try {
-        const response = await fetch(`/api/profile`);
-        const data = await response.json();
-        console.log(data);
-        
-       if (data.success) {
-         setProfile(data.data);
-       } else setError(data.message);
-      } catch {
+        const response = await api.get("/userProfile");
+        // console.log(response?.data);
+
+        //  if (response.success) {
+        setProfile(response?.data?.user);
+        //  } else setError(data.message);
+      } catch (error) {
+        console.error("Error fetching profile:", error);
         setError("An error occurred while fetching the profile.");
       } finally {
         setLoading(false);
@@ -27,7 +28,6 @@ function ProfilePage() {
 
     fetchProfile();
   }, []);
- 
 
   if (loading)
     return (
@@ -42,9 +42,9 @@ function ProfilePage() {
       <div className="max-w-4xl mx-auto bg-white/60 backdrop-blur-md rounded-2xl shadow-xl p-8">
         {/* Avatar + Username */}
         <div className="text-center mb-8">
-          {profile.avatarUrl ? (
+          {profile?.avatarUrl ? (
             <Image
-              src={profile.avatarUrl}
+              src={profile?.avatarUrl}
               alt="User Avatar"
               width={128}
               height={128}
@@ -112,4 +112,3 @@ function ProfilePage() {
 }
 
 export default ProfilePage;
-    

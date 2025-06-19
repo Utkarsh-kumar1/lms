@@ -140,11 +140,14 @@ export default function SubjectItem({ subject }) {
   };
 
   const handleDeleteClick = async () => {
-    const { success, error } = await DeleteSubjectAction(subject.id);
-    if (success) {
+    try {
+      console.log("Deleting subject:", subject.id);
+      const response = await api.delete(`deleteSubject/${subject.id}`);
+      console.log("Subject deleted successfully:", response);
+
       setIsModalOpen(false);
       setIsEditModalOpen(false);
-    } else if (error) {
+    } catch (error) {
       setErrors((prev) => ({ ...prev, savingError: error }));
       setIsModalOpen(false);
     }
@@ -152,7 +155,7 @@ export default function SubjectItem({ subject }) {
 
   const handleAddCourse = async (e) => {
     e.preventDefault();
-     const formData = new FormData(e.target);
+    const formData = new FormData(e.target);
     const courseNameArray = formData
       .get("CourseName")
       .split(";")

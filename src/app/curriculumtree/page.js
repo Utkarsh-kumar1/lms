@@ -8,6 +8,7 @@ export default function Page() {
   const [subjects, setSubjects] = useState(null);
   const [loading, setLoading] = useState(true);
 
+
   useEffect(() => {
     // Fetch activity data from the API and send id in body
     // console.log("Fetching activity data for user ID:", user.id);
@@ -26,6 +27,9 @@ export default function Page() {
         console.error("Error fetching activity:", error);
       });
   }, []);
+
+
+
 
   // Check if the data is still loading
   if (loading) {

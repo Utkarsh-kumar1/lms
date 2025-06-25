@@ -140,11 +140,14 @@ export default function SubjectItem({ subject }) {
   };
 
   const handleDeleteClick = async () => {
-    const { success, error } = await DeleteSubjectAction(subject.id);
-    if (success) {
+    try {
+      console.log("Deleting subject:", subject.id);
+      const response = await api.delete(`deleteSubject/${subject.id}`);
+      // console.log("Subject deleted successfully:", response);
+
       setIsModalOpen(false);
       setIsEditModalOpen(false);
-    } else if (error) {
+    } catch (error) {
       setErrors((prev) => ({ ...prev, savingError: error }));
       setIsModalOpen(false);
     }
@@ -152,7 +155,7 @@ export default function SubjectItem({ subject }) {
 
   const handleAddCourse = async (e) => {
     e.preventDefault();
-     const formData = new FormData(e.target);
+    const formData = new FormData(e.target);
     const courseNameArray = formData
       .get("CourseName")
       .split(";")
@@ -167,13 +170,14 @@ export default function SubjectItem({ subject }) {
     if (filteredCourses.length === 0) {
       setErrors((prev) => ({
         ...prev,
-        errorwhileSaving: "Please enter valid subjects.",
+        errorwhileSaving: "Please enter valid courses.",
       }));
       return;
     }
 
     try {
-      const res = await api.post("addCourses", {
+      const res = await api.post("/addCourses", {
+        subjectId: subject?.id,
         courses: filteredCourses,
       });
       console.log("Courses added successfully:", res);
@@ -181,7 +185,6 @@ export default function SubjectItem({ subject }) {
       setCourses((prev) => [...res.data.data, ...prev]);
 
       setIsAddingCourse(false); // here
-      setCourseInput("");
     } catch (error) {
       console.error("Error adding courses:", error);
       if (error.response && error.response.data) {

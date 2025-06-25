@@ -1,17 +1,20 @@
 'use client";';
 
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import SubjectItem from "./SubjectItem";
 import { IoAddCircleSharp } from "react-icons/io5";
 import { Check, X } from "lucide-react";
 import api from "@/axios";
 import { set } from "zod";
+import { useSocket } from "@/context/SocketContext";
 
 export default function CurriculumTree({ data }) {
   const [isAddingSubject, setIsAddingSubject] = useState(false);
   const [subjectInput, setSubjectInput] = useState("");
   const [errors, setErrors] = useState({ errorwhileSaving: "" });
   const [subjects, setSubjects] = useState(data);
+
+  const socket = useSocket();
 
   const handleInputChange = (e) => {
     if (errors.errorwhileSaving) {
@@ -64,6 +67,18 @@ export default function CurriculumTree({ data }) {
       }
     }
   };
+
+  useEffect(() => {
+    if (!socket) return;
+
+    // Listen for the 'subjectsUpdated' event
+    socket.on("subjectDeleted", (data) => {
+
+      setSubjects((prevSubjects) =>
+        prevSubjects.filter((subject) => subject.id !== data.subjectId)
+      );
+    });
+  }, [socket]);
 
   return (
     <div className="mx-auto bg-white dark:bg-black shadow rounded-lg p-4 ">

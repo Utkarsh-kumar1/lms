@@ -5,7 +5,7 @@ import { useState } from "react";
 import { BsCheckCircleFill, BsCircle, BsPencilSquare } from "react-icons/bs";
 import { IoClose } from "react-icons/io5";
 
-export default function SubTopicItem({ subtopic }) {
+export default function SubTopicItem({ subtopic, handleSubTopicDelete }) {
   const [isEditing, setIsEditing] = useState(false);
   const [newsubtopicName, setnewsubtopicName] = useState(subtopic.subtopicName);
   const [isCompleted, setIsCompleted] = useState(subtopic.isCompleted);
@@ -68,18 +68,7 @@ export default function SubTopicItem({ subtopic }) {
     // }
   };
 
-  const handleDeleteClick = async (e) => {
-    setIsProcessing(true);
-    const { error, success } = await DeleteSubTopic(subtopic.id);
-    if (success) {
-      setIsDeleteModalOpen(false);
-      setIsEditing(false);
-      setIsProcessing(false);
-    } else if (error) {
-      setIsProcessing(false);
-      setErrors((prev) => ({ ...prev, deletionError: error }));
-    }
-  };
+  
 
   const handleSaveClick = async () => {
     if (
@@ -255,7 +244,7 @@ export default function SubTopicItem({ subtopic }) {
                 Cancel
               </button>
               <button
-                onClick={handleDeleteClick}
+                onClick={() => handleSubTopicDelete(subtopic?.id)}
                 className="px-4 py-2 bg-green-600 dark:bg-green-700 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-800 transition duration-200 disabled:cursor-progress"
                 disabled={isProcessing}
               >

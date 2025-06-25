@@ -170,13 +170,14 @@ export default function SubjectItem({ subject }) {
     if (filteredCourses.length === 0) {
       setErrors((prev) => ({
         ...prev,
-        errorwhileSaving: "Please enter valid subjects.",
+        errorwhileSaving: "Please enter valid courses.",
       }));
       return;
     }
 
     try {
-      const res = await api.post("addCourses", {
+      const res = await api.post("/addCourses", {
+        subjectId: subject?.id,
         courses: filteredCourses,
       });
       console.log("Courses added successfully:", res);
@@ -184,7 +185,6 @@ export default function SubjectItem({ subject }) {
       setCourses((prev) => [...res.data.data, ...prev]);
 
       setIsAddingCourse(false); // here
-      setCourseInput("");
     } catch (error) {
       console.error("Error adding courses:", error);
       if (error.response && error.response.data) {

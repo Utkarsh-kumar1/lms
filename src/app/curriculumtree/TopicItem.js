@@ -7,6 +7,7 @@ import { FilePlus2, NotebookPen } from "lucide-react";
 import { BsCheckCircleFill, BsCircle, BsPencilSquare } from "react-icons/bs";
 import { IoClose } from "react-icons/io5";
 import SubTopicItem from "./SubTopicItem";
+import { IoAddCircleSharp } from "react-icons/io5";
 
 export default function TopicItem({ topic }) {
   const [open, setOpen] = useState(false);
@@ -25,6 +26,8 @@ export default function TopicItem({ topic }) {
     savingError: "",
     fileError: "",
   });
+  const [isAddingSubTopic, setIsAddingSubTopic] = useState(false);
+  const [dragIndex, setDragIndex] = useState(null);
 
   const handleToggle = async () => {
     const newOpen = !open;
@@ -82,6 +85,39 @@ export default function TopicItem({ topic }) {
   //     router,
   //     topic.isCompleted,
   //   ]);
+
+  const handleSubTopicDelete = async (subtopicId) => {
+    setIsProcessing(true);
+    setErrors((prev) => ({ ...prev, deletionError: "" }));
+
+    try {
+      const response = await api.delete("/deleteSubtopic", {
+        data: {
+          subTopicId: subtopicId,
+          topicId: topic.id,
+        },
+      });
+
+      if (response.data.success) {
+        // ✅ Remove deleted item from frontend
+        setSubtopics((prev) => prev.filter((s) => s.id !== subtopicId));
+        setIsDeleteModalOpen(false);
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          deletionError: response.data.message || "Could not delete subtopic",
+        }));
+      }
+    } catch (err) {
+      console.error("Error while deleting subtopic:", err);
+      setErrors((prev) => ({
+        ...prev,
+        deletionError: "Error while deleting subtopic. Please try again.",
+      }));
+    } finally {
+      setIsProcessing(false);
+    }
+  };
 
   const handleDeleteClick = async (e) => {
     setIsProcessing(true);
@@ -170,16 +206,111 @@ export default function TopicItem({ topic }) {
     }
   };
 
+  const handleAddSubTopic = async (e) => {
+    e.preventDefault();
+    const formData = new FormData(e.target);
+    const subTopicNameArray = formData
+      .get("CourseName")
+      .split(";")
+      .map((name) => name.trim())
+      .filter((name) => name);
+
+    // Check for duplicates, empty strings, and whitespace
+    const uniqueSubTopics = new Set(subTopicNameArray);
+    const filteredSubTopics = Array.from(uniqueSubTopics).filter(
+      (subject) => subject && subject.trim() !== ""
+    );
+    if (filteredSubTopics.length === 0) {
+      setErrors((prev) => ({
+        ...prev,
+        errorwhileSaving: "Please enter valid topics.",
+      }));
+      return;
+    }
+
+    try {
+      const res = await api.post("/addSubTopic", {
+        topicId: topic?.id,
+        subtopics: filteredSubTopics,
+      });
+      console.log("Courses added successfully:", res);
+
+      setSubtopics((prev) => [...prev, ...res.data.data]);
+
+      setIsAddingSubTopic(false); // here
+    } catch (error) {
+      console.error("Error adding courses:", error);
+      if (error.response && error.response.data) {
+        setErrors((prev) => ({
+          ...prev,
+          errorwhileSaving: error.response.data.message,
+        }));
+      } else {
+        setErrors((prev) => ({ ...prev, errorwhileSaving: error }));
+      }
+    }
+  };
+
+  const handleDragStart = (index) => setDragIndex(index);
+
+  const handleDragOver = (e) => {
+    e.preventDefault(); // necessary to allow drop
+  };
+
+  const handleDrop = async (dropIndex) => {
+    if (dragIndex === null || dragIndex === dropIndex) return;
+
+    const updated = [...subtopics];
+    const [moved] = updated.splice(dragIndex, 1);
+    updated.splice(dropIndex, 0, moved);
+
+    // Reset indexes
+    const reindexed = updated.map((s, i) => ({
+      ...s,
+      subTopicIndex: i + 1,
+    }));
+
+    // 🔍 Only send items whose index changed
+    const updatesToSend = reindexed
+      .filter((item, idx) => {
+        const original = subtopics.find((s) => s.id === item.id);
+        return original?.subTopicIndex !== item.subTopicIndex;
+      })
+      .map((item) => ({
+        id: item.id,
+        subTopicIndex: item.subTopicIndex,
+      }));
+
+    if (updatesToSend.length === 0) {
+      setDragIndex(null);
+      return;
+    }
+
+    try {
+      await api.patch("/updateSubtopicIndex", {
+        updates: updatesToSend,
+        topicId: topic.id,
+      });
+
+      // ✅ Only update state after successful API call
+      setSubtopics(reindexed);
+    } catch (err) {
+      console.error("Error while updating order:", err);
+    } finally {
+      setDragIndex(null);
+    }
+  };
+
   return (
     <div className="ml-4">
       <div
         onClick={handleToggle}
-        className="cursor-pointer flex items-center gap-2 py-1 text-gray-800 hover:text-blue-600 w-full"
+        className="group cursor-pointer flex items-center gap-2 py-1 text-gray-800 hover:text-blue-600 w-full"
       >
         {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         <div className="bg-gray-50 dark:bg-gray-700 p-4 rounded-md shadow-sm mb-4 cursor-pointer w-full">
           <div className="flex items-center justify-between">
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2 ">
               <button
                 // onClick={toggleCompletionStatus}
                 aria-label="Toggle Completion Status"
@@ -193,12 +324,12 @@ export default function TopicItem({ topic }) {
                   />
                 )}
               </button>
-              <h4 className="text-sm sm:text-lg font-semibold text-gray-700 dark:text-gray-300">
+              <h4 className="text-sm sm:text-lg font-semibold text-gray-700 dark:text-gray-300 w-full">
                 {topic.topicIndex}. {newtopicName}
               </h4>
             </div>
 
-            <div className="flex items-center space-x-2">
+            <div className="group-hover:flex items-center justify-end gap-2 hidden">
               {topic?.notes?.length > 0 && (
                 <button
                   onClick={() => setIsFileViewOpen((prev) => !prev)}
@@ -207,15 +338,24 @@ export default function TopicItem({ topic }) {
                   <NotebookPen />
                 </button>
               )}
+              <button
+                className="text-gray-500 dark:text-gray-400 hover:text-blue-700 dark:hover:text-blue-500 transition"
+                onClick={(e) => {
+                  e.stopPropagation();
+                  setIsAddingSubTopic(true);
+                }}
+              >
+                <IoAddCircleSharp className="h-8 w-8" />
+              </button>
 
               <button
                 onClick={(e) => {
                   e.stopPropagation();
                   setIsEditing(true);
                 }}
-                className="text-indigo-600 dark:text-indigo-400 hover:text-indigo-800 dark:hover:text-indigo-300 transition"
+                className="flex items-center gap-2 px-4 py-2 bg-gray-600 text-white rounded-lg hover:bg-blue-700 transition-all duration-200 ease-in-out focus:outline-none focus:ring-2 focus:ring-blue-500"
               >
-                <BsPencilSquare size={20} />
+                <BsPencilSquare className="h-5 w-5" />
               </button>
             </div>
           </div>
@@ -260,6 +400,63 @@ export default function TopicItem({ topic }) {
               </div>
             )}
           </div>
+
+          {isAddingSubTopic && (
+            <form
+              onSubmit={handleAddSubTopic}
+              className="fixed inset-0 bg-gray-800 dark:bg-black bg-opacity-30 dark:bg-opacity-30 flex items-center justify-center z-50"
+            >
+              <div
+                className="bg-white dark:bg-gray-800 rounded-lg shadow-lg p-8 max-w-md w-full"
+                onClick={(e) => e.stopPropagation()}
+              >
+                <h2 className="text-xl font-semibold mb-4 text-gray-800 dark:text-gray-200">
+                  {topic?.topicName} - Add a New TopicItem
+                </h2>
+                <div className="sm:p-6 p-4 mb-4 rounded-lg shadow-lg transition-transform transform flex flex-col gap-4 items-center w-full max-w-lg mx-auto bg-white dark:bg-gray-800">
+                  <div className="flex flex-col gap-4 items-center w-full">
+                    {/* Input for Course Names */}
+                    <div className="relative w-full">
+                      <input
+                        type="text"
+                        autoFocus
+                        placeholder="Course Names (semi-colon separated)"
+                        className="text-lg font-semibold text-gray-800 dark:text-gray-100 border-b border-gray-400 dark:border-gray-600 outline-none bg-transparent w-full text-center sm:text-left p-2 placeholder:text-sm sm:placeholder:text-lg"
+                        required
+                        name="CourseName"
+                      />
+                    </div>
+                  </div>
+                </div>
+                {errors.errorWhileSavingData && (
+                  <p className="w-full text-center text-red-400 dark:text-red-300">
+                    {errors.errorWhileSavingData}
+                  </p>
+                )}
+                {/* Save and Cancel Buttons */}
+                <div className="flex items-center justify-around w-full">
+                  <button
+                    className="mt-4 text-red-500 dark:text-red-400 hover:text-red-700 dark:hover:text-red-500 transition"
+                    onClick={() => {
+                      setIsAddingSubTopic(false);
+                      setErrors((prev) => ({
+                        ...prev,
+                        errorWhileSavingData: "",
+                      }));
+                    }}
+                  >
+                    Cancel
+                  </button>
+                  <button
+                    className="mt-4 text-green-500 dark:text-green-400 hover:text-green-700 dark:hover:text-green-500 transition"
+                    type="submit"
+                  >
+                    Save
+                  </button>
+                </div>
+              </div>
+            </form>
+          )}
 
           {isEditing && (
             <div
@@ -409,8 +606,17 @@ export default function TopicItem({ topic }) {
             <p className="text-sm text-gray-400">Loading...</p>
           ) : (
             <ul className="list-disc list-inside text-gray-700">
-              {subtopics?.map((sub) => (
-                <SubTopicItem key={sub.id} subtopic={sub} />
+              {subtopics?.map((sub, index) => (
+                <li
+                  key={sub.id}
+                  draggable
+                  onDragStart={() => handleDragStart(index)}
+                  onDragOver={handleDragOver}
+                  onDrop={() => handleDrop(index)}
+                  className="list-none cursor-move"
+                >
+                  <SubTopicItem key={sub.id} subtopic={sub} handleSubTopicDelete={handleSubTopicDelete} />
+                </li>
               ))}
             </ul>
           )}

@@ -317,6 +317,8 @@ export default function SubjectItem({ subject }) {
                 </button>
               </div>
 
+              <div className="mb-2">UUID: <span className=" select-text">{ subject?.id }</span></div>
+
               <input
                 type="text"
                 value={newSubjectName}

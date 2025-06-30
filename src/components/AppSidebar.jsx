@@ -15,6 +15,8 @@ import {
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { FiUserPlus } from "react-icons/fi";
+import { IoMdAddCircle } from "react-icons/io";
+
 import { usePathname, useRouter } from "next/navigation";
 import {
   HomeIcon,
@@ -95,6 +97,12 @@ export function AppSidebar() {
       name: "Curriculumtree",
       url: "/curriculumtree",
       icon: BookIcon,
+      isActive: user !== null,
+    },
+    {
+      name: "Upload",
+      url: "/upload",
+      icon: IoMdAddCircle ,
       isActive: user !== null,
     },
     {

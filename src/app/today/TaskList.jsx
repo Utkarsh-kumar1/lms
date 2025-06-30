@@ -187,7 +187,7 @@ export default function TaskList({ initialTasks, changeDate }) {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row  w-full h-auto  justify-items-end items-center space-x-4 fixed z-10 ">
+      <div className="flex flex-col sm:flex-row  w-full h-auto  justify-items-end items-center space-x-4 fixed z-10 bg-white/30 backdrop-blur-md  ">
         {/* Date change section */}
         <div className="mx-2 w-full ">
           <div className="flex items-center justify-center sm:justify-between space-x-4 rounded-lg ">

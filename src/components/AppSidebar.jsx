@@ -11,10 +11,12 @@ import {
   SidebarTrigger,
   useSidebar,
 } from "@/components/ui/sidebar";
-import { signOut, useSession } from "next-auth/react";
+// import { signOut, useSession } from "next-auth/react";
 import Link from "next/link";
 import { cn } from "@/lib/utils";
 import { FiUserPlus } from "react-icons/fi";
+import { IoMdAddCircle } from "react-icons/io";
+
 import { usePathname, useRouter } from "next/navigation";
 import {
   HomeIcon,
@@ -40,9 +42,10 @@ import {
 } from "./ui/dropdown-menu";
 import Image from "next/image";
 import { IoToday, IoTodayOutline } from "react-icons/io5";
+import { useAuth } from "@/context/AuthContext";
 
 export function AppSidebar() {
-  const { data, status } = useSession();
+  // const { data, status } = useSession();
   const router = useRouter();
   const pathname = usePathname();
   const {
@@ -55,78 +58,70 @@ export function AppSidebar() {
     toggleSidebar,
   } = useSidebar();
 
+  const { user, logout } = useAuth();
+  // console.log(user);
+  // console.log(user === null);
+
   const NAV_OPTIONS = [
     {
       name: "Dashboard",
       url: "/dashboard",
       icon: LayoutDashboardIcon,
-      isActive: status === "authenticated",
+      isActive: user !== null,
     },
     {
       name: "Today",
       url: "/today",
       icon: IoTodayOutline,
-      isActive: status === "authenticated",
+      isActive: user !== null,
     },
     {
       name: "MindMap",
       url: "/mindmap",
       icon: Brain,
-      isActive: status === "authenticated",
+      isActive: user !== null,
     },
     {
       name: "Activity",
       url: "/activity",
       icon: ActivityIcon,
-      isActive: status === "authenticated",
+      isActive: user !== null,
     },
     {
       name: "Revision",
       url: "/revision",
       icon: EditIcon,
-      isActive: status === "authenticated",
+      isActive: user !== null,
     },
     {
-      name: "Subjects",
-      url: "/subjects",
+      name: "Curriculumtree",
+      url: "/curriculumtree",
       icon: BookIcon,
-      isActive: status === "authenticated",
+      isActive: user !== null,
     },
     {
-      name: "Courses",
-      url: "/courses",
-      icon: BookIcon,
-      isActive: status === "authenticated",
-    },
-    {
-      name: "Topics",
-      url: "/topics",
-      icon: BookIcon,
-      isActive: status === "authenticated",
-    },
-    {
-      name: "Sub Topics",
-      url: "/subTopics",
-      icon: BookIcon,
-      isActive: status === "authenticated",
+      name: "Upload",
+      url: "/upload",
+      icon: IoMdAddCircle ,
+      isActive: user !== null,
     },
     {
       name: "Home",
       url: "/",
       icon: HomeIcon,
-      isActive: status === "unauthenticated",
+      isActive: user === null,
     },
     {
       name: "Sign In",
       url: "/sign-in",
       icon: LogInIcon,
-      isActive: status === "unauthenticated",
+      isActive: user === null,
     },
     {
       name: "Sign Up",
       url: "/sign-up",
       icon: FiUserPlus,
-      isActive: status === "unauthenticated",
+      isActive: user === null,
     },
   ];
 
@@ -209,7 +204,7 @@ export function AppSidebar() {
       </SidebarContent>
 
       {/* Sidebar Footer */}
-      {data && (
+      {user && (
         <SidebarFooter className="px-2 py-4 border-t dark:border-gray-700">
           <SidebarMenu>
             <SidebarMenuItem>
@@ -217,7 +212,7 @@ export function AppSidebar() {
                 <DropdownMenuTrigger asChild>
                   <SidebarMenuButton className="flex items-center w-full text-black transition-colors duration-200 px-4 py-2 rounded-lg dark:text-gray-200 dark:hover:bg-gray-600">
                     <User2 className="text-gray-400 mr-3 w-5 h-5" />
-                    <span>{data?.firstName + " " + data?.lastName}</span>
+                    <span>{user?.firstName + " " + user?.lastName}</span>
                     <ChevronUp className="ml-auto text-gray-500 w-4 h-4" />
                   </SidebarMenuButton>
                 </DropdownMenuTrigger>
@@ -228,20 +223,27 @@ export function AppSidebar() {
                   align="end"
                   className="mt-2 text-gray-300 shadow-lg rounded-md w-full overflow-hidden dark:bg-gray-800"
                 >
-                  <DropdownMenuItem className="hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 px-4 py-2 flex items-center">
+                  <DropdownMenuItem className="hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 px-4 py-2 flex items-center"
+                    onClick={() => {
+                      if (isMobile || open) {
+                        toggleSidebar();
+                      }
+                      router.push("/profile");
+                    }}
+                  >
                     <HomeIcon className="mr-3 w-5 h-5 text-gray-400" />
                     <span>Profile</span>
                   </DropdownMenuItem>
-                  <DropdownMenuItem className="hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 px-4 py-2 flex items-center">
+                  {/* <DropdownMenuItem className="hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 px-4 py-2 flex items-center">
                     <Settings className="mr-3 w-5 h-5 text-gray-400" />
                     <span>Settings</span>
-                  </DropdownMenuItem>
+                  </DropdownMenuItem> */}
                   <DropdownMenuItem className="hover:bg-gray-700 dark:hover:bg-gray-600 transition-colors duration-200 px-4 py-2 flex items-center">
                     <button
                       onClick={() => {
                         // Trigger a custom logout event
                         window.dispatchEvent(new Event("logout"));
-                        signOut();
+                        logout();
                       }}
                       className="flex items-center text-gray-300 hover:text-red-400 transition-colors duration-200 w-full"
                     >

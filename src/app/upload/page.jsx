@@ -1,4 +1,4 @@
-import Today from "./Today";
+import ExcelUpload from "./ExcelUpload";
 
 
 
@@ -6,7 +6,7 @@ export default async function Page() {
 
   return (
     <div>
-      <Today  />
+      <ExcelUpload />
       
     </div>
   );

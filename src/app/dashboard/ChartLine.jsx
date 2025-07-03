@@ -1,23 +1,147 @@
+"use client";
+import api from "@/axios";
+import Loader from "@/components/Loader";
+import { useAuth } from "@/context/AuthContext";
 import { ResponsiveLine } from "@nivo/line";
 import { useTheme } from "next-themes";
-import React, { useEffect, useState } from "react";
+import React, { use, useEffect, useState } from "react";
 import colors from "tailwindcss/colors";
 
-export default function ChartLine({ data }) {
+async function fetchChartLineData() {
+  // Fetch activities and revisions for the last 6 days for chart data
+  const response = await api.get("/chartData", {
+    params: {
+      n: '6',
+    },
+  });
+
+
+  const result = response.data.data;
+
+  // Helper function to get the name of the day
+  const getDayName = (date) =>
+    ["Sun", "Mon", "Tue", "Wed", "Thu", "Fri", "Sat"][date.getDay()];
+
+  // Helper function to get the dates for the last 6 days
+  const getLast6Days = () => {
+    const days = [];
+    for (let i = 6; i >= 0; i--) {
+      const date = new Date();
+      date.setDate(date.getDate() - i);
+      days.push({
+        dayName: getDayName(date),
+        date,
+      });
+    }
+
+    return days;
+  };
+
+  const processResults = (data) => {
+    return data?.reduce((acc, item) => {
+      const dayName = getDayName(
+        new Date(item.end || item.startDate || item.dueDate)
+      );
+      acc[dayName] = (acc[dayName] || 0) + 1;
+      return acc;
+    }, {});
+  };
+
+  let activityCounts = processResults(result.activities);
+  let revisionCounts = processResults(result.revisions);
+  let dailyActivitiesScheduledsCounts = processResults(result.tasks);
+
+  // Check if any count length is 0 then add Mon to 0
+  if (!activityCounts || Object.keys(activityCounts).length === 0) {
+    activityCounts = {};
+    activityCounts["Mon"] = 0;
+  }
+  if (!revisionCounts || Object.keys(revisionCounts).length === 0) {
+    revisionCounts = {};
+    revisionCounts["Mon"] = 0;
+  }
+  if (!dailyActivitiesScheduledsCounts || Object.keys(dailyActivitiesScheduledsCounts).length === 0) {
+    dailyActivitiesScheduledsCounts = {};
+    dailyActivitiesScheduledsCounts["Mon"] = 0;
+  }
+
+
+  // Get the last 6 days in the correct order
+  const last6Days = getLast6Days();
+
+  // Map the results to match the last 6 days
+  const activityResult = last6Days.map(({ dayName }) => ({
+    id: "activity",
+    x: dayName,
+    y: activityCounts[dayName] || 0,
+  }));
+
+  const revisionResult = last6Days.map(({ dayName }) => ({
+    id: "revision",
+    x: dayName,
+    y: revisionCounts[dayName] || 0,
+  }));
+  const dailyActivitiesScheduledsResult = last6Days.map(({ dayName }) => ({
+    id: "DailyActivity",
+    x: dayName,
+    y: dailyActivitiesScheduledsCounts[dayName] || 0,
+  }));
+
+  // Format the final response for Nivo
+  return [
+    {
+      id: "activity",
+      color: "hsl(81, 70%, 50%)",
+      data: activityResult,
+    },
+    {
+      id: "revision",
+      color: "hsl(70, 70%, 50%)",
+      data: revisionResult,
+    },
+    {
+      id: "DailyActivity",
+      color: "hsl(70, 70%, 50%)",
+      data: dailyActivitiesScheduledsResult,
+    },
+  ];
+}
+
+export default function ChartLine() {
   const { theme: themeMode } = useTheme();
   const [isDarkMode, setIsDarkMode] = useState(themeMode === "dark");
+  const [data, setData] = useState(null);
+  // const { user } = useAuth();
+  const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    setIsDarkMode(themeMode === "dark");
-  }, [themeMode]);
+    setLoading(true);
+    const fetchData = async () => {
+      try {
+        // Fetch chart data from the API
+        const chartData = await fetchChartLineData();
+        setData(chartData);
+      } catch (error) {
+        console.error("Error fetching chart data:", error);
+        setData([]);
+      } finally {
+        setLoading(false);
+      }
+    };
+    fetchData();
+  }, []);
 
   // Check if all y-values are zero
-  const allZero = data.every((series) =>
+  const allZero = data?.every((series) =>
     series.data.every((point) => point.y === 0)
   );
 
   // Set the minimum Y-axis value based on whether all y-values are zero
   const maxYValue = allZero ? 4 : "auto";
+
+  useEffect(() => {
+    setIsDarkMode(themeMode === "dark");
+  }, [themeMode]);
 
   // Define the theme for dark mode and light mode using Tailwind colors
   const theme = {
@@ -58,6 +182,10 @@ export default function ChartLine({ data }) {
       },
     },
   };
+
+  if (loading || !data) {
+    return <Loader />;
+  }
 
   return (
     <div>

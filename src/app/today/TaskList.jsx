@@ -120,14 +120,20 @@ export default function TaskList({ initialTasks, changeDate }) {
   useEffect(() => {
     // console.log("In Tasklist socket", socket);
     if (socket) {
-      socket.on('taskUpdated', (data) => {
+      socket.on("taskUpdated", (data) => {
         // console.log("getting update from websocket", data.updatedTask);
         onUpdate(data.updatedTask[0]);
       });
 
+      socket.on("taskCreated", (data) => {
+        // console.log("getting update from websocket", data.updatedTask);
+        onAdd(data.createdTask[0]);
+      });
+
       return () => {
         // console.log("Cleaning up socket listener for taskUpdated");
-        socket.off('taskUpdated');
+        socket.off("taskUpdated");
+        socket.off("taskCreated");
       };
     }
   }, [socket]);
@@ -180,10 +186,10 @@ export default function TaskList({ initialTasks, changeDate }) {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row  w-full  justify-items-end items-center space-x-4">
+      <div className="flex flex-col sm:flex-row  w-full h-auto  justify-items-end items-center space-x-4 fixed z-10 bg-white/30 backdrop-blur-md pr-24  ">
         {/* Date change section */}
-        <div className="mx-2 w-full">
-          <div className="flex items-center justify-center sm:justify-between space-x-4 rounded-lg">
+        <div className="mx-2 w-full ">
+          <div className="flex items-center justify-center sm:justify-between space-x-4 rounded-lg ">
             <div className="flex items-center justify-between space-x-4">
               {/* Left Arrow */}
               <button
@@ -218,6 +224,7 @@ export default function TaskList({ initialTasks, changeDate }) {
             </div>
           </div>
         </div>
+
         <div className="flex h-11 justify-end items-center space-x-4  max-w-full ">
           {/* Showing count based on status for today's tasks */}
           {tasks?.filter((task) => task.status === "Pending").length > 0 ? (
@@ -307,16 +314,20 @@ export default function TaskList({ initialTasks, changeDate }) {
               ))}
             </select>
           </div>
-          <IoMdAdd
-            className="text-2xl cursor-pointer hover:text-gray-500"
-            onClick={() => setInputTask(true)}
-          />
+          <div>
+            <IoMdAdd
+              className="text-2xl cursor-pointer hover:text-gray-500"
+              onClick={() => setInputTask(true)}
+            />
+          </div>
 
-          <MoreVertical onClick={() => setShowScheduledAndRecuring(true)} />
+          <div>
+            <MoreVertical onClick={() => setShowScheduledAndRecuring(true)} />
+          </div>
         </div>
       </div>
 
-      <div className="mt-4">
+      <div className="mt-4 pt-20 md:pt-10 lg:pt-25">
         {tasks?.length > 0 ? (
           <ul className="space-y-2">
             {tasks.map((task) => (
@@ -335,11 +346,11 @@ export default function TaskList({ initialTasks, changeDate }) {
       {/* For Adding New Task */}
       <TaskInput
         isOpen={inputTask}
-        onClose={(props) => {
+        onClose={() => {
           setInputTask(false);
-          if (props) onAdd(props);
         }}
       />
+
       <ScheduledAndRecuringList
         isOpen={showScheduledAndRecuring}
         onClose={() => setShowScheduledAndRecuring((prev) => !prev)}
@@ -360,38 +371,37 @@ export default function TaskList({ initialTasks, changeDate }) {
       {/* Streak */}
       {showMore && (
         <div className="text-sm space-y-1 m-2">
-        <div>
-          <span className=" text-green-600 dark:text-green-400">
-            Spark (Days 1–7):
-          </span>{" "}
-          Start small to ignite change
+          <div>
+            <span className=" text-green-600 dark:text-green-400">
+              Spark (Days 1–7):
+            </span>{" "}
+            Start small to ignite change
+          </div>
+          <div>
+            <span className=" text-blue-600 dark:text-blue-400">
+              Momentum (Week 2–4):
+            </span>{" "}
+            Build consistency with tiny wins
+          </div>
+          <div>
+            <span className=" text-purple-600 dark:text-purple-400">
+              Rhythm (Month 2–3):
+            </span>{" "}
+            Integrate habits into your flow
+          </div>
+          <div>
+            <span className=" text-yellow-600 dark:text-yellow-400">
+              Identity (Month 4–6):
+            </span>{" "}
+            Become the person your habits reflect
+          </div>
+          <div>
+            <span className=" text-red-600 dark:text-red-400">
+              Mastery (6+ Months):
+            </span>{" "}
+            Expand and reinforce lasting success
+          </div>
         </div>
-        <div>
-          <span className=" text-blue-600 dark:text-blue-400">
-            Momentum (Week 2–4):
-          </span>{" "}
-          Build consistency with tiny wins
-        </div>
-        <div>
-          <span className=" text-purple-600 dark:text-purple-400">
-            Rhythm (Month 2–3):
-          </span>{" "}
-          Integrate habits into your flow
-        </div>
-        <div>
-          <span className=" text-yellow-600 dark:text-yellow-400">
-            Identity (Month 4–6):
-          </span>{" "}
-          Become the person your habits reflect
-        </div>
-        <div>
-          <span className=" text-red-600 dark:text-red-400">
-            Mastery (6+ Months):
-          </span>{" "}
-          Expand and reinforce lasting success
-        </div>
-      </div>
-      
       )}
     </>
   );

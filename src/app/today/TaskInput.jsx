@@ -1,4 +1,4 @@
-import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
+import api from "@/axios";
 import { Blocks } from "lucide-react";
 import { useState, useEffect } from "react";
 
@@ -116,15 +116,16 @@ export default function TaskInput({ isOpen, onClose }) {
       }
     }
     // console.log("Task Submitted:", task);
-    const { success, id, error } = await AddOrUpdateTasks(task);
-    clearStates();
-    const newTask = {
-      ...task,
-      id: id,
-      startTime: task.startTime + ":00",
-      status: 'Pending',
-    };
-    onClose(newTask);
+    try {
+      const response = await api.post("/createTask", {
+        ...task,
+      });
+    } catch (error) {
+      console.error("Error submitting task:", error);
+    } finally {
+      clearStates();
+      onClose();
+    }
   };
 
   const handleCancel = () => {

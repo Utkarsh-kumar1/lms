@@ -1,19 +1,17 @@
 import { Inter } from "next/font/google";
 import "./globals.css";
-import AuthProvider from "@/context/AuthProvider";
 import { Toaster } from "@/components/ui/toaster";
 import Header from "@/components/Header";
 import { SidebarProvider, SidebarTrigger } from "@/components/ui/sidebar";
 import { AppSidebar } from "@/components/AppSidebar";
 import { ThemeProvider } from "@/context/theme-provider";
-import { getServerSession } from "next-auth";
-import { authOptions } from "./api/auth/[...nextauth]/options";
 import { SocketProvider } from "@/context/SocketContext";
+import { AuthProvider } from "@/context/AuthContext";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata = {
-  title: "LMS",
+  title: "Ignify",
   description: "Goals Management System",
   head: (
     <>
@@ -30,7 +28,6 @@ export const metadata = {
 };
 
 export default async function RootLayout({ children }) {
-  const session = await getServerSession(authOptions);
 
   return (
     <html lang="en" suppressHydrationWarning>
@@ -45,7 +42,7 @@ export default async function RootLayout({ children }) {
           <AuthProvider>
             <SocketProvider>
               <SidebarProvider defaultOpen={false}>
-                {session && <AppSidebar />}
+                <AppSidebar />
                 <main className=" w-full min-h-screen flex flex-col   bg-gray-100  dark:bg-gray-800">
                   <Header />
 

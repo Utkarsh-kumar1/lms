@@ -18,8 +18,9 @@ import React, { useState } from "react";
 import { NotebookPen } from "lucide-react";
 import ViewNotes from "./ViewNotes";
 
-function Topics({ topic, topicIndex }) {
+function Topics({ topics, topicIndex }) {
   const [isModalOpen, setIsModalOpen] = useState(false);
+  console.log("Topic Name from Accordian", topics, topicIndex);
 
   return (
     <>
@@ -37,7 +38,7 @@ function Topics({ topic, topicIndex }) {
           <AccordionTrigger className="bg-blue-500 text-white p-4 rounded-t-lg hover:bg-blue-600 transition duration-150 ease-in-out flex justify-between items-center dark:bg-darkBlue ">
             {/* Topic Name */}
             <span className=" text-wrap text-left    ">
-              {topic.topicIndex + ". " + topic.topicName}
+              {topics[0]?.topicIndex + ". " + topics[0]?.topicName}
             </span>
 
             {/* View Notes button with icon */}
@@ -56,7 +57,7 @@ function Topics({ topic, topicIndex }) {
           </AccordionTrigger>
           {/* Modal for viewing notes */}
           {isModalOpen && (
-            <ViewNotes isOpen={isModalOpen} notes={topic.notes} />
+            <ViewNotes isOpen={isModalOpen} notes={topics.notes} />
           )}
 
           {/* Accordion Content */}
@@ -79,7 +80,8 @@ function Topics({ topic, topicIndex }) {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {topic.subtopics?.map((subtopic, subIndex) => (
+                {topics ?.sort((a, b) => a.subtopicIndex - b.subtopicIndex)
+                .map((subtopic, subIndex) => (
                   <DataRow key={subIndex} subtopic={subtopic} />
                 ))}
               </TableBody>

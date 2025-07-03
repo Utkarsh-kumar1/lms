@@ -15,9 +15,8 @@ import {
   Trash2,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import { AddOrUpdateTasks } from "@/actions/AddOrUpdateTasks";
 import axios from "axios";
-import { useSession } from "next-auth/react";
+import { useAuth } from "@/context/AuthContext";
 
 function Header() {
   const pathname = usePathname();
@@ -32,13 +31,14 @@ function Header() {
   const [todos, setTodos] = useState([]);
   const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
   const [showList, setShowList] = useState(false);
-  const { data, status } = useSession();
+  // const { data, status } = useSession();
+  const { user } = useAuth();
 
   // Ensures the component is mounted before rendering theme-dependent content
   useEffect(() => setMounted(true), []);
 
   useEffect(() => {
-    if (status === "authenticated") {
+    if (user) {
       // Fetch building blocks
       const today = "todo";
 
@@ -53,9 +53,9 @@ function Header() {
           console.error(error);
         }
       };
-      fetchToDos();
+      // fetchToDos();
     }
-  }, [refreshData, status]);
+  }, [refreshData, user]);
 
   const paths = decodeURI(pathname).split("/");
 
@@ -82,7 +82,8 @@ function Header() {
 
     const title = task;
 
-    const { success, error } = await AddOrUpdateTasks({ title });
+    // TODO: Add task
+    // const { success, error } = await AddOrUpdateTasks({ title });
     if (success) {
       setRefreshData(!refreshData);
     }
@@ -133,53 +134,53 @@ function Header() {
     return { formattedDate, formattedTime };
   };
 
-  const showTodo = todos?.length > 0 && (
-    <div className="relative">
-      {/* Title Button with Animated Width */}
-      <div
-        className="flex items-center justify-center cursor-pointer select-none bg-orange-200 hover:bg-orange-300 hover:text-gray-800 shadow-md rounded-lg p-2 focus:ring-2 focus:ring-orange-300 transition-all duration-300 ease-in-out"
-        onClick={handleTitleClick}
-      >
-        <span className="inline-block transition-all duration-300 ease-in-out">
-          {todos[currentTitleIndex]?.title}
-        </span>
-      </div>
+  // const showTodo = todos?.length > 0 && (
+  //   <div className="relative">
+  //     {/* Title Button with Animated Width */}
+  //     <div
+  //       className="flex items-center justify-center cursor-pointer select-none bg-orange-200 hover:bg-orange-300 hover:text-gray-800 shadow-md rounded-lg p-2 focus:ring-2 focus:ring-orange-300 transition-all duration-300 ease-in-out"
+  //       onClick={handleTitleClick}
+  //     >
+  //       <span className="inline-block transition-all duration-300 ease-in-out">
+  //         {todos[currentTitleIndex]?.title}
+  //       </span>
+  //     </div>
 
-      {/* Task List (Fixed Width) */}
-      {showList && (
-        <div className="absolute top-full right-0 bg-white p-4 shadow-lg w-64 h-48 overflow-y-auto border mt-2 rounded-lg">
-          <ul className="divide-y-4 divide-gray-200">
-            {todos.map((item) => {
-              const { formattedDate, formattedTime } = formatDate(
-                item?.createdAt
-              );
-              return (
-                <li
-                  key={item?.id}
-                  className="p-3 text-sm text-gray-700 flex flex-col"
-                >
-                  {/* Task Title */}
-                  <span className="font-semibold">{item?.title}</span>
+  //     {/* Task List (Fixed Width) */}
+  //     {showList && (
+  //       <div className="absolute top-full right-0 bg-white p-4 shadow-lg w-64 h-48 overflow-y-auto border mt-2 rounded-lg">
+  //         <ul className="divide-y-4 divide-gray-200">
+  //           {todos.map((item) => {
+  //             const { formattedDate, formattedTime } = formatDate(
+  //               item?.createdAt
+  //             );
+  //             return (
+  //               <li
+  //                 key={item?.id}
+  //                 className="p-3 text-sm text-gray-700 flex flex-col"
+  //               >
+  //                 {/* Task Title */}
+  //                 <span className="font-semibold">{item?.title}</span>
 
-                  {/* Date & Time */}
-                  <div className="text-xs text-gray-500 mt-1 flex justify-between items-center border-t pt-2">
-                    <span>{formattedDate}</span>
-                    <Trash2
-                      onClick={() => {
-                        deleteTodo(item?.id);
-                      }}
-                      className="w-3 h-3 text-red-500 cursor-pointer"
-                    />
-                    <span>{formattedTime}</span>
-                  </div>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      )}
-    </div>
-  )
+  //                 {/* Date & Time */}
+  //                 <div className="text-xs text-gray-500 mt-1 flex justify-between items-center border-t pt-2">
+  //                   <span>{formattedDate}</span>
+  //                   <Trash2
+  //                     onClick={() => {
+  //                       deleteTodo(item?.id);
+  //                     }}
+  //                     className="w-3 h-3 text-red-500 cursor-pointer"
+  //                   />
+  //                   <span>{formattedTime}</span>
+  //                 </div>
+  //               </li>
+  //             );
+  //           })}
+  //         </ul>
+  //       </div>
+  //     )}
+  //   </div>
+  // )
 
   return (
     <header className="min-h-12 sticky top-0 bg-white/30 backdrop-blur-md flex items-center justify-between px-4 shadow-sm z-50 dark:bg-transparent gap-3">
@@ -210,12 +211,12 @@ function Header() {
       </nav>
 
       {/* Todo show only for tablet and laptop screen */}
-      <div className="absolute top-full right-4 shadow-lg rounded-lg md:static">{showTodo}</div>
+      {/* <div className="absolute top-full right-4 shadow-lg rounded-lg md:static">{showTodo}</div> */}
       
       
-      {status === "authenticated" && (
+      {/* Clickable ToDo Button with animation */}
+      {/* {user && (
         <div className="relative">
-          {/* Clickable ToDo Button with animation */}
           <div
             className="flex items-center justify-center mr-6 cursor-pointer select-none  bg-orange-200 hover:bg-orange-300 hover:text-gray-800 shadow-md rounded-lg p-1 focus:ring-2 focus:ring-orange-300 hover:scale-105"
             onClick={() => setShowInput(!showInput)}
@@ -225,7 +226,6 @@ function Header() {
             <ClipboardList className="p-0.5 transform transition-transform duration-300 ease-in-out hover:scale-110 dark:text-slate-400" />
           </div>
 
-          {/* Floating Input Field & Submit Button with animation */}
           {showInput && (
             <form
               onSubmit={handleSubmit}
@@ -252,7 +252,7 @@ function Header() {
             </form>
           )}
         </div>
-      )}
+      )} */}
 
       <div>
         {/* Only render theme icon if component is mounted */}

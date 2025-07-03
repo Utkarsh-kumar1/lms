@@ -15,7 +15,7 @@ export default function Mindmap() {
       width: 120,
       height: 60,
       fill: "#e0f2fe",
-      isHovered: false,
+      // isHovered: false,
       parentId: null,
     },
     {
@@ -25,8 +25,8 @@ export default function Mindmap() {
       y: 400,
       width: 120,
       height: 60,
-      fill: "#e0f2fe",
-      isHovered: false,
+      fill: "#FF0000",
+      // isHovered: false,
       parentId: "1",
     },
     {
@@ -37,7 +37,7 @@ export default function Mindmap() {
       width: 120,
       height: 60,
       fill: "#e0f2fe",
-      isHovered: false,
+      // isHovered: false,
       parentId: "1",
     },
     {
@@ -48,7 +48,7 @@ export default function Mindmap() {
       width: 120,
       height: 60,
       fill: "#e0f2fe",
-      isHovered: false,
+      // isHovered: false,
       parentId: "1",
     },
   ]);
@@ -288,7 +288,6 @@ export default function Mindmap() {
       width: 120,
       height: 60,
       fill: "#e0f2fe",
-      isHovered: false,
       parentId: parentId,
     };
     setRectangles([...rectangles, newRect]);
@@ -413,7 +412,7 @@ export default function Mindmap() {
                       e.cancelBubble = true;
                       handleAddRectangle(rect.id);
                     }}
-                    visible={rect.isHovered}
+                    visible={rect.isHovered !== undefined && rect.isHovered}
                   >
                     <Rect
                       width={20}

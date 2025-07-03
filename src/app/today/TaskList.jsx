@@ -89,7 +89,6 @@ export default function TaskList({ initialTasks, changeDate }) {
   const [date, setDate] = useState(new Date());
   const [showMore, setShowMore] = useState(false);
 
-
   const socket = useSocket();
 
   // Todo: statusColors and getTextColor can be reused from TaskItem
@@ -121,20 +120,20 @@ export default function TaskList({ initialTasks, changeDate }) {
   useEffect(() => {
     // console.log("In Tasklist socket", socket);
     if (socket) {
-      socket.on('taskUpdated', (data) => {
+      socket.on("taskUpdated", (data) => {
         // console.log("getting update from websocket", data.updatedTask);
         onUpdate(data.updatedTask[0]);
       });
 
-      socket.on('taskCreated', (data) => {
+      socket.on("taskCreated", (data) => {
         // console.log("getting update from websocket", data.updatedTask);
         onAdd(data.createdTask[0]);
       });
 
       return () => {
         // console.log("Cleaning up socket listener for taskUpdated");
-        socket.off('taskUpdated');
-        socket.off('taskCreated');
+        socket.off("taskUpdated");
+        socket.off("taskCreated");
       };
     }
   }, [socket]);
@@ -187,7 +186,7 @@ export default function TaskList({ initialTasks, changeDate }) {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row  w-full h-auto  justify-items-end items-center space-x-4 fixed z-10 bg-white/30 backdrop-blur-md  ">
+      <div className="flex flex-col sm:flex-row  w-full h-auto  justify-items-end items-center space-x-4 fixed z-10 bg-white/30 backdrop-blur-md pr-24  ">
         {/* Date change section */}
         <div className="mx-2 w-full ">
           <div className="flex items-center justify-center sm:justify-between space-x-4 rounded-lg ">
@@ -315,12 +314,16 @@ export default function TaskList({ initialTasks, changeDate }) {
               ))}
             </select>
           </div>
-          <IoMdAdd
-            className="text-2xl cursor-pointer hover:text-gray-500"
-            onClick={() => setInputTask(true)}
-          />
+          <div>
+            <IoMdAdd
+              className="text-2xl cursor-pointer hover:text-gray-500"
+              onClick={() => setInputTask(true)}
+            />
+          </div>
 
-          <MoreVertical onClick={() => setShowScheduledAndRecuring(true)} />
+          <div>
+            <MoreVertical onClick={() => setShowScheduledAndRecuring(true)} />
+          </div>
         </div>
       </div>
 

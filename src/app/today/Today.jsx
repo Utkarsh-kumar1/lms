@@ -8,9 +8,18 @@ function Today() {
   const [tasks, setTasks] = useState([]);
   const [selectedDate, setSelectedDate] = useState(new Date());
 
+  function formatDateToLocalIST(date) {
+  return new Intl.DateTimeFormat("en-CA", {
+    timeZone: "Asia/Kolkata",
+    year: "numeric",
+    month: "2-digit",
+    day: "2-digit",
+  }).format(date);
+}
+
   useEffect(() => {
-    // Fetch building blocks
-    const date = selectedDate.toISOString().split("T")[0];
+    const date = formatDateToLocalIST(selectedDate);
+    console.log(date);
 
     const fetchBuildingBlocks = async () => {
       try {

@@ -71,13 +71,13 @@ async function fetchChartLineData() {
 
   // Map the results to match the last 6 days
   const activityResult = last6Days.map(({ dayName }) => ({
-    id: "activity",
+    id: "Activity",
     x: dayName,
     y: activityCounts[dayName] || 0,
   }));
 
   const revisionResult = last6Days.map(({ dayName }) => ({
-    id: "revision",
+    id: "Revision",
     x: dayName,
     y: revisionCounts[dayName] || 0,
   }));
@@ -90,12 +90,12 @@ async function fetchChartLineData() {
   // Format the final response for Nivo
   return [
     {
-      id: "activity",
+      id: "Activity",
       color: "hsl(81, 70%, 50%)",
       data: activityResult,
     },
     {
-      id: "revision",
+      id: "Revision",
       color: "hsl(70, 70%, 50%)",
       data: revisionResult,
     },

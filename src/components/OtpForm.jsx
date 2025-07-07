@@ -1,6 +1,6 @@
 "use client";
 
-import { ChevronLeft } from "lucide-react"
+import { ChevronLeft } from "lucide-react";
 
 import { zodResolver } from "@hookform/resolvers/zod";
 import { useForm } from "react-hook-form";
@@ -23,9 +23,9 @@ import {
   InputOTPSlot,
 } from "@/components/ui/input-otp";
 import { toast } from "@/components/ui/use-toast";
-import axios from "axios";
 import { useEffect, useState, useRef } from "react";
 import CustomAlertDialog from "./Alert";
+import api from "@/axios";
 
 const FormSchema = z.object({
   OTP: z
@@ -94,8 +94,11 @@ export default function OTPForm({ setIsOtpSended, userData }) {
   async function onSubmit(data) {
     try {
       setIsVerifying(true);
-      const verifyResponse = await axios.patch("/api/verifyuser", data);
-      if (verifyResponse.data.statusCode === 200) {
+      const verifyResponse = await api.post("/verifyOTP", {
+        username: userData.username,
+        otp: data.OTP,
+      });
+      if (verifyResponse.data.status === 200) {
         toast({
           variant: "success",
           title: "Message:",
@@ -115,32 +118,32 @@ export default function OTPForm({ setIsOtpSended, userData }) {
   }
 
   async function resendOtp() {
-    try {
-      setIsResending(true);
-      const resendResponse = await axios.post("/api/sign-up/resend-otp", {
-        usernameOrEmail: userData.username,
-        password: userData.password,
-      });
-      setIsResending(false);
-      setIsCounting(true);
-      setTimeLeft(300); // Reset to 5 minutes
-      setTimeout(() => {
-        setIsCounting(false);
-      }, 300000); // Stop countdown after 5 minutes (300,000 milliseconds)
-      toast({
-        variant: "success",
-        title: "Message : ",
-        description: resendResponse.data.message,
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Error:",
-        description: error.response.data.message,
-      });
-    } finally {
-      setIsResending(false);
-    }
+    // try {
+    //   setIsResending(true);
+    //   const resendResponse = await axios.post("/api/sign-up/resend-otp", {
+    //     usernameOrEmail: userData.username,
+    //     password: userData.password,
+    //   });
+    //   setIsResending(false);
+    //   setIsCounting(true);
+    //   setTimeLeft(300); // Reset to 5 minutes
+    //   setTimeout(() => {
+    //     setIsCounting(false);
+    //   }, 300000); // Stop countdown after 5 minutes (300,000 milliseconds)
+    //   toast({
+    //     variant: "success",
+    //     title: "Message : ",
+    //     description: resendResponse.data.message,
+    //   });
+    // } catch (error) {
+    //   toast({
+    //     variant: "destructive",
+    //     title: "Error:",
+    //     description: error.response.data.message,
+    //   });
+    // } finally {
+    //   setIsResending(false);
+    // }
   }
 
   const handleResendClick = () => {
@@ -158,14 +161,17 @@ export default function OTPForm({ setIsOtpSended, userData }) {
 
   return (
     <>
-
-      <Button variant="outline" size="icon" disabled={isVerifying || isResending}
+      <Button
+        variant="outline"
+        size="icon"
+        disabled={isVerifying || isResending}
         type="button"
         onClick={() => {
           setIsOtpSended(false);
-        }}>
-      <ChevronLeft className="h-4 w-4" />
-    </Button>
+        }}
+      >
+        <ChevronLeft className="h-4 w-4" />
+      </Button>
 
       <Form {...form}>
         <form onSubmit={form.handleSubmit(onSubmit)} className="space-y-6">
@@ -208,7 +214,12 @@ export default function OTPForm({ setIsOtpSended, userData }) {
                   </InputOTP>
                 </FormControl>
                 <FormDescription>
-                  Please enter the one-time password sent to your <span className="text-base font-bold text-black "> {userData.email}</span>.
+                  Please enter the one-time password sent to your{" "}
+                  <span className="text-base font-bold text-black ">
+                    {" "}
+                    {userData.email}
+                  </span>
+                  .
                 </FormDescription>
                 <FormMessage />
               </FormItem>

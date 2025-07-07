@@ -13,11 +13,12 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+const bcrypt = require('bcryptjs');
 
 import SignupSchema from "@/Schema/SignupSchema";
-import axios from "axios";
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
+import api from "@/axios";
 
 export default function SignUpForm({ setIsOtpSended, FormData, setFormData }) {
   const [isLogging, setIsLogging] = useState(false);
@@ -32,17 +33,17 @@ export default function SignUpForm({ setIsOtpSended, FormData, setFormData }) {
     setFormData(data)
     try {
       setIsLogging(true);
-      const Response = await axios.post("/api/sign-up", {
+      const response = await api.post("/register", {
         firstName,
         lastName,
         username,
         email,
-        password,
+        password: bcrypt.hashSync(password, 10)
       });
       toast({
         variant: "success",
         title: "Message : ",
-        description: Response.data.message,
+        description: response.data.message,
       });
       setIsOtpSended(true);
     } catch (error) {

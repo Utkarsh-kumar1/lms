@@ -13,7 +13,8 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
-const bcrypt = require('bcryptjs');
+import CryptoJS from "crypto-js";
+
 
 import SignupSchema from "@/Schema/SignupSchema";
 import { useState } from "react";
@@ -33,24 +34,30 @@ export default function SignUpForm({ setIsOtpSended, FormData, setFormData }) {
     setFormData(data)
     try {
       setIsLogging(true);
+
+      const encryptedPassword = CryptoJS.AES.encrypt(
+      password,
+      process.env.NEXT_PUBLIC_AUTH_SECRET
+      ).toString();
+      
       const response = await api.post("/register", {
         firstName,
         lastName,
         username,
         email,
-        password: bcrypt.hashSync(password, 10)
+        password: encryptedPassword,
       });
       toast({
         variant: "success",
         title: "Message : ",
-        description: response.data.message,
+        description: response?.data?.message,
       });
       setIsOtpSended(true);
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error : ",
-        description: error.response.data.message,
+        description: error?.response?.data?.message,
       });
     } finally {
       setIsLogging(false);

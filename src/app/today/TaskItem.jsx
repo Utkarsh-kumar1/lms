@@ -133,11 +133,7 @@ function TaskItem({ task, onDelete, onUpdate }) {
   const handleDeleteTask = async () => {
     setIsProcessing(true);
     try {
-      await fetch("/api/buildingBlocks", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: task.id }),
-      });
+      await api.delete(`deleteTask/${task.id}`);
       onDelete(task);
     } catch (error) {
       console.error(error);

@@ -126,7 +126,7 @@ export default function TaskList() {
 
   useEffect(() => {
     const fdate = formatDateToLocalIST(date);
-    console.log(fdate);
+    // console.log(fdate);
 
     const fetchBuildingBlocks = async () => {
       try {
@@ -143,10 +143,10 @@ export default function TaskList() {
   }, [date]);
 
   useEffect(() => {
-    console.log("In Tasklist socket", socket);
+    // console.log("In Tasklist socket", socket);
     if (socket) {
       socket.on("taskUpdated", (data) => {
-        console.log("getting update from websocket", data.updatedTask);
+        // console.log("getting update from websocket", data.updatedTask);
         onUpdate(data.updatedTask[0]);
       });
 

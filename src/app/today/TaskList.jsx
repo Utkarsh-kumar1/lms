@@ -21,6 +21,7 @@ import {
   FaTimesCircle,
 } from "react-icons/fa";
 import { useSocket } from "@/context/SocketContext";
+import api from "@/axios";
 
 const actionTypes = {
   SET_TASKS: "SET_TASKS",
@@ -79,8 +80,9 @@ const reducer = (tasks, action) => {
   }
 };
 
-export default function TaskList({ initialTasks, changeDate }) {
-  const [tasks, dispatch] = useReducer(reducer, initialTasks);
+// Main TaskList component
+export default function TaskList() {
+  const [tasks, dispatch] = useReducer(reducer, []);
   const [inputTask, setInputTask] = useState(false);
   const [showScheduledAndRecuring, setShowScheduledAndRecuring] =
     useState(false);
@@ -113,8 +115,31 @@ export default function TaskList({ initialTasks, changeDate }) {
     });
   };
 
+  function formatDateToLocalIST(date) {
+    return new Intl.DateTimeFormat("en-CA", {
+      timeZone: "Asia/Kolkata",
+      year: "numeric",
+      month: "2-digit",
+      day: "2-digit",
+    }).format(date);
+  }
+
   useEffect(() => {
-    changeDate(date);
+    const fdate = formatDateToLocalIST(date);
+    // console.log(fdate);
+
+    const fetchBuildingBlocks = async () => {
+      try {
+        const data = await api.get("/tasks", {
+          params: { today: fdate },
+        });
+        // const data = await response.json()
+        onSetTasks(data.data.data);
+      } catch (error) {
+        console.error(error);
+      }
+    };
+    fetchBuildingBlocks();
   }, [date]);
 
   useEffect(() => {
@@ -126,12 +151,12 @@ export default function TaskList({ initialTasks, changeDate }) {
       });
 
       socket.on("taskCreated", (data) => {
-        // console.log("getting update from websocket", data.updatedTask);
+        // console.log("getting created from websocket", data.createdTask);
         onAdd(data.createdTask[0]);
       });
 
       return () => {
-        // console.log("Cleaning up socket listener for taskUpdated");
+        console.log("Cleaning up socket listener for taskUpdated");
         socket.off("taskUpdated");
         socket.off("taskCreated");
       };
@@ -149,21 +174,29 @@ export default function TaskList({ initialTasks, changeDate }) {
 
   const onSetTasks = (tasks) =>
     dispatch({ type: actionTypes.SET_TASKS, payload: tasks });
-  const onAdd = (task) =>
+  const onAdd = (task) => {
     dispatch({ type: actionTypes.ADD_TASKS, payload: task });
-  const onUpdate = (task) =>
-    dispatch({ type: actionTypes.UPDATE_TASK, payload: task });
-  const onDelete = (task) =>
-    dispatch({ type: actionTypes.DELETE_TASK, payload: task });
-
-  useEffect(() => {
-    if (!initialTasks) return;
-    dispatch({ type: actionTypes.SET_TASKS, payload: initialTasks });
     dispatch({
       type: actionTypes.SORT,
       payload: { key: sortBy, ascending: sortingAsc },
     });
-  }, [sortingAsc, sortBy, initialTasks]);
+  };
+  const onUpdate = (task) => {
+    dispatch({ type: actionTypes.UPDATE_TASK, payload: task });
+    dispatch({
+      type: actionTypes.SORT,
+      payload: { key: sortBy, ascending: sortingAsc },
+    });
+  };
+  const onDelete = (task) =>
+    dispatch({ type: actionTypes.DELETE_TASK, payload: task });
+
+  useEffect(() => {
+    dispatch({
+      type: actionTypes.SORT,
+      payload: { key: sortBy, ascending: sortingAsc },
+    });
+  }, [sortingAsc, sortBy]);
 
   const formatDate = (dateStr) => {
     const date = new Date(dateStr);

@@ -77,7 +77,7 @@ export default function ProfileForm() {
           >
             <div>
               <label className="block font-medium text-gray-800 dark:text-gray-200">
-                Username / Email <span className="text-red-500">*</span>
+                Username <span className="text-red-500">*</span>
               </label>
               <Input
                 {...register("usernameOrEmail")}

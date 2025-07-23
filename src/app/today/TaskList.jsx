@@ -151,7 +151,7 @@ export default function TaskList() {
       });
 
       socket.on("taskCreated", (data) => {
-        // console.log("getting created from websocket", data.createdTask);
+        console.log("getting created from websocket", data.createdTask);
         onAdd(data.createdTask[0]);
       });
 

@@ -70,7 +70,9 @@ export default function TaskInput({ isOpen, onClose, taskToEdit = null }) {
         endDate: taskToEdit?.endDate ? end : "",
         // Convert to array
         recurrenceDays: taskToEdit?.recurrenceDays?.split(","),
-        recurrenceMonthDays: taskToEdit?.recurrenceMonthDays?.split(",").map(Number),
+        recurrenceMonthDays: taskToEdit?.recurrenceMonthDays
+          ?.split(",")
+          .map(Number),
         // recurrenceYearDays: taskToEdit?.recurrenceYearDays?.split(","),
       });
     } else {
@@ -159,7 +161,7 @@ export default function TaskInput({ isOpen, onClose, taskToEdit = null }) {
       task.recurrencePattern === "yearly" &&
       (task.recurrenceYearDays === null || task.recurrenceYearDays.length === 0)
     ) {
-      console.log()
+      console.log();
       alert("Please enter comma-separated integers (e.g., 1,2,3).");
       return;
     }
@@ -339,6 +341,9 @@ export default function TaskInput({ isOpen, onClose, taskToEdit = null }) {
                     value={task.startDate}
                     onChange={(e) => handleChange("startDate", e.target.value)}
                     className="w-full p-2 border rounded"
+                    min={new Date().toLocaleDateString("en-CA", {
+                      timeZone: "Asia/Kolkata",
+                    })}
                     required
                   />
                 </div>
@@ -351,6 +356,9 @@ export default function TaskInput({ isOpen, onClose, taskToEdit = null }) {
                     value={task.endDate}
                     onChange={(e) => handleChange("endDate", e.target.value)}
                     className="w-full p-2 border rounded"
+                    min={new Date().toLocaleDateString("en-CA", {
+                      timeZone: "Asia/Kolkata",
+                    })}
                   />
                 </div>
 

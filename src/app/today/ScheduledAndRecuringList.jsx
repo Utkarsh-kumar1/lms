@@ -3,28 +3,44 @@
 import { useEffect, useState } from "react";
 import { X, Loader2 } from "lucide-react"; // Loader2 for loading animation
 import api from "@/axios";
+import { MdEdit } from "react-icons/md";
+import TaskInput from "./TaskInput";
+import { Trash } from "lucide-react";
 
 function ScheduledAndRecuringList({ isOpen, onClose }) {
   const [recurringTasks, setRecurringTasks] = useState([]);
   const [loading, setLoading] = useState(false);
+  const [editingTask, setEditingTask] = useState(false);
+  const [editingTaskDetails, setEditingTaskDetails] = useState(null);
 
   useEffect(() => {
     if (!isOpen) return;
     setLoading(true);
-    
+
     api
       .get(`/getRecurringTasks`)
       .then((result) => {
         console.log(result);
         setRecurringTasks(result.data.data);
       })
-      .catch((err) => {
-        
-      })
+      .catch((err) => {})
       .finally(() => {
         setLoading(false);
-    })
+      });
   }, [isOpen]);
+
+  const handleDeleteRecurringTask = async (taskId) => {
+    // setIsProcessing(true);
+    try {
+      await api.delete(`deleteRecurringTask/${taskId}`);
+      setRecurringTasks(recurringTasks.filter((tsk) => tsk.id !== taskId));
+
+    } catch (error) {
+      console.error(error);
+    } finally {
+      // setIsProcessing(false);
+    }
+  };
 
   if (!isOpen) return null;
 
@@ -61,19 +77,32 @@ function ScheduledAndRecuringList({ isOpen, onClose }) {
                     {task.priority}
                   </p>
                 </div>
-                <div className="flex space-x-2">
-                  <button className="text-blue-500 hover:underline text-sm">
-                    Edit
-                  </button>
-                  <button className="text-red-500 hover:underline text-sm">
-                    Delete
-                  </button>
+                <div className="flex space-x-2 items-center">
+                  <MdEdit
+                    className="text-blue-300 text-center hover:text-blue-700 hover:cursor-pointer"
+                    onClick={() => {
+                      setEditingTask(true);
+                      setEditingTaskDetails(task);
+                    }}
+                  />
+                  <Trash className="text-red-500 hover:text-white hover:bg-red-700 hover:rounded-sm hover:cursor-pointer p-1  text-sm"
+                  onClick={() => handleDeleteRecurringTask(task.id)}/>
                 </div>
               </li>
             ))}
           </ul>
         )}
       </div>
+
+      {/* For Editing Task */}
+      <TaskInput
+        isOpen={editingTask}
+        taskToEdit={editingTaskDetails}
+        onClose={() => {
+          setEditingTask(false);
+          setEditingTaskDetails(null);
+        }}
+      />
     </div>
   );
 }

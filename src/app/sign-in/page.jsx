@@ -48,7 +48,7 @@ export default function ProfileForm() {
     toast({
       variant: response.status!==200 ? "destructive" : "success",
       title: response.status===200 ? "Success" : "Error",
-      description: response.status===200 ? "Sign In Successfully" : response.error,
+      description: response.status===200 ? "Sign In Successfully" : response?.response?.data,
     });
     if (response.status===200) {
       router.push("/dashboard");
@@ -95,7 +95,9 @@ export default function ProfileForm() {
                 placeholder="Password"
                 className="bg-gray-100 dark:bg-gray-700 dark:text-white"
               />
-              <span className="flex justify-end text-xs text-blue-500 dark:text-blue-400 underline">
+            <span className="flex justify-end text-xs text-blue-500 dark:text-blue-400 underline cursor-pointer"
+              onClick={() => router.push("/sign-in/forgotPassword")}
+            >
                 Forgot your password?
               </span>
             </div>

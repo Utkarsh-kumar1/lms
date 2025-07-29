@@ -75,12 +75,12 @@ export function AppSidebar() {
       icon: IoTodayOutline,
       isActive: user !== null,
     },
-    {
-      name: "MindMap",
-      url: "/mindmap",
-      icon: Brain,
-      isActive: user !== null,
-    },
+    // {
+    //   name: "MindMap",
+    //   url: "/mindmap",
+    //   icon: Brain,
+    //   isActive: user !== null,
+    // },
     {
       name: "Activity",
       url: "/activity",

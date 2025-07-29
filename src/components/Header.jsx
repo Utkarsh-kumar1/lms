@@ -17,122 +17,123 @@ import {
 import { useTheme } from "next-themes";
 import axios from "axios";
 import { useAuth } from "@/context/AuthContext";
+import api from "@/axios";
 
 function Header() {
   const pathname = usePathname();
   const { isMobile } = useSidebar();
   const { setTheme, theme } = useTheme();
   const [mounted, setMounted] = useState(false);
-  const [showInput, setShowInput] = useState(false);
-  const [task, setTask] = useState("");
-  const timerRef = useRef(null);
-  const inputRef = useRef(null);
-  const [refreshData, setRefreshData] = useState(false);
-  const [todos, setTodos] = useState([]);
-  const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
-  const [showList, setShowList] = useState(false);
+  // const [showInput, setShowInput] = useState(false);
+  // const [task, setTask] = useState("");
+  // const timerRef = useRef(null);
+  // const inputRef = useRef(null);
+  // const [refreshData, setRefreshData] = useState(false);
+  // const [todos, setTodos] = useState([]);
+  // const [currentTitleIndex, setCurrentTitleIndex] = useState(0);
+  // const [showList, setShowList] = useState(false);
   // const { data, status } = useSession();
-  const { user } = useAuth();
+  // const { user } = useAuth();
 
   // Ensures the component is mounted before rendering theme-dependent content
   useEffect(() => setMounted(true), []);
 
-  useEffect(() => {
-    if (user) {
-      // Fetch building blocks
-      const today = "todo";
+  // useEffect(() => {
+  //   if (user) {
+  //     console.log("user", user);
+  //     // Fetch building blocks
+  //     const today = "todo";
 
-      const fetchToDos = async () => {
-        try {
-          const { data } = await axios.get("/api/buildingBlocks", {
-            params: { today },
-          });
-          // const data = await response.json()
-          setTodos(data.data);
-        } catch (error) {
-          console.error(error);
-        }
-      };
-      // fetchToDos();
-    }
-  }, [refreshData, user]);
+  //     const fetchToDos = async () => {
+  //       try {
+  //         const { data } = await api.get("/tasks", {
+  //           params: { today },
+  //         });
+
+  //         console.log("All todos", data);
+  //         setTodos(data.data);
+  //       } catch (error) {
+  //         console.error(error);
+  //       }
+  //     };
+  //     fetchToDos();
+  //   }
+  // }, [refreshData, user]);
 
   const paths = decodeURI(pathname).split("/");
 
   // Function to start/reset the timer (only when task is empty & input is not focused)
-  const resetTimer = () => {
-    if (timerRef.current) clearTimeout(timerRef.current);
-    if (task.trim() === "" && document.activeElement !== inputRef.current) {
-      timerRef.current = setTimeout(() => {
-        setShowInput(false); // Close input after 10 seconds of inactivity
-      }, 10000);
-    }
-  };
+  // const resetTimer = () => {
+  //   if (timerRef.current) clearTimeout(timerRef.current);
+  //   if (task.trim() === "" && document.activeElement !== inputRef.current) {
+  //     timerRef.current = setTimeout(() => {
+  //       setShowInput(false); // Close input after 10 seconds of inactivity
+  //     }, 10000);
+  //   }
+  // };
 
-  // Start timer when input appears, reset it on input change
-  useEffect(() => {
-    if (showInput) {
-      resetTimer(); // Only start timer when the input is shown
-    }
-    return () => clearTimeout(timerRef.current);
-  }, [showInput, task]);
+  // // Start timer when input appears, reset it on input change
+  // useEffect(() => {
+  //   if (showInput) {
+  //     resetTimer(); // Only start timer when the input is shown
+  //   }
+  //   return () => clearTimeout(timerRef.current);
+  // }, [showInput, task]);
 
-  const handleSubmit = async (e) => {
-    e.preventDefault();
+  // const handleSubmit = async (e) => {
+  //   e.preventDefault();
 
-    const title = task;
+  //   const title = task;
 
-    // TODO: Add task
-    // const { success, error } = await AddOrUpdateTasks({ title });
-    if (success) {
-      setRefreshData(!refreshData);
-    }
-    setTask(""); // Clear input after submission
-    setShowInput(false); // Hide input after submission
-  };
+  //   // TODO: Add task
+  //   const { success, error } = await api.post("/createTask", { title, priority: "Low" });
+  //   if (success) {
+  //     setRefreshData(!refreshData);
+  //   }
+  //   setTask(""); // Clear input after submission
+  //   setShowInput(false); // Hide input after submission
+  // };
 
-  const deleteTodo = async (id) => {
-    try {
-      const response = await axios.delete("/api/buildingBlocks", {
-        data: { id },
-      });
-      setRefreshData(!refreshData);
-    } catch (error) {
-      console.error("Error deleting:", error);
-    }
-  };
+  // const deleteTodo = async (id) => {
+  //   try {
+  //     const response = await api.delete(`deleteTask/${id}`);
+  //     setRefreshData(!refreshData);
+  //   } catch (error) {
+  //     console.error("Error deleting:", error);
+  //   }
+  // };
 
   // Flip title every 5 seconds
-  useEffect(() => {
-    const interval = setInterval(() => {
-      setCurrentTitleIndex((prevIndex) => (prevIndex + 1) % todos.length);
-    }, 5000);
-    return () => clearInterval(interval);
-  }, [todos]);
+  // useEffect(() => {
+  //   const interval = setInterval(() => {
+  //     setCurrentTitleIndex((prevIndex) => (prevIndex + 1) % todos.length);
+  //   }, 5000);
+  //   return () => clearInterval(interval);
+  // }, [todos]);
 
   // Handle click to toggle the scrollable list
-  const handleTitleClick = () => {
-    setShowList(!showList);
-  };
+  // const handleTitleClick = () => {
+  //   setShowList(!showList);
+  // };
 
-  const formatDate = (dateStr) => {
-    const date = new Date(dateStr);
-    const now = new Date();
+  // const formatDate = (dateStr) => {
+  //   const date = new Date(dateStr);
+  //   const now = new Date();
 
-    const options = { month: "short", day: "numeric" };
-    if (date.getFullYear() !== now.getFullYear()) {
-      options.year = "numeric";
-    }
+  //   const options = { month: "short", day: "numeric" };
+  //   if (date.getFullYear() !== now.getFullYear()) {
+  //     options.year = "numeric";
+  //   }
 
-    const formattedDate = date.toLocaleDateString("en-US", options);
-    const formattedTime = date.toLocaleTimeString("en-US", {
-      hour: "numeric",
-      minute: "2-digit",
-      hour12: true,
-    });
+  //   const formattedDate = date.toLocaleDateString("en-US", options);
+  //   const formattedTime = date.toLocaleTimeString("en-US", {
+  //     hour: "numeric",
+  //     minute: "2-digit",
+  //     hour12: true,
+  //   });
 
-    return { formattedDate, formattedTime };
-  };
+  //   return { formattedDate, formattedTime };
+  // };
 
   // const showTodo = todos?.length > 0 && (
   //   <div className="relative">
@@ -210,8 +211,8 @@ function Header() {
           ))}
       </nav>
 
-      {/* Todo show only for tablet and laptop screen */}
-      {/* <div className="absolute top-full right-4 shadow-lg rounded-lg md:static">{showTodo}</div> */}
+      {/* Todo show only for tablet and laptop screen
+      <div className="absolute top-full right-4 shadow-lg rounded-lg md:static">{showTodo}</div> */}
       
       
       {/* Clickable ToDo Button with animation */}

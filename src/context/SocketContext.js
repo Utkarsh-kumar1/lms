@@ -25,8 +25,8 @@ export const SocketProvider = ({ children }) => {
       });
 
       socketRef.current.on("connect", () => {
-        console.log("✅ Socket connected:", socketRef.current.id);
-        socketRef.current.emit("register", user.id);
+        console.log("✅ Socket connected:", socketRef.current?.id);
+        socketRef.current.emit("register", user?.id);
         // change the state to trigger a re-render
         setRefreshSocket((prev) => !prev);
       });

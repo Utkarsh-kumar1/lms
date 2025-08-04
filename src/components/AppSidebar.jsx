@@ -41,7 +41,8 @@ import {
   DropdownMenuTrigger,
 } from "./ui/dropdown-menu";
 import Image from "next/image";
-import { IoToday, IoTodayOutline } from "react-icons/io5";
+import { FaBook } from "react-icons/fa";
+import {  IoTodayOutline } from "react-icons/io5";
 import { useAuth } from "@/context/AuthContext";
 
 export function AppSidebar() {
@@ -82,17 +83,23 @@ export function AppSidebar() {
     //   isActive: user !== null,
     // },
     {
-      name: "Activity",
-      url: "/activity",
-      icon: ActivityIcon,
+      name: "Study",
+      url: "/study",
+      icon: FaBook,
       isActive: user !== null,
     },
-    {
-      name: "Revision",
-      url: "/revision",
-      icon: EditIcon,
-      isActive: user !== null,
-    },
+    // {
+    //   name: "Activity",
+    //   url: "/activity",
+    //   icon: ActivityIcon,
+    //   isActive: user !== null,
+    // },
+    // {
+    //   name: "Revision",
+    //   url: "/revision",
+    //   icon: EditIcon,
+    //   isActive: user !== null,
+    // },
     {
       name: "Curriculumtree",
       url: "/curriculumtree",

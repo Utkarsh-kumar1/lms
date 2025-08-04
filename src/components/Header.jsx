@@ -15,9 +15,6 @@ import {
   Trash2,
 } from "lucide-react";
 import { useTheme } from "next-themes";
-import axios from "axios";
-import { useAuth } from "@/context/AuthContext";
-import api from "@/axios";
 
 function Header() {
   const pathname = usePathname();

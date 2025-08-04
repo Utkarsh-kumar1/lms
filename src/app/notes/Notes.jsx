@@ -14,7 +14,7 @@ const Topics = dynamic(() => import("./Topics"), {
   ),
 });
 
-export default function Page() {
+export default function Notes() {
   const [revision, setRevision] = useState(null);
 
   useEffect(() => {
@@ -35,7 +35,7 @@ export default function Page() {
 
   useEffect(() => {
     api
-      .get("/revision", {
+      .get("/getFirstRevision", {
         headers: {
           "Content-Type": "application/json",
         },
@@ -51,7 +51,7 @@ export default function Page() {
 
   if (!revision || revision.length <= 0)
     return (
-      <p className="text-center text-gray-500">No Revision data available.</p>
+      <p className="text-center text-gray-500">No notes data available.</p>
     );
   return (
     <div className="container mx-auto p-4  dark:bg-gray-800">

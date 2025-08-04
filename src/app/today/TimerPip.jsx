@@ -4,7 +4,6 @@ import { FaRegCirclePause } from "react-icons/fa6";
 import { RxResume } from "react-icons/rx";
 import { CiStop1 } from "react-icons/ci";
 
-
 const TimerPiP = ({ minutes }) => {
   const initialSeconds = minutes * 60;
   const [timeLeft, setTimeLeft] = useState(initialSeconds);
@@ -75,65 +74,90 @@ const TimerPiP = ({ minutes }) => {
   // Draw timer on canvas
   useEffect(() => {
     drawTimer();
+
+    if (timeLeft === 0) {
+      playCelebrationSound();
+    }
   }, [timeLeft]);
 
+  const playCelebrationSound = () => {
+    const audio = new Audio("/ping_pong.mp3");
+    audio.volume = 0.8; // Optional: lower if too loud
+    audio.play().catch((e) => {
+      console.warn("Audio play failed:", e);
+    });
+  };
+
+
+
   const drawTimer = () => {
+
     const canvas = canvasRef.current;
+    if (!canvas) return;
+
     const ctx = canvas.getContext("2d");
 
-    const text = formatTime(timeLeft);
-    const fontSize = 36;
+    const text = formatTime(timeLeft); // E.g., "02:45"
+    const fontSize = 200;
     const padding = 16;
     const font = `bold ${fontSize}px monospace`;
 
-    // Set font before measuring
+    // Set font to measure text
     ctx.font = font;
-    const metrics = ctx.measureText(text);
-    const textWidth = metrics.width;
+    const textMetrics = ctx.measureText(text);
+    const textWidth = textMetrics.width;
     const textHeight = fontSize * 1.2;
 
     const logicalWidth = textWidth + padding * 2;
     const logicalHeight = textHeight + padding * 2;
-    const scale = window.devicePixelRatio || 1;
 
-    // Set actual and displayed canvas sizes
-    canvas.width = logicalWidth * scale;
-    canvas.height = logicalHeight * scale;
+    const ratio = window.devicePixelRatio || 1;
+
+    // Set actual resolution of canvas
+    canvas.width = logicalWidth * ratio;
+    canvas.height = logicalHeight * ratio;
+
+    // Set CSS size (display size)
     canvas.style.width = `${logicalWidth}px`;
     canvas.style.height = `${logicalHeight}px`;
 
+    // Ensure high-DPI clarity
     ctx.setTransform(1, 0, 0, 1, 0, 0); // Reset transform
-    ctx.scale(scale, scale);
+    ctx.clearRect(0, 0, canvas.width, canvas.height);
+    ctx.scale(ratio, ratio);
 
-    // High quality smoothing
+    // Enable quality rendering
     ctx.imageSmoothingEnabled = true;
     ctx.imageSmoothingQuality = "high";
     ctx.textAlign = "center";
     ctx.textBaseline = "middle";
     ctx.font = font;
 
-    // Optional: Rounded rectangle background
+    // Draw rounded rectangle
     const radius = 12;
-    ctx.fillStyle = "rgba(30, 30, 47, 0.85)";
-    ctx.shadowColor = "rgba(0,0,0,0.3)";
-    ctx.shadowBlur = 8;
+    ctx.fillStyle = "rgba(30, 30, 47, 0.95)";
+    ctx.shadowColor = "rgba(0,0,0,0.4)";
+    ctx.shadowBlur = 10;
     roundRect(ctx, 0, 0, logicalWidth, logicalHeight, radius);
     ctx.fill();
 
-    // Text
+    // Draw text
     ctx.shadowBlur = 0;
     ctx.fillStyle = "#ffffff";
     ctx.fillText(text, logicalWidth / 2, logicalHeight / 2);
   };
 
-  // Draws a rounded rectangle path
-  const roundRect = (ctx, x, y, w, h, r) => {
+  const roundRect = (ctx, x, y, width, height, radius) => {
     ctx.beginPath();
-    ctx.moveTo(x + r, y);
-    ctx.arcTo(x + w, y, x + w, y + h, r);
-    ctx.arcTo(x + w, y + h, x, y + h, r);
-    ctx.arcTo(x, y + h, x, y, r);
-    ctx.arcTo(x, y, x + w, y, r);
+    ctx.moveTo(x + radius, y);
+    ctx.lineTo(x + width - radius, y);
+    ctx.quadraticCurveTo(x + width, y, x + width, y + radius);
+    ctx.lineTo(x + width, y + height - radius);
+    ctx.quadraticCurveTo(x + width, y + height, x + width - radius, y + height);
+    ctx.lineTo(x + radius, y + height);
+    ctx.quadraticCurveTo(x, y + height, x, y + height - radius);
+    ctx.lineTo(x, y + radius);
+    ctx.quadraticCurveTo(x, y, x + radius, y);
     ctx.closePath();
   };
 
@@ -144,6 +168,7 @@ const TimerPiP = ({ minutes }) => {
   };
 
   const handleStart = async () => {
+
     setTimeLeft(initialSeconds);
     setIsRunning(true);
     setHasStarted(true);
@@ -204,7 +229,6 @@ const TimerPiP = ({ minutes }) => {
             className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow"
           >
             <CiStop1 />
-
           </button>
         </div>
       )}

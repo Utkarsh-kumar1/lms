@@ -1,4 +1,9 @@
 import React, { useEffect, useRef, useState } from "react";
+import { TfiTimer } from "react-icons/tfi";
+import { FaRegCirclePause } from "react-icons/fa6";
+import { RxResume } from "react-icons/rx";
+import { CiStop1 } from "react-icons/ci";
+
 
 const TimerPiP = ({ minutes }) => {
   const initialSeconds = minutes * 60;
@@ -176,30 +181,30 @@ const TimerPiP = ({ minutes }) => {
   };
 
   return (
-    <div className="text-center mt-10 space-y-4">
-
+    <div className="text-center space-y-4">
       {!hasStarted && (
         <button
           onClick={handleStart}
-          className="bg-green-600 hover:bg-green-700 text-white px-6 py-2 rounded shadow"
+          className="bg-green-600 hover:bg-green-700 text-white px-4 py-2 rounded shadow"
         >
-          Start Timer
+          <TfiTimer />
         </button>
       )}
 
       {hasStarted && (
-        <div className="flex justify-center gap-4">
+        <div className="flex justify-center gap-2">
           <button
             onClick={handlePausePlay}
-            className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-2 rounded shadow"
+            className="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded shadow"
           >
-            {isRunning ? "Pause" : "Resume"}
+            {isRunning ? <FaRegCirclePause /> : <RxResume />}
           </button>
           <button
             onClick={handleStop}
-            className="bg-red-600 hover:bg-red-700 text-white px-6 py-2 rounded shadow"
+            className="bg-red-600 hover:bg-red-700 text-white px-4 py-2 rounded shadow"
           >
-            Stop
+            <CiStop1 />
+
           </button>
         </div>
       )}

@@ -10,6 +10,7 @@ import {
   FaTimesCircle,
 } from "react-icons/fa";
 import api from "../../axios";
+import TimerPiP from "./TimerPip";
 
 function TaskItem({ task, onDelete, onUpdate }) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -338,6 +339,8 @@ function TaskItem({ task, onDelete, onUpdate }) {
 
       {/* Actions */}
       <div className="flex justify-between items-center md: gap-3 ">
+        {/* Start Timer */}
+        <TimerPiP minutes={task.duration -4} />
         <button
           className={`px-4 py-2 rounded-lg text-white ${
             priorityColors[task.priority] || "bg-gray-800"

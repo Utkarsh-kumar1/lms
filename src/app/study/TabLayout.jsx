@@ -56,7 +56,7 @@ export default function TabLayout() {
   return (
     <div className="relative w-full mx-auto  ">
       {/* Tabs */}
-      <div className="w-1/3 absolute -top-6 left-4 flex justify-around space-x-3 bg-slate-800/80 dark:bg-slate-700/80 backdrop-blur rounded-full px-4 py-2 shadow-lg border border-slate-600 z-10">
+      <div className="w-1/3 fixed flex justify-around space-x-3 bg-slate-800/80 dark:bg-slate-700/80 backdrop-blur rounded-full px-4 py-2 shadow-lg border border-slate-600 z-10 ml-8 -mt-5">
         {tabs.map((tab) => (
           <button
             key={tab.id}

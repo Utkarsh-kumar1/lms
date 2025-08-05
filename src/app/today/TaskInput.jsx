@@ -44,11 +44,11 @@ export default function TaskInput({ isOpen, onClose, taskToEdit = null }) {
   ];
   const daysOfMonth = Array.from({ length: 31 }, (_, i) => i + 1);
 
-  useEffect(() => {
-    console.log("taskname", task?.title);
-    console.log("daysOfWeek", task?.recurrenceDays);
-    console.log("month days", task?.recurrenceMonthDays);
-  }, [task]);
+  // useEffect(() => {
+  //   console.log("taskname", task?.title);
+  //   console.log("daysOfWeek", task?.recurrenceDays);
+  //   console.log("month days", task?.recurrenceMonthDays);
+  // }, [task]);
 
   useEffect(() => {
     if (taskToEdit) {
@@ -76,9 +76,17 @@ export default function TaskInput({ isOpen, onClose, taskToEdit = null }) {
         // recurrenceYearDays: taskToEdit?.recurrenceYearDays?.split(","),
       });
     } else {
-      setTask(initialTaskState);
+      setTask({
+        ...initialTaskState,
+        startTime: new Date().toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+          timeZone: "Asia/Kolkata",
+        })
+      });
     }
-  }, [taskToEdit]);
+  }, [taskToEdit, isOpen]);
 
   useEffect(() => {
     if (task.recurrencePattern === "custom" && task.customCron.trim() !== "") {

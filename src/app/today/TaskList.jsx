@@ -403,7 +403,7 @@ export default function TaskList() {
 
   return (
     <>
-      <div className="flex flex-col sm:flex-row  w-full h-auto  justify-items-end items-center space-x-4 fixed z-10 bg-white/30 backdrop-blur-md pr-24  ">
+      <div className="flex flex-col sm:flex-row  w-full h-auto  justify-items-end items-center space-x-4 fixed z-10 bg-white/30 dark:bg-transparent backdrop-blur-md pr-24  ">
         {/* Date change section */}
         <div className="mx-2 w-full ">
           <div className="flex items-center justify-center sm:justify-between space-x-4 rounded-lg ">
@@ -411,7 +411,7 @@ export default function TaskList() {
               {/* Left Arrow */}
               <button
                 onClick={() => setChangeDate(-1)}
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300"
               >
                 <ChevronLeft />
               </button>
@@ -424,7 +424,7 @@ export default function TaskList() {
               {/* Right Arrow */}
               <button
                 onClick={() => setChangeDate(1)}
-                className="p-2 rounded-full bg-gray-200 hover:bg-gray-300"
+                className="p-2 rounded-full bg-gray-200 dark:bg-gray-800 hover:bg-gray-300"
               >
                 <ChevronRight />
               </button>

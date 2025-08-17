@@ -318,20 +318,7 @@ export default function CourseItem({ course }) {
                     {isActive ? "Active" : "Deactivated"}
                   </label>
                 </div>
-                <div className="mb-4">
-                  <label className="inline-flex items-center text-gray-600 dark:text-gray-400">
-                    <input
-                      type="checkbox"
-                      checked={wantRevision}
-                      onChange={(e) => {
-                        e.stopPropagation();
-                        setwantRevision(e.target.checked);
-                      }}
-                      className="mr-2"
-                    />
-                    Do You Want Revision
-                  </label>
-                </div>
+                
                 <div className="mb-4 flex items-center gap-3 text-sm sm:text-base">
                   <p className="text-gray-800 dark:text-gray-200 font-medium">
                     Activity Schedule Count:
@@ -359,6 +346,22 @@ export default function CourseItem({ course }) {
                     <Plus className="w-4 h-4 text-gray-800 dark:text-white" />
                   </button>
                 </div>
+
+                <div className="mb-4">
+                  <label className="inline-flex items-center text-gray-600 dark:text-gray-400">
+                    <input
+                      type="checkbox"
+                      checked={wantRevision}
+                      onChange={(e) => {
+                        e.stopPropagation();
+                        setwantRevision(e.target.checked);
+                      }}
+                      className="mr-2"
+                    />
+                    Want Notes and Revision
+                  </label>
+                </div>
+
                 <div className="text-gray-700 mb-2">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold text-gray-800">
@@ -424,8 +427,8 @@ export default function CourseItem({ course }) {
                     </div>
                   ) : (
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {editableReps.length > 0 ? (
-                        editableReps.map((gap, index) => (
+                      {editableReps?.length > 0 ? (
+                        editableReps?.map((gap, index) => (
                           <div
                             key={index}
                             className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm shadow-sm"

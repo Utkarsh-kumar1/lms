@@ -32,7 +32,7 @@ export default function CourseItem({ course }) {
   const [originalReps, setOriginalReps] = useState(course.spaceRepetition);
 
   const startEditing = () => {
-    setOriginalReps([...editableReps]); // save a copy
+    setOriginalReps(editableReps !==null ? [...editableReps] : []); // save a copy
     setEditMode(true);
   };
   const cancelEditing = () => {
@@ -41,7 +41,7 @@ export default function CourseItem({ course }) {
   };
   const addNewGap = () => {
 
-    if (editableReps.length <= 0) {
+    if (editableReps === null || editableReps.length <= 0) {
       setEditableReps([1]); // start with 1 day gap if no gaps exist
       return;
     }
@@ -87,7 +87,7 @@ export default function CourseItem({ course }) {
       if (
         course.courseName !== newCourseName ||
         isActive !== course.isActive ||
-        wantRevision != course.wantRevision || editableReps.length !== course.spaceRepetition.length ||
+        wantRevision != course.wantRevision || editableReps.length !== course?.spaceRepetition?.length ||
         scheduleCount !== course.ActivityScheduleCount ||
         editableReps.some((val, idx) => val !== course.spaceRepetition[idx])
       ) {
@@ -319,7 +319,7 @@ export default function CourseItem({ course }) {
                   </label>
                 </div>
                 
-                <div className="mb-4 flex items-center gap-3 text-sm sm:text-base">
+                {isActive && <div className="mb-4 flex items-center gap-3 text-sm sm:text-base">
                   <p className="text-gray-800 dark:text-gray-200 font-medium">
                     Activity Schedule Count:
                   </p>
@@ -345,7 +345,7 @@ export default function CourseItem({ course }) {
                   >
                     <Plus className="w-4 h-4 text-gray-800 dark:text-white" />
                   </button>
-                </div>
+                </div>}
 
                 <div className="mb-4">
                   <label className="inline-flex items-center text-gray-600 dark:text-gray-400">
@@ -362,7 +362,7 @@ export default function CourseItem({ course }) {
                   </label>
                 </div>
 
-                <div className="text-gray-700 mb-2">
+                {wantRevision && <div className="text-gray-700 mb-2">
                   <div className="flex justify-between items-center mb-4">
                     <h2 className="text-xl font-semibold text-gray-800">
                       📈 Spaced Repetition Journey:
@@ -396,7 +396,7 @@ export default function CourseItem({ course }) {
 
                   {editMode ? (
                     <div className="flex flex-wrap gap-2 mt-2">
-                      {editableReps.map((gap, index) => (
+                      {editableReps?.map((gap, index) => (
                         <div key={index} className="flex items-center gap-2">
                           <input
                             type="number"
@@ -442,7 +442,7 @@ export default function CourseItem({ course }) {
                       )}
                     </div>
                   )}
-                </div>
+                </div>}
 
                 {errors.fileError && (
                   <p className="text-red-600 w-full text-center">

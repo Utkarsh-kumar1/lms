@@ -81,7 +81,7 @@ export default function ProfileForm() {
             </label>
             <Input
               {...register("usernameOrEmail")}
-              placeholder="sample@gmail.com"
+              placeholder="username"
               className="bg-gray-100 dark:bg-gray-700 dark:text-white"
             />
           </div>

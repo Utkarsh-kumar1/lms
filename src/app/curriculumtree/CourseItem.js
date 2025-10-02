@@ -5,6 +5,7 @@ import api from "@/axios";
 import clsx from "clsx";
 import { X, Pencil, FilePlus2, NotebookPen } from "lucide-react";
 import { BsCheckCircleFill, BsCircle } from "react-icons/bs";
+import ActivityPlanner from "./ActivityPlanner";
 
 export default function CourseItem({ course }) {
   const [open, setOpen] = useState(false);
@@ -25,14 +26,16 @@ export default function CourseItem({ course }) {
   const [wantRevision, setwantRevision] = useState(course.wantRevision);
   const [isActive, setIsActive] = useState(course.isActive);
   const [editMode, setEditMode] = useState(false);
+  const [targetType, setTargetType] = useState(course?.targetType);
   const [scheduleCount, setScheduleCount] = useState(
     course.ActivityScheduleCount
   );
+  const [completionDate, setCompletionDate] = useState(course?.completionDate);
   const [editableReps, setEditableReps] = useState(course.spaceRepetition);
   const [originalReps, setOriginalReps] = useState(course.spaceRepetition);
-
+  console.log(course); 
   const startEditing = () => {
-    setOriginalReps(editableReps !==null ? [...editableReps] : []); // save a copy
+    setOriginalReps(editableReps !== null ? [...editableReps] : []); // save a copy
     setEditMode(true);
   };
   const cancelEditing = () => {
@@ -40,7 +43,6 @@ export default function CourseItem({ course }) {
     setEditMode(false);
   };
   const addNewGap = () => {
-
     if (editableReps === null || editableReps.length <= 0) {
       setEditableReps([1]); // start with 1 day gap if no gaps exist
       return;
@@ -81,70 +83,76 @@ export default function CourseItem({ course }) {
     setIsProcessing(false);
   };
 
-    const handleSaveClick = async () => {
-      const reqArray = [];
+  const handleSaveClick = async () => {
+    const reqArray = [];
 
-      if (
-        course.courseName !== newCourseName ||
-        isActive !== course.isActive ||
-        wantRevision != course.wantRevision || editableReps.length !== course?.spaceRepetition?.length ||
-        scheduleCount !== course.ActivityScheduleCount ||
-        editableReps.some((val, idx) => val !== course.spaceRepetition[idx])
-      ) {
-        setIsProcessing(true);
-        try {
-          const res = await api.patch("updateCourse", {
-            courseId: course.id,
-            courseName: newCourseName,
-            isActive,
-            wantRevision,
-            spaceRepetition: editableReps,
-            ActivityScheduleCount: scheduleCount,
-          });
-          course.courseName = newCourseName;
-          setIsEditing(false);
-        } catch (err) {
-          setErrors((prev) => ({
-            ...prev,
-            savingError: "Error while saving data. Please try again.",
-          }));
-        } finally {
-          setIsProcessing(false);
-        }
+    if (
+      course.courseName !== newCourseName ||
+      isActive !== course.isActive ||
+      wantRevision != course.wantRevision ||
+      editableReps.length !== course?.spaceRepetition?.length ||
+      targetType !== course?.targetType ||
+      scheduleCount !== course.ActivityScheduleCount ||
+      completionDate !== course?.targetDate ||
+      editableReps.some((val, idx) => val !== course.spaceRepetition[idx])
+    ) {
+      setIsProcessing(true);
+      console.log(completionDate);
+      try {
+        const res = await api.patch("updateCourse", {
+          courseId: course.id,
+          courseName: newCourseName,
+          isActive,
+          wantRevision,
+          spaceRepetition: editableReps,
+          targetType: targetType,
+          ActivityScheduleCount: targetType === "activity_count" ? scheduleCount : 0,
+          completionDate: targetType === "completion_date" ? completionDate : null,
+        });
+        course.courseName = newCourseName;
+        setIsEditing(false);
+      } catch (err) {
+        setErrors((prev) => ({
+          ...prev,
+          savingError: "Error while saving data. Please try again.",
+        }));
+      } finally {
+        setIsProcessing(false);
       }
+    }
 
-      // if (file) {
-      //   const MAX_FILE_SIZE = 1024 * 1024 * 1024;
-      //   if (file.size > MAX_FILE_SIZE) {
-      //     setErrors((prev) => ({ ...prev, fileError: "File size exceeds 1GB" }));
-      //     setIsProcessing(false);
-      //     return;
-      //   }
-      //   reqArray.push(
-      //     axios.postForm("/api/uploadfile", {
-      //       file: file,
-      //       courseId: course.id,
-      //       subjectId: subjectId,
-      //     })
-      //   );
-      // }
+    // if (file) {
+    //   const MAX_FILE_SIZE = 1024 * 1024 * 1024;
+    //   if (file.size > MAX_FILE_SIZE) {
+    //     setErrors((prev) => ({ ...prev, fileError: "File size exceeds 1GB" }));
+    //     setIsProcessing(false);
+    //     return;
+    //   }
+    //   reqArray.push(
+    //     axios.postForm("/api/uploadfile", {
+    //       file: file,
+    //       courseId: course.id,
+    //       subjectId: subjectId,
+    //     })
+    //   );
+    // }
 
-      // Promise.all(reqArray)
-      //   .then(() => {
-      //     setFile(null);
-      //     router.refresh();
-      //     setIsEditing(false);
-      //   })
-      //   .catch((err) => {
-      //     setErrors((prev) => ({
-      //       ...prev,
-      //       savingError: "Error while saving data. Please try again.",
-      //     }));
-      //   })
-      //   .finally(() => {
-      //     setIsProcessing(false);
-      //   });
-    };
+    // Promise.all(reqArray)
+    //   .then(() => {
+    //     setFile(null);
+    //     router.refresh();
+    //     setIsEditing(false);
+    //   })
+    //   .catch((err) => {
+    //     setErrors((prev) => ({
+    //       ...prev,
+    //       savingError: "Error while saving data. Please try again.",
+    //     }));
+    //   })
+    //   .finally(() => {
+    //     setIsProcessing(false);
+    //   });
+  };
 
   const handleFileChange = (e) => {
     const MAX_FILE_SIZE = 1024 * 1024 * 1024;
@@ -160,7 +168,7 @@ export default function CourseItem({ course }) {
     <div className="ml-4">
       <div
         onClick={handleToggle}
-        className="cursor-pointer flex items-center gap-2 py-1 text-gray-800 hover:text-blue-600"
+        className="cursor-pointer flex items-center gap-2 py-1 text-gray-800 dark:hover:text-white"
       >
         {open ? <ChevronDown size={16} /> : <ChevronRight size={16} />}
         <div className="bg-gray-50 dark:bg-gray-800 p-4 rounded-md shadow-sm mb-4 w-full cursor-pointer">
@@ -318,34 +326,19 @@ export default function CourseItem({ course }) {
                     {isActive ? "Active" : "Deactivated"}
                   </label>
                 </div>
-                
-                {isActive && <div className="mb-4 flex items-center gap-3 text-sm sm:text-base">
-                  <p className="text-gray-800 dark:text-gray-200 font-medium">
-                    Activity Schedule Count:
-                  </p>
 
-                  <button
-                    onClick={() =>
-                      setScheduleCount((pre) => (pre > 0 ? pre - 1 : 0))
-                    }
-                    className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                    aria-label="Decrease count"
-                  >
-                    <Minus className="w-4 h-4 text-gray-800 dark:text-white" />
-                  </button>
+                {isActive && (
+                  <ActivityPlanner
+                    scheduleCount={scheduleCount}
+                    setScheduleCount={setScheduleCount}
+                    completionDate={completionDate}
+                    setCompletionDate={setCompletionDate}
+                    targetType={targetType}
+                    setTargetType={setTargetType}
+                    courseId={course.id}
 
-                  <span className="px-4 text-lg font-semibold text-gray-800 dark:text-gray-100">
-                    {scheduleCount}
-                  </span>
-
-                  <button
-                    onClick={() => setScheduleCount((pre) => pre + 1)}
-                    className="p-2 rounded-full bg-gray-200 dark:bg-gray-700 hover:bg-gray-300 dark:hover:bg-gray-600 transition"
-                    aria-label="Increase count"
-                  >
-                    <Plus className="w-4 h-4 text-gray-800 dark:text-white" />
-                  </button>
-                </div>}
+                  />
+                )}
 
                 <div className="mb-4">
                   <label className="inline-flex items-center text-gray-600 dark:text-gray-400">
@@ -362,87 +355,93 @@ export default function CourseItem({ course }) {
                   </label>
                 </div>
 
-                {wantRevision && <div className="text-gray-700 mb-2">
-                  <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-xl font-semibold text-gray-800">
-                      📈 Spaced Repetition Journey:
-                    </h2>
-                    <div className="flex gap-4 mt-4">
-                      {editMode ? (
-                        <>
+                {wantRevision && (
+                  <div className="text-gray-700 mb-2">
+                    <div className="flex justify-between items-center mb-4">
+                      <h2 className="text-xl font-semibold text-gray-800">
+                        📈 Spaced Repetition Journey:
+                      </h2>
+                      <div className="flex gap-4 mt-4">
+                        {editMode ? (
+                          <>
+                            <button
+                              onClick={addNewGap}
+                              className="text-sm text-green-600 hover:underline"
+                            >
+                              ➕ Add Revision Gap
+                            </button>
+                            <button
+                              onClick={cancelEditing}
+                              className="text-sm text-gray-600 hover:underline"
+                            >
+                              ❌ Cancel
+                            </button>
+                          </>
+                        ) : (
                           <button
-                            onClick={addNewGap}
-                            className="text-sm text-green-600 hover:underline"
+                            onClick={startEditing}
+                            className="text-sm text-blue-600 hover:underline"
                           >
-                            ➕ Add Revision Gap
+                            ✏️ Edit
                           </button>
-                          <button
-                            onClick={cancelEditing}
-                            className="text-sm text-gray-600 hover:underline"
-                          >
-                            ❌ Cancel
-                          </button>
-                        </>
-                      ) : (
-                        <button
-                          onClick={startEditing}
-                          className="text-sm text-blue-600 hover:underline"
-                        >
-                          ✏️ Edit
-                        </button>
-                      )}
+                        )}
+                      </div>
                     </div>
-                  </div>
 
-                  {editMode ? (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {editableReps?.map((gap, index) => (
-                        <div key={index} className="flex items-center gap-2">
-                          <input
-                            type="number"
-                            min={1}
-                            value={gap}
-                            onChange={(e) => {
-                              const updated = [...editableReps];
-                              updated[index] = parseInt(e.target.value) || 0;
-                              setEditableReps(updated);
-                            }}
-                            className="w-20 px-3 py-1 rounded-full border text-sm shadow focus:outline-none focus:ring-2 focus:ring-blue-300"
-                          />
-                          <span className="text-gray-500 text-sm">
-                            {index == 0 ? "Notes" : "Rev " + index}
-                          </span>
-                          <button
-                            onClick={() => {
-                              const updated = [...editableReps];
-                              updated.splice(index, 1);
-                              setEditableReps(updated);
-                            }}
-                            className="text-red-500 hover:text-red-700 text-sm"
-                          >
-                            ❌
-                          </button>
-                        </div>
-                      ))}
-                    </div>
-                  ) : (
-                    <div className="flex flex-wrap gap-2 mt-2">
-                      {editableReps?.length > 0 ? (
-                        editableReps?.map((gap, index) => (
-                          <div
-                            key={index}
-                            className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm shadow-sm"
-                          >
-                            <span className="text-gray-600">{gap}d +</span>
-                            <span className="font-semibold">{index == 0 ? "Notes" : "Rev " + index}</span>
+                    {editMode ? (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {editableReps?.map((gap, index) => (
+                          <div key={index} className="flex items-center gap-2">
+                            <input
+                              type="number"
+                              min={1}
+                              value={gap}
+                              onChange={(e) => {
+                                const updated = [...editableReps];
+                                updated[index] = parseInt(e.target.value) || 0;
+                                setEditableReps(updated);
+                              }}
+                              className="w-20 px-3 py-1 rounded-full border text-sm shadow focus:outline-none focus:ring-2 focus:ring-blue-300"
+                            />
+                            <span className="text-gray-500 text-sm">
+                              {index == 0 ? "Notes" : "Rev " + index}
+                            </span>
+                            <button
+                              onClick={() => {
+                                const updated = [...editableReps];
+                                updated.splice(index, 1);
+                                setEditableReps(updated);
+                              }}
+                              className="text-red-500 hover:text-red-700 text-sm"
+                            >
+                              ❌
+                            </button>
                           </div>
-                        ))
-                      ) : (
-                        <p className="text-gray-500">No revision data available.</p>
-                      )}
-                    </div>
-                  )}
-                </div>}
+                        ))}
+                      </div>
+                    ) : (
+                      <div className="flex flex-wrap gap-2 mt-2">
+                        {editableReps?.length > 0 ? (
+                          editableReps?.map((gap, index) => (
+                            <div
+                              key={index}
+                              className="flex items-center gap-2 px-4 py-2 bg-blue-100 text-blue-800 rounded-full text-sm shadow-sm"
+                            >
+                              <span className="text-gray-600">{gap}d +</span>
+                              <span className="font-semibold">
+                                {index == 0 ? "Notes" : "Rev " + index}
+                              </span>
+                            </div>
+                          ))
+                        ) : (
+                          <p className="text-gray-500">
+                            No revision data available.
+                          </p>
+                        )}
+                      </div>
+                    )}
+                  </div>
+                )}
 
                 {errors.fileError && (
                   <p className="text-red-600 w-full text-center">

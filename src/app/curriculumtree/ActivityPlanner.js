@@ -119,7 +119,7 @@ export default function ActivityPlanner({
               </button>
               <input
                 type="date"
-                value={completionDate ?? ""}
+                value={completionDate.toISOString().split("T")[0] ?? ""}
                 onChange={(e) => setCompletionDate(e.target.value)}
                 className="flex-1 p-2 rounded-lg border dark:bg-gray-700 dark:text-white"
               />

@@ -5,7 +5,7 @@ import api from "@/axios";
 import Loader from "@/components/Loader";
 import { useSocket } from "@/context/SocketContext";
 
-export default function Page() {
+export default function Activity() {
   const [activity, setActivity] = useState([]);
   const [loading, setLoading] = useState(true);
 

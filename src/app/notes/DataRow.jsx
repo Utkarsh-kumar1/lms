@@ -81,9 +81,9 @@ export default function DataRow({ subtopic }) {
       <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-gray-200">
         {formatDate(subtopic?.start)}
       </TableCell>
-      <TableCell className="p-2 text-[.7rem] sm:text-base text-center dark:text-gray-200">
-        {subtopic?.revisionCounter - 1}
-      </TableCell>
+      {/* <TableCell className="p-2 text-[.7rem] sm:text-base text-center dark:text-gray-200">
+        {subtopic?.revisionCounter}
+      </TableCell> */}
       <TableCell className="p-2 text-[.7rem] sm:text-base dark:text-gray-200">
         {isUpdating ? (
           <Loader2Icon className=" animate-spin h-7 " />

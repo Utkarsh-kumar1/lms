@@ -10,6 +10,7 @@ import {
   FaTimesCircle,
 } from "react-icons/fa";
 import api from "../../axios";
+import TimerPiP from "./TimerPip";
 
 function TaskItem({ task, onDelete, onUpdate }) {
   const [isProcessing, setIsProcessing] = useState(false);
@@ -20,7 +21,6 @@ function TaskItem({ task, onDelete, onUpdate }) {
   const [isLongPress, setIsLongPress] = useState(false);
   const [newTitle, setNewTitle] = useState(task.title);
 
-
   const priorityColors = {
     High: "bg-red-500 text-white",
     Medium: "bg-orange-500 text-white",
@@ -28,9 +28,9 @@ function TaskItem({ task, onDelete, onUpdate }) {
   };
 
   const statusColors = {
-    Completed: "bg-green-100 dark:bg-green-500",
-    "In Progress": "bg-yellow-100 dark:bg-yellow-500",
-    Pending: "bg-gray-100 dark:bg-gray-500",
+    Completed: "bg-green-100 dark:bg-[rgb(19,86,42)]",
+    "In Progress": "bg-yellow-100 dark:bg-[rgb(105,79,0)]",
+    Pending: "bg-gray-100 dark:bg-[rgb(70,79,97)]",
   };
 
   const getTextColor = (bgColor) => bgColor?.replace(/bg-/g, "text-");
@@ -61,7 +61,6 @@ function TaskItem({ task, onDelete, onUpdate }) {
   const handleUpdateTask = async ({ editingField, e = null }) => {
     // Check if dueDate of the task is not more than 7 days ago
 
-
     if (canNotEdit(new Date(task.dueDate))) {
       return;
     }
@@ -76,7 +75,6 @@ function TaskItem({ task, onDelete, onUpdate }) {
           startTime: newStartTime,
           duration: newDuration,
         };
-        
 
         setEditingField(null); // Close the editing field after saving
       } else if (editingField === "status") {
@@ -84,15 +82,13 @@ function TaskItem({ task, onDelete, onUpdate }) {
           ...task,
           status: "Cancelled",
         };
-      }
-      else if (editingField === "title") {
+      } else if (editingField === "title") {
         updatedTask = {
           ...task,
           title: newTitle,
         };
         setEditingField(null); // Close the editing field after saving
-      }
-       else {
+      } else {
         if (isLongPress) {
           e.preventDefault();
           return;
@@ -124,7 +120,7 @@ function TaskItem({ task, onDelete, onUpdate }) {
       // onUpdate(response.data.data[0]); // Update the task in the parent component
     } catch (error) {
       console.error(error);
-      alert("Error: " + error);
+      // alert("Error: " + error);
     } finally {
       setIsProcessing(false);
     }
@@ -133,11 +129,7 @@ function TaskItem({ task, onDelete, onUpdate }) {
   const handleDeleteTask = async () => {
     setIsProcessing(true);
     try {
-      await fetch("/api/buildingBlocks", {
-        method: "DELETE",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({ id: task.id }),
-      });
+      await api.delete(`deleteTask/${task.id}`);
       onDelete(task);
     } catch (error) {
       console.error(error);
@@ -293,48 +285,51 @@ function TaskItem({ task, onDelete, onUpdate }) {
             )}
 
             <div className="flex flex-col sm:flex-row  items-start sm:items-center gap-2 sm:gap-4 mt-3 sm:mt-0 mr-6">
-              {task.streak > 0 &&
-                (task.streak <= 7 ? (
-                  <span className="bg-green-200 dark:bg-green-400 text-green-800 dark:text-green-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
-                    <Zap className="w-5 h-5 mr-2 text-green-600 dark:text-green-200" />
-                    Spark Phase
-                    <span className="ml-1 font-normal text-xs bg-green-300 text-green-900 dark:bg-green-500 dark:text-green-100 px-2 py-0.5 rounded-full">
-                      Days 1-7
+              {task.streak > 0 && (
+                <div className="flex items-center gap-2">
+                  {task.streak <= 7 ? (
+                    <span className="flex items-center px-4 py-2 rounded-full text-xs font-semibold text-white dark:text-green-100 shadow-lg bg-gradient-to-r from-green-500 to-emerald-500 dark:from-green-400 dark:to-green-600 backdrop-blur-sm">
+                      <Zap className="w-4 h-4 mr-2 text-white dark:text-green-200" />
+                      Spark Phase
+                      <span className="ml-2 bg-white/20 dark:bg-green-700/30 text-green-100 px-2 py-0.5 rounded-full font-normal text-[10px] shadow-sm">
+                        1–7 Days Streak
+                      </span>
                     </span>
-                  </span>
-                ) : task.streak <= 28 ? (
-                  <span className="bg-blue-200 dark:bg-blue-400 text-blue-800 dark:text-blue-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
-                    <RefreshCw className="w-5 h-5 mr-2 text-blue-600 dark:text-blue-200" />
-                    Momentum Phase
-                    <span className="ml-1 font-normal text-xs bg-blue-300 text-blue-900 dark:bg-blue-500 dark:text-blue-100 px-2 py-0.5 rounded-full">
-                      Week 2-4
+                  ) : task.streak <= 28 ? (
+                    <span className="flex items-center px-4 py-2 rounded-full text-xs font-semibold text-blue-900 dark:text-blue-100 shadow-lg bg-gradient-to-r from-blue-200 to-blue-400 dark:from-blue-500 dark:to-blue-700 backdrop-blur-sm">
+                      <RefreshCw className="w-4 h-4 mr-2 text-blue-700 dark:text-blue-200" />
+                      Momentum Phase
+                      <span className="ml-2 bg-white/30 dark:bg-blue-800/40 text-blue-900 dark:text-blue-100 px-2 py-0.5 rounded-full font-normal text-[10px] shadow-sm">
+                        2–4 Weeks Streak
+                      </span>
                     </span>
-                  </span>
-                ) : task.streak <= 90 ? (
-                  <span className="bg-purple-200 dark:bg-purple-400 text-purple-800 dark:text-purple-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
-                    <Music className="w-5 h-5 mr-2 text-purple-600 dark:text-purple-200" />
-                    Rhythm Phase
-                    <span className="ml-1 font-normal text-xs bg-purple-300 text-purple-900 dark:bg-purple-500 dark:text-purple-100 px-2 py-0.5 rounded-full">
-                      Month 2-3
+                  ) : task.streak <= 90 ? (
+                    <span className="flex items-center px-4 py-2 rounded-full text-xs font-semibold text-purple-900 dark:text-purple-100 shadow-lg bg-gradient-to-r from-purple-200 to-purple-400 dark:from-purple-500 dark:to-purple-700 backdrop-blur-sm">
+                      <Music className="w-4 h-4 mr-2 text-purple-700 dark:text-purple-200" />
+                      Rhythm Phase
+                      <span className="ml-2 bg-white/30 dark:bg-purple-800/40 text-purple-900 dark:text-purple-100 px-2 py-0.5 rounded-full font-normal text-[10px] shadow-sm">
+                        2–3 Months Streak
+                      </span>
                     </span>
-                  </span>
-                ) : task.streak <= 180 ? (
-                  <span className="bg-yellow-200 dark:bg-yellow-400 text-yellow-800 dark:text-yellow-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
-                    <User className="w-5 h-5 mr-2 text-yellow-600 dark:text-yellow-200" />
-                    Identity Phase
-                    <span className="ml-1 font-normal text-xs bg-yellow-300 text-yellow-900 dark:bg-yellow-500 dark:text-yellow-100 px-2 py-0.5 rounded-full">
-                      Month 4-6
+                  ) : task.streak <= 180 ? (
+                    <span className="flex items-center px-4 py-2 rounded-full text-xs font-semibold text-yellow-900 dark:text-yellow-100 shadow-lg bg-gradient-to-r from-yellow-200 to-yellow-400 dark:from-yellow-500 dark:to-yellow-700 backdrop-blur-sm">
+                      <User className="w-4 h-4 mr-2 text-yellow-700 dark:text-yellow-200" />
+                      Identity Phase
+                      <span className="ml-2 bg-white/30 dark:bg-yellow-800/40 text-yellow-900 dark:text-yellow-100 px-2 py-0.5 rounded-full font-normal text-[10px] shadow-sm">
+                        4–6 Months Streak
+                      </span>
                     </span>
-                  </span>
-                ) : (
-                  <span className="bg-red-200 dark:bg-red-400 text-red-800 dark:text-red-100 px-3 py-1.5 rounded-full font-semibold text-xs shadow-sm flex items-center mr-1">
-                    <Crown className="w-5 h-5 mr-2 text-red-600 dark:text-red-200" />
-                    Mastery Phase
-                    <span className="ml-1 font-normal text-xs bg-red-300 text-red-900 dark:bg-red-500 dark:text-red-100 px-2 py-0.5 rounded-full">
-                      6+ Months
+                  ) : (
+                    <span className="flex items-center px-4 py-2 rounded-full text-xs font-semibold text-red-900 dark:text-red-100 shadow-lg bg-gradient-to-r from-red-200 to-red-400 dark:from-red-500 dark:to-red-700 backdrop-blur-sm">
+                      <Crown className="w-4 h-4 mr-2 text-red-700 dark:text-red-200" />
+                      Mastery Phase
+                      <span className="ml-2 bg-white/30 dark:bg-red-800/40 text-red-900 dark:text-red-100 px-2 py-0.5 rounded-full font-normal text-[10px] shadow-sm">
+                        6+ Months Streak
+                      </span>
                     </span>
-                  </span>
-                ))}
+                  )}
+                </div>
+              )}
             </div>
           </div>
         </div>
@@ -342,6 +337,8 @@ function TaskItem({ task, onDelete, onUpdate }) {
 
       {/* Actions */}
       <div className="flex justify-between items-center md: gap-3 ">
+        {/* Start Timer */}
+        <TimerPiP minutes={task.duration} />
         <button
           className={`px-4 py-2 rounded-lg text-white ${
             priorityColors[task.priority] || "bg-gray-800"

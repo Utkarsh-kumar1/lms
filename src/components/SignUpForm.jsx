@@ -13,11 +13,13 @@ import {
   FormMessage,
 } from "@/components/ui/form";
 import { Input } from "@/components/ui/input";
+import CryptoJS from "crypto-js";
+
 
 import SignupSchema from "@/Schema/SignupSchema";
-import axios from "axios";
 import { useState } from "react";
 import { toast } from "@/components/ui/use-toast";
+import api from "@/axios";
 
 export default function SignUpForm({ setIsOtpSended, FormData, setFormData }) {
   const [isLogging, setIsLogging] = useState(false);
@@ -32,24 +34,30 @@ export default function SignUpForm({ setIsOtpSended, FormData, setFormData }) {
     setFormData(data)
     try {
       setIsLogging(true);
-      const Response = await axios.post("/api/sign-up", {
+
+      const encryptedPassword = CryptoJS.AES.encrypt(
+      password,
+      process.env.NEXT_PUBLIC_AUTH_SECRET
+      ).toString();
+      
+      const response = await api.post("/register", {
         firstName,
         lastName,
         username,
         email,
-        password,
+        password: encryptedPassword,
       });
       toast({
         variant: "success",
         title: "Message : ",
-        description: Response.data.message,
+        description: response?.data?.message,
       });
       setIsOtpSended(true);
     } catch (error) {
       toast({
         variant: "destructive",
         title: "Error : ",
-        description: error.response.data.message,
+        description: error?.response?.data?.message,
       });
     } finally {
       setIsLogging(false);

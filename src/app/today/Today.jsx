@@ -5,26 +5,7 @@ import TaskList from "./TaskList";
 import api from "@/axios";
 
 function Today() {
-  const [tasks, setTasks] = useState([]);
-  const [selectedDate, setSelectedDate] = useState(new Date());
-
-  useEffect(() => {
-    // Fetch building blocks
-    const date = selectedDate.toISOString().split("T")[0];
-
-    const fetchBuildingBlocks = async () => {
-      try {
-        const data = await api.get("/tasks", {
-          params: { today: date },
-        });
-        // const data = await response.json()
-        setTasks(data.data.data);
-      } catch (error) {
-        console.error(error);
-      }
-    };
-    fetchBuildingBlocks();
-  }, [selectedDate]);
+  
   // console.log(token.id);
 
   return (
@@ -32,8 +13,8 @@ function Today() {
       {/* Header */}
       {/* Tasks Section */}
       <TaskList
-        initialTasks={tasks}
-        changeDate={(newDate) => setSelectedDate(newDate)}
+        // initialTasks={tasks}
+        // changeDate={(newDate) => setSelectedDate(newDate)}
       />
       
     </div>

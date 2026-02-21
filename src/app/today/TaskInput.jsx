@@ -3,6 +3,7 @@ import { Blocks } from "lucide-react";
 import { useState, useEffect } from "react";
 
 const initialTaskState = {
+  id: "",
   title: "",
   startTime: new Date().toLocaleTimeString("en-US", {
     hour: "2-digit",
@@ -13,19 +14,21 @@ const initialTaskState = {
   duration: 15,
   description: "",
   isRecurring: false,
-  startDate: new Date().toISOString().split("T")[0],
+  startDate: new Date().toLocaleDateString("en-CA", {
+    timeZone: "Asia/Kolkata",
+  }),
   endDate: "",
   recurrencePattern: "daily",
   recurrenceInterval: 1,
-  recurrenceDays: ["Monday"],
-  recurrenceMonthDays: [1],
+  recurrenceDays: [],
+  recurrenceMonthDays: [],
   recurrenceYearDays: "",
-  priority: "Medium",
+  priority: "medium",
   customCron: "",
   customCronDescription: "",
 };
 
-export default function TaskInput({ isOpen, onClose }) {
+export default function TaskInput({ isOpen, onClose, taskToEdit = null }) {
   const [task, setTask] = useState(initialTaskState);
 
   const recurrenceOptions = ["Daily", "Weekly", "Monthly", "Yearly", "Custom"];
@@ -40,6 +43,50 @@ export default function TaskInput({ isOpen, onClose }) {
     "Sunday",
   ];
   const daysOfMonth = Array.from({ length: 31 }, (_, i) => i + 1);
+
+  // useEffect(() => {
+  //   console.log("taskname", task?.title);
+  //   console.log("daysOfWeek", task?.recurrenceDays);
+  //   console.log("month days", task?.recurrenceMonthDays);
+  // }, [task]);
+
+  useEffect(() => {
+    if (taskToEdit) {
+      console.log("Task to edit", taskToEdit);
+
+      const start = new Date(taskToEdit?.startDate).toLocaleDateString(
+        "en-CA",
+        {
+          timeZone: "Asia/Kolkata",
+        }
+      );
+      const end = new Date(taskToEdit?.endDate).toLocaleDateString("en-CA", {
+        timeZone: "Asia/Kolkata",
+      });
+
+      setTask({
+        ...taskToEdit,
+        startDate: taskToEdit?.startDate ? start : "",
+        endDate: taskToEdit?.endDate ? end : "",
+        // Convert to array
+        recurrenceDays: taskToEdit?.recurrenceDays?.split(","),
+        recurrenceMonthDays: taskToEdit?.recurrenceMonthDays
+          ?.split(",")
+          .map(Number),
+        // recurrenceYearDays: taskToEdit?.recurrenceYearDays?.split(","),
+      });
+    } else {
+      setTask({
+        ...initialTaskState,
+        startTime: new Date().toLocaleTimeString("en-US", {
+          hour: "2-digit",
+          minute: "2-digit",
+          hour12: false,
+          timeZone: "Asia/Kolkata",
+        })
+      });
+    }
+  }, [taskToEdit, isOpen]);
 
   useEffect(() => {
     if (task.recurrencePattern === "custom" && task.customCron.trim() !== "") {
@@ -61,9 +108,9 @@ export default function TaskInput({ isOpen, onClose }) {
   const toggleSelection = (name, value) => {
     setTask((prev) => ({
       ...prev,
-      [name]: prev[name].includes(value)
-        ? prev[name].filter((v) => v !== value)
-        : [...prev[name], value],
+      [name]: prev[name]?.includes(value)
+        ? prev[name]?.filter((v) => v !== value)
+        : [...(Array.isArray(prev[name]) ? prev[name] : []), value],
     }));
   };
 
@@ -100,8 +147,34 @@ export default function TaskInput({ isOpen, onClose }) {
 
   const handleSubmit = async (e) => {
     e.preventDefault();
+
     if (
-      task.recurrencePattern === "custom" &&
+      task.recurrencePattern === "weekly" &&
+      (task.recurrenceDays === null || task.recurrenceDays.length === 0)
+    ) {
+      alert("Select days");
+      return;
+    }
+
+    if (
+      task.recurrencePattern === "monthly" &&
+      (task.recurrenceMonthDays === null ||
+        task.recurrenceMonthDays.length === 0)
+    ) {
+      alert("Select days");
+      return;
+    }
+
+    if (
+      task.recurrencePattern === "yearly" &&
+      (task.recurrenceYearDays === null || task.recurrenceYearDays.length === 0)
+    ) {
+      console.log();
+      alert("Please enter comma-separated integers (e.g., 1,2,3).");
+      return;
+    }
+    if (
+      task.recurrencePattern === "yearly" &&
       !isValidCommaSeparatedIntegers()
     ) {
       alert(
@@ -109,22 +182,37 @@ export default function TaskInput({ isOpen, onClose }) {
       );
       return;
     }
+
     // Trim all
     for (const key in task) {
       if (typeof task[key] === "string") {
         task[key] = task[key].trim();
       }
     }
-    // console.log("Task Submitted:", task);
+
+    console.log("Task Submitted:", task);
     try {
-      const response = await api.post("/createTask", {
-        ...task,
-      });
-    } catch (error) {
-      console.error("Error submitting task:", error);
-    } finally {
+      if (task?.id?.length === 0) {
+        console.log("Creating task");
+        const response = await api.post("/createTask", {
+          ...task,
+          //Convert to string
+          recurrenceDays: task?.recurrenceDays?.join(","),
+          recurrenceMonthDays: task?.recurrenceMonthDays?.join(","),
+        });
+      } else {
+        console.log("Updating task");
+        const response = await api.patch("/updateRecurringTask", {
+          ...task,
+          //Convert to string
+          recurrenceDays: task?.recurrenceDays?.join(","),
+          recurrenceMonthDays: task?.recurrenceMonthDays?.join(","),
+        });
+      }
       clearStates();
       onClose();
+    } catch (error) {
+      console.error("Error submitting task:", error);
     }
   };
 
@@ -158,7 +246,7 @@ export default function TaskInput({ isOpen, onClose }) {
       onClick={handleOutsideClick}
       onKeyDown={handleEscapeKeyDown}
     >
-      <div className="max-w-lg max-h-screen mx-auto p-6 bg-white shadow-md rounded-lg overflow-y-auto transition-all duration-300 ease-in-out">
+      <div className="max-w-lg max-h-screen mx-auto p-6 bg-white dark:bg-black shadow-md rounded-lg overflow-y-auto transition-all duration-300 ease-in-out">
         <h2 className="flex items-center justify-center gap-2 text-2xl font-bold mb-4">
           Creating Block <Blocks />
         </h2>
@@ -181,6 +269,9 @@ export default function TaskInput({ isOpen, onClose }) {
                 value={task.startDate}
                 onChange={(e) => handleChange("startDate", e.target.value)}
                 className="w-full p-2 border rounded"
+                min={new Date().toLocaleDateString("en-CA", {
+                  timeZone: "Asia/Kolkata",
+                })}
                 required
               />
             </div>
@@ -258,6 +349,9 @@ export default function TaskInput({ isOpen, onClose }) {
                     value={task.startDate}
                     onChange={(e) => handleChange("startDate", e.target.value)}
                     className="w-full p-2 border rounded"
+                    min={new Date().toLocaleDateString("en-CA", {
+                      timeZone: "Asia/Kolkata",
+                    })}
                     required
                   />
                 </div>
@@ -270,6 +364,9 @@ export default function TaskInput({ isOpen, onClose }) {
                     value={task.endDate}
                     onChange={(e) => handleChange("endDate", e.target.value)}
                     className="w-full p-2 border rounded"
+                    min={new Date().toLocaleDateString("en-CA", {
+                      timeZone: "Asia/Kolkata",
+                    })}
                   />
                 </div>
 
@@ -286,10 +383,10 @@ export default function TaskInput({ isOpen, onClose }) {
                             option.toLowerCase()
                           )
                         }
-                        className={`px-4 py-2 border rounded ${
+                        className={`px-4 py-2  border rounded ${
                           task.recurrencePattern === option.toLowerCase()
                             ? "bg-blue-500 text-white"
-                            : "bg-gray-100"
+                            : "bg-gray-100 dark:bg-black"
                         }`}
                       >
                         {option}
@@ -328,9 +425,9 @@ export default function TaskInput({ isOpen, onClose }) {
                           type="button"
                           onClick={() => toggleSelection("recurrenceDays", day)}
                           className={`p-2 border rounded ${
-                            task.recurrenceDays.includes(day)
+                            task?.recurrenceDays?.includes(day)
                               ? "bg-blue-500 text-white"
-                              : "bg-gray-100"
+                              : "bg-gray-100 dark:bg-black"
                           }`}
                         >
                           {day}
@@ -354,9 +451,9 @@ export default function TaskInput({ isOpen, onClose }) {
                             toggleSelection("recurrenceMonthDays", day)
                           }
                           className={`p-2 border rounded ${
-                            task.recurrenceMonthDays.includes(day)
+                            task.recurrenceMonthDays?.includes(day)
                               ? "bg-blue-500 text-white"
-                              : "bg-gray-100"
+                              : "bg-gray-100 dark:bg-black"
                           }`}
                         >
                           {day}
@@ -408,7 +505,7 @@ export default function TaskInput({ isOpen, onClose }) {
                   className={`px-4 py-2 border rounded ${
                     task.priority === option.toLowerCase()
                       ? "bg-blue-500 text-white"
-                      : "bg-gray-100"
+                      : "bg-gray-100 dark:bg-black"
                   }`}
                 >
                   {option}
@@ -421,7 +518,7 @@ export default function TaskInput({ isOpen, onClose }) {
             <button
               type="button"
               onClick={handleCancel}
-              className="px-4 py-2 bg-gray-300 rounded-md"
+              className="px-4 py-2 bg-gray-300 dark:bg-black rounded-md"
             >
               Cancel
             </button>

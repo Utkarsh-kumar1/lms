@@ -10,7 +10,7 @@ const usernameOrEmailValidation = z.string({ required_error: "Username or Email 
     },  "Must be a valid username or email",
     );
 
-const passwordValidation = z.string({ required_error: "Password is required" })
+export const passwordValidation = z.string({ required_error: "Password is required" })
     .min(8, "Password must contain at least 8 characters")
     .max(20, "Password must contain less than 20 characters")
     .regex(/[A-Za-z]/, "Password must contain at least one letter")

@@ -19,7 +19,7 @@ export default function Page() {
         },
       })
       .then((response) => {
-        console.log("all subjects data fetched:", response.data.data);
+        // console.log("all subjects data fetched:", response.data.data);
         setSubjects(response.data.data);
         setLoading(false);
       })

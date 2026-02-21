@@ -99,5 +99,13 @@ module.exports = {
 			}
 		}
 	},
-	plugins: [require("tailwindcss-animate")],
+	plugins: [require("tailwindcss-animate"), function ({ addUtilities }) {
+      addUtilities({
+        '.placeholder-gradient': {
+          'background-image': 'linear-gradient(to right, #3b82f6, #06b6d4)',
+          '-webkit-background-clip': 'text',
+          '-webkit-text-fill-color': 'transparent',
+        },
+      }, ['responsive', 'hover'])
+    },],
 }

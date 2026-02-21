@@ -1,472 +1,203 @@
-// app/mindmap/page.js
 "use client";
 
-import React, { useState, useRef, useEffect } from "react";
-import { Stage, Layer, Rect, Text, Line, Group, Path } from "react-konva";
-import Toolbar from "../../components/Toolabar";
+import { useEffect, useRef, useState } from "react";
 
-export default function Mindmap() {
-  const [rectangles, setRectangles] = useState([
-    {
-      id: "1",
-      text: "Start",
-      x: 100,
-      y: 400,
-      width: 120,
-      height: 60,
-      fill: "#e0f2fe",
-      // isHovered: false,
-      parentId: null,
-    },
-    {
-      id: "2",
-      text: "Start",
-      x: 100,
-      y: 400,
-      width: 120,
-      height: 60,
-      fill: "#FF0000",
-      // isHovered: false,
-      parentId: "1",
-    },
-    {
-      id: "4",
-      text: "Start",
-      x: 100,
-      y: 400,
-      width: 120,
-      height: 60,
-      fill: "#e0f2fe",
-      // isHovered: false,
-      parentId: "1",
-    },
-    {
-      id: "3",
-      text: "Start",
-      x: 100,
-      y: 400,
-      width: 120,
-      height: 60,
-      fill: "#e0f2fe",
-      // isHovered: false,
-      parentId: "1",
-    },
+const START_OFFSET_Y = 120;
+const NODE_WIDTH = 140;
+const NODE_HEIGHT = 60;
+const GAP_X = 180;
+const GAP_Y = 80;
+
+export default function MindMap() {
+    const containerRef = useRef(null);
+    const [startOffsetX, setStartOffsetX] = useState(300);
+
+useEffect(() => {
+  setStartOffsetX(window.innerWidth / 4);
+}, []);
+
+  const [nodes, setNodes] = useState([
+    { id: "1", text: "Start", parentId: null },
+    { id: "2", text: "Child 1", parentId: "1" },
+    { id: "3", text: "Child 2", parentId: "1" },
   ]);
-  const [selectedId, setSelectedId] = useState(null);
-  const stageRef = useRef(null);
-  const [scale, setScale] = useState(1);
-  const [position, setPosition] = useState({ x: 0, y: 0 });
-  const [isDragging, setIsDragging] = useState(false);
-  const [lastMousePos, setLastMousePos] = useState({ x: 0, y: 0 });
 
-  const [layout, setLayout] = useState("horizontal");
-  const [mode, setMode] = useState("edit");
-  const [tool, setTool] = useState(""); // Optional: for UI feedback
+  const [positions, setPositions] = useState({});
 
-  const subtreeSizes = new Map();
+  /* ---------------- tree utils ---------------- */
 
-  const handleToolSelect = (selected) => {
-    switch (selected) {
-      case "recenter":
-        // recenter logic
-        break;
-      case "layoutToggle":
-        setLayout((prev) =>
-          prev === "horizontal" ? "vertical" : "horizontal"
-        );
-        console.log(layout);
-        break;
-      case "modeToggle":
-        setMode((prev) => (prev === "edit" ? "view" : "edit"));
-        console.log("Mode", mode);
-        break;
-      default:
-        break;
-    }
-    setTool(selected); // for activeTool highlight if needed
-  };
-
-  // Handle panning
-  const handleMouseDown = (e) => {
-    setIsDragging(true);
-    const pos = e.evt;
-    setLastMousePos({ x: pos.clientX, y: pos.clientY });
-  };
-
-  const handleMouseMove = (e) => {
-    if (!isDragging) return;
-    const pos = e.evt;
-    const dx = pos.clientX - lastMousePos.x;
-    const dy = pos.clientY - lastMousePos.y;
-
-    setLastMousePos({ x: pos.clientX, y: pos.clientY });
-    setPosition((prev) => ({ x: prev.x + dx, y: prev.y + dy }));
-  };
-
-  const handleMouseUp = () => {
-    setIsDragging(false);
-  };
-
-  // Zooming (wheel)
-  const handleWheel = (e) => {
-    e.evt.preventDefault();
-    const scaleBy = 1.05;
-    const oldScale = scale;
-    const mousePointTo = {
-      x: (e.evt.offsetX - position.x) / oldScale,
-      y: (e.evt.offsetY - position.y) / oldScale,
-    };
-
-    const direction = e.evt.deltaY > 0 ? -1 : 1;
-    const newScale = direction > 0 ? oldScale * scaleBy : oldScale / scaleBy;
-
-    setScale(newScale);
-    setPosition({
-      x: e.evt.offsetX - mousePointTo.x * newScale,
-      y: e.evt.offsetY - mousePointTo.y * newScale,
+  const buildTree = (flat) => {
+    const map = {};
+    flat.forEach((n) => (map[n.id] = { ...n, children: [] }));
+    flat.forEach((n) => {
+      if (n.parentId) map[n.parentId].children.push(map[n.id]);
     });
+    return map[flat.find((n) => n.parentId === null)?.id];
   };
 
-  const spacing = 20;
+  const getContentBounds = () => {
+    if (!nodes.length) return { width: 0, height: 0 };
 
-  const handleStageMouseDown = () => {
-    setSelectedId(null);
+    const maxX = Math.max(...nodes.map((n) => positions[n.id]?.x ?? 0));
+    const maxY = Math.max(...nodes.map((n) => positions[n.id]?.y ?? 0));
+
+    return {
+      width: maxX + NODE_WIDTH + 200,
+      height: maxY + NODE_HEIGHT + 200,
+    };
   };
 
-  const handleTextEdit = (id, newText) => {
-    if (mode === "view") return;
-    const updated = rectangles.map((rect) =>
-      rect.id === id ? { ...rect, text: newText } : rect
-    );
-    setRectangles(updated);
-  };
+  const { width, height } = getContentBounds();
+
+  /* ---------------- layout ---------------- */
 
   useEffect(() => {
-    if (layout === "horizontal")
-      setPosition({
-        x: 0,
-        y: 200,
-      });
-    else {
-      setPosition({
-        y: 0,
-        x: 500,
-      });
-    }
+    const tree = buildTree(nodes);
+    if (!tree) return;
 
-    reflowLayout();
-  }, [layout]);
+    const pos = {};
+    let currentY = 0;
 
-  useEffect(() => {
-    reflowLayout();
-  }, [rectangles.length]);
+    const dfs = (node, depth) => {
+      const children = node.children;
 
-  const reflowLayout = () => {
-    const newRects = [...rectangles];
-    subtreeSizes.clear(); // reset map
-
-    const roots = newRects.filter((r) => r.parentId === null);
-
-    roots.forEach((root) => measureSubtree(root));
-
-    roots.forEach((root, i) => {
-      const rootSize = subtreeSizes.get(root.id);
-      const x =
-        layout === "horizontal" ? 100 : 100 + i * (rootSize.width + 150);
-      const y =
-        layout === "horizontal" ? 100 + i * (rootSize.height + 150) : 100;
-      positionSubtree(root, x, y);
-    });
-
-    setRectangles(newRects);
-  };
-
-  const measureSubtree = (node) => {
-    const children = rectangles.filter((r) => r.parentId === node.id);
-    if (children.length === 0) {
-      const size = { width: node.width, height: node.height };
-      subtreeSizes.set(node.id, size);
-      return size;
-    }
-
-    let totalWidth = 0;
-    let totalHeight = 0;
-
-    const childSizes = children.map((child) => {
-      const size = measureSubtree(child);
-      if (layout === "horizontal") {
-        totalHeight += size.height + spacing;
-        totalWidth = Math.max(totalWidth, size.width);
-      } else {
-        totalWidth += size.width + spacing;
-        totalHeight = Math.max(totalHeight, size.height);
+      if (children.length === 0) {
+        pos[node.id] = {
+          x: depth * GAP_X + startOffsetX,
+          y: currentY + START_OFFSET_Y,
+        };
+        currentY += NODE_HEIGHT + GAP_Y;
+        return;
       }
-      return size;
-    });
 
-    if (layout === "horizontal") totalHeight -= spacing;
-    else totalWidth -= spacing;
+      children.forEach((c) => dfs(c, depth + 1));
 
-    const size = { width: totalWidth, height: totalHeight };
-    subtreeSizes.set(node.id, size);
-    return size;
-  };
+      const first = pos[children[0].id];
+      const last = pos[children[children.length - 1].id];
 
-  const positionSubtree = (node, x, y) => {
-    node.x = x;
-    node.y = y;
-
-    const children = rectangles.filter((r) => r.parentId === node.id);
-    if (children.length === 0) return;
-
-    let offsetX = x;
-    let offsetY = y;
-
-    const parentSize = subtreeSizes.get(node.id);
-
-    if (layout === "horizontal") {
-      offsetX += node.width + 100;
-      offsetY -= parentSize.height / 2;
-    } else {
-      offsetY += node.height + 100;
-      offsetX -= parentSize.width / 2;
-    }
-
-    children.forEach((child) => {
-      const size = subtreeSizes.get(child.id);
-      if (layout === "horizontal") {
-        positionSubtree(child, offsetX, offsetY + size.height / 2);
-        offsetY += size.height + spacing;
-      } else {
-        positionSubtree(child, offsetX + size.width / 2, offsetY);
-        offsetX += size.width + spacing;
-      }
-    });
-  };
-
-  const centerLayout = () => {
-    if (!stageRef.current || rectangles.length === 0) return;
-
-    const stage = stageRef.current;
-    const stageWidth = stage.width();
-    const stageHeight = stage.height();
-
-    const padding = 50;
-
-    const minX = Math.min(...rectangles.map((r) => r.x));
-    const maxX = Math.max(...rectangles.map((r) => r.x + r.width));
-    const minY = Math.min(...rectangles.map((r) => r.y));
-    const maxY = Math.max(...rectangles.map((r) => r.y + r.height));
-
-    const contentWidth = maxX - minX;
-    const contentHeight = maxY - minY;
-
-    const offsetX = (stageWidth - contentWidth) / 2 - minX + padding;
-    const offsetY = (stageHeight - contentHeight) / 2 - minY + padding;
-
-    const newRects = rectangles.map((rect) => ({
-      ...rect,
-      x: rect.x + offsetX,
-      y: rect.y + offsetY,
-    }));
-
-    setRectangles(newRects);
-  };
-
-  const handleAddRectangle = (parentId) => {
-    const parent = rectangles.find((r) => r.id === parentId);
-    const siblings = rectangles.filter((r) => r.parentId === parentId);
-    const newY = parent.y + siblings.length * (parent.height + spacing);
-    const newX = parent.x + parent.width + 100;
-    const newId = `${Date.now()}`;
-
-    const newRect = {
-      id: newId,
-      text: "New",
-      x: newX,
-      y: newY,
-      width: 120,
-      height: 60,
-      fill: "#e0f2fe",
-      parentId: parentId,
+      pos[node.id] = {
+        x: depth * GAP_X + startOffsetX,
+        y: (first.y + last.y) / 2, // ✅ FIX
+      };
     };
-    setRectangles([...rectangles, newRect]);
+
+    dfs(tree, 0);
+    setPositions(pos);
+  }, [nodes]);
+
+  /* ---------------- add node ---------------- */
+
+  const addNode = (parentId) => {
+    setNodes((prev) => [
+      ...prev,
+      { id: Date.now().toString(), text: "New", parentId },
+    ]);
   };
 
-  const handleDelete = () => {
-    if (selectedId) {
-      setRectangles((prev) =>
-        prev.filter((r) => r.id !== selectedId && r.parentId !== selectedId)
-      );
-      setSelectedId(null);
-    }
+  /* ---------------- delete node ---------------- */
+
+  const deleteNode = (id) => {
+    const ids = new Set();
+
+    const collect = (nodeId) => {
+      ids.add(nodeId);
+      nodes.filter((n) => n.parentId === nodeId).forEach((c) => collect(c.id));
+    };
+
+    collect(id);
+    setNodes((prev) => prev.filter((n) => !ids.has(n.id)));
   };
+
+  /* ---------------- render ---------------- */
 
   return (
-    <div className="relative w-full h-full  bg-gray-100">
-      <Toolbar
-        activeTool={tool}
-        onToolSelect={handleToolSelect}
-        layout={layout}
-        mode={mode}
-        centerLayout={centerLayout}
-      />
-
-      <Stage
-        ref={stageRef}
-        width={window.innerWidth}
-        height={window.innerHeight}
-        scale={{ x: scale, y: scale }}
-        x={position.x}
-        y={position.y}
-        className="cursor-crosshair"
-        onWheel={handleWheel}
-        onMouseDown={handleMouseDown}
-        onMouseMove={handleMouseMove}
-        onMouseUp={handleMouseUp}
+    <div
+      ref={containerRef}
+      className="relative w-full h-screen bg-gray-100 overflow-auto"
+    >
+      {/* connections */}
+      <svg
+        className="absolute inset-0 pointer-events-none"
+        preserveAspectRatio="none"
+        width={width}
+        height={height}
+        style={{ overflow: "visible" }}
       >
-        <Layer>
-          {rectangles.map((rect) => {
-            const isSelected = rect.id === selectedId;
-            return (
-              <Group
-                key={rect.id}
-                x={rect.x}
-                y={rect.y}
-                draggable
-                onClick={(e) => {
-                  setSelectedId(rect.id);
-                  e.cancelBubble = true;
-                }}
-                onDblClick={() => {
-                  const newText = prompt("Edit text:", rect.text);
-                  if (newText) handleTextEdit(rect.id, newText);
-                }}
-                // onDragEnd={(e) => {
-                //   const updated = rectangles.map((r) =>
-                //     r.id === rect.id
-                //       ? { ...r, x: e.target.x(), y: e.target.y() }
-                //       : r
-                //   );
+        {nodes.map((n) => {
+          if (!n.parentId) return null;
+          const p = positions[n.parentId];
+          const c = positions[n.id];
+          if (!p || !c) return null;
 
-                //   setRectangles(updated);
-                // }}
+          return (
+            <path
+              key={n.id}
+              d={`
+                M ${p.x + NODE_WIDTH} ${p.y + NODE_HEIGHT / 2}
+                C ${p.x + NODE_WIDTH + 40} ${p.y + NODE_HEIGHT / 2},
+                  ${c.x - 40} ${c.y + NODE_HEIGHT / 2},
+                  ${c.x} ${c.y + NODE_HEIGHT / 2}
+              `}
+              stroke="#888"
+              fill="none"
+              strokeWidth="2"
+            />
+          );
+        })}
+      </svg>
 
-                // TODO: Implement targeted UI reflesh to counter laggy redenring
-                onDragMove={(e) => {
-                  const newX = e.target.x();
-                  const newY = e.target.y();
+      {/* nodes */}
+      {nodes.map((n) => {
+        const p = positions[n.id];
+        if (!p) return null;
 
-                  setRectangles((prev) =>
-                    prev.map((r) =>
-                      r.id === rect.id ? { ...r, x: newX, y: newY } : r
-                    )
-                  );
-                }}
-                onMouseEnter={() => {
-                  setRectangles((prev) =>
-                    prev.map((r) =>
-                      r.id === rect.id ? { ...r, isHovered: true } : r
-                    )
-                  );
-                }}
-                onMouseLeave={() => {
-                  setRectangles((prev) =>
-                    prev.map((r) =>
-                      r.id === rect.id ? { ...r, isHovered: false } : r
-                    )
-                  );
-                }}
+        return (
+          <div
+            key={n.id}
+            className="group absolute rounded-xl border bg-white shadow px-3 py-2
+                        text-center select-none"
+            style={{
+              left: p.x,
+              top: p.y,
+              width: NODE_WIDTH,
+              height: NODE_HEIGHT,
+            }}
+          >
+            <div className="font-medium">{n.text}</div>
+
+            <button
+              onClick={() => addNode(n.id)}
+              className="
+                    absolute -right-3 top-1/2 -translate-y-1/2
+                    w-6 h-6 rounded-full bg-blue-500 text-white text-sm
+                    opacity-0 scale-90
+                    group-hover:opacity-100 group-hover:scale-100
+                    hover:opacity-100
+                    transition-all duration-150
+                    shadow-md hover:shadow-lg
+                "
+            >
+              +
+            </button>
+
+            {n.parentId && (
+              <button
+                onClick={() => deleteNode(n.id)}
+                className="
+                    absolute -bottom-3 left-1/2 -translate-x-1/2
+                    w-6 h-6 rounded-full bg-red-500 text-white text-sm
+                    opacity-0 scale-90
+                    group-hover:opacity-100 group-hover:scale-100
+                    hover:opacity-100
+                    transition-all duration-150
+                    "
               >
-                <Rect
-                  width={rect.width}
-                  height={rect.height}
-                  fill={rect.fill}
-                  stroke={isSelected ? "#0ea5e9" : "#888"}
-                  strokeWidth={2}
-                  cornerRadius={10}
-                />
-                <Text
-                  text={rect.text}
-                  fontSize={16}
-                  padding={10}
-                  width={rect.width}
-                  height={rect.height}
-                  align="center"
-                  verticalAlign="middle"
-                />
-                {mode === "edit" && (
-                  <Group
-                    // className={rect.isHovered ? "hidden" : "block"}
-                    x={
-                      layout === "vertical"
-                        ? rect.width / 2 - 10
-                        : rect.width - 10
-                    }
-                    y={
-                      layout === "vertical"
-                        ? rect.height - 10
-                        : rect.height / 2 - 10
-                    }
-                    onClick={(e) => {
-                      e.cancelBubble = true;
-                      handleAddRectangle(rect.id);
-                    }}
-                    visible={rect.isHovered !== undefined && rect.isHovered}
-                  >
-                    <Rect
-                      width={20}
-                      height={20}
-                      fill="#bae6fd"
-                      cornerRadius={5}
-                    />
-                    <Text
-                      text="+"
-                      fontSize={18}
-                      width={20}
-                      height={20}
-                      align="center"
-                      verticalAlign="middle"
-                      fill="#0369a1"
-                    />
-                  </Group>
-                )}
-              </Group>
-            );
-          })}
-
-          {/* Lines to children */}
-          {rectangles.map((child) => {
-            const parent = rectangles.find((p) => p.id === child.parentId);
-            if (!parent) return null;
-            return (
-              <Path
-                key={child.id + "-path"}
-                data={
-                  layout === "vertical"
-                    ? `M ${parent.x + parent.width / 2},${
-                        parent.y + parent.height
-                      }
-         Q ${child.x + child.width / 2},${
-                        (parent.y + parent.height + child.y) / 2
-                      }
-           ${child.x + child.width / 2},${child.y}`
-                    : `M ${parent.x + parent.width},${
-                        parent.y + parent.height / 2
-                      }
-         Q ${(parent.x + parent.width + child.x) / 2},${
-                        child.y + child.height / 2
-                      }
-           ${child.x},${child.y + child.height / 2}`
-                }
-                stroke="#888"
-                strokeWidth={2}
-                fill="transparent"
-              />
-            );
-          })}
-        </Layer>
-      </Stage>
+                ×
+              </button>
+            )}
+          </div>
+        );
+      })}
     </div>
   );
 }

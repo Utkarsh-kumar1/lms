@@ -134,12 +134,12 @@ export function AppSidebar() {
 
   return (
     <Sidebar
-      className="bg-slate-800 text-gray-200 flex flex-col overflow-hidden dark:bg-gray-900 dark:text-gray-200"
+      className="bg-slate-800 text-gray-200 flex flex-col overflow-hidden dark:bg-gray-900 dark:text-gray-200 pointer-events-auto"
       collapsible="icon"
       default="collapsed"
     >
       {/* Sidebar Header */}
-      <SidebarHeader className=" text-2xl font-bold text-black border-b dark:border-gray-700">
+      <SidebarHeader className="h-14 shrink-0 text-2xl font-bold text-black border-b dark:border-gray-700">
         <SidebarMenu>
           <SidebarMenuItem className="w-full">
             <SidebarMenuButton className="w-full ">

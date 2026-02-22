@@ -43,7 +43,7 @@ export default async function RootLayout({ children }) {
             <SocketProvider>
               <SidebarProvider defaultOpen={false}>
                 <AppSidebar />
-                <main className=" w-full min-h-screen flex flex-col   bg-gray-100  dark:bg-gray-800">
+                <main className=" relative flex-1 overflow-hidden pointer-events-auto bg-gray-100  dark:bg-gray-800">
                   <Header />
 
                   {children}

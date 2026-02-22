@@ -2,14 +2,30 @@
 
 import { useEffect, useRef, useState } from "react";
 
+const MIN_FONT = 12;
+const MAX_FONT = 16;
+const MAX_WIDTH = 220;
+
 const START_OFFSET_Y = 120;
-const NODE_WIDTH = 140;
-const NODE_HEIGHT = 60;
+const NODE_WIDTH = 60;
+const NODE_HEIGHT = 40;
 const GAP_X = 180;
 const GAP_Y = 80;
 
+const getFontSize = (text) => {
+  if (text.length < 20) return MAX_FONT;
+  if (text.length > 80) return MIN_FONT;
+
+  const ratio = (80 - text.length) / 60;
+  return MIN_FONT + ratio * (MAX_FONT - MIN_FONT);
+};
+
 export default function MindMap() {
   const containerRef = useRef(null);
+  const [editingId, setEditingId] = useState(null);
+
+  const nodeRefs = useRef({});
+  const [nodeSizes, setNodeSizes] = useState({});
 
   /* ---------- PAN & ZOOM (refs, not state) ---------- */
   const panRef = useRef({ x: 0, y: 0 });
@@ -34,16 +50,16 @@ export default function MindMap() {
 
   /* ---------- POINTER PAN ---------- */
   const onPointerDown = (e) => {
-  // 🚫 If clicking a button or node UI — do NOT pan
-  if (e.target.closest("button")) return;
+    // 🚫 If clicking a button or node UI — do NOT pan
+    if (e.target.closest("button")) return;
 
-  if (e.button !== 0) return;
+    if (e.button !== 0) return;
 
-  isPanning.current = true;
-  last.current = { x: e.clientX, y: e.clientY };
+    isPanning.current = true;
+    last.current = { x: e.clientX, y: e.clientY };
 
-  e.currentTarget.setPointerCapture(e.pointerId);
-};
+    e.currentTarget.setPointerCapture(e.pointerId);
+  };
 
   const onPointerMove = (e) => {
     if (!isPanning.current) return;
@@ -68,10 +84,7 @@ export default function MindMap() {
     e.preventDefault();
 
     const zoom = e.deltaY < 0 ? 1.1 : 0.9;
-    const newScale = Math.min(
-      Math.max(scaleRef.current * zoom, 0.3),
-      2.5
-    );
+    const newScale = Math.min(Math.max(scaleRef.current * zoom, 0.3), 2.5);
 
     const rect = containerRef.current.getBoundingClientRect();
     const cx = e.clientX - rect.left;
@@ -127,6 +140,23 @@ export default function MindMap() {
     dfs(tree, 0);
     setPositions(pos);
   }, [nodes, startOffsetX]);
+
+useEffect(() => {
+  const sizes = {};
+
+  Object.entries(nodeRefs.current).forEach(([id, el]) => {
+    if (!el) return;
+
+    const rect = el.getBoundingClientRect();
+
+    sizes[id] = {
+      width: rect.width / scaleRef.current,
+      height: rect.height / scaleRef.current,
+    };
+  });
+
+  setNodeSizes(sizes);
+}, [nodes, editingId, scaleRef.current]);
 
   /* ---------- ACTIONS ---------- */
   const addNode = (parentId) => {
@@ -188,10 +218,17 @@ export default function MindMap() {
             return (
               <path
                 key={n.id}
-                d={`M ${p.x + NODE_WIDTH} ${p.y + NODE_HEIGHT / 2}
-                    C ${p.x + NODE_WIDTH + 40} ${p.y + NODE_HEIGHT / 2},
-                      ${c.x - 40} ${c.y + NODE_HEIGHT / 2},
-                      ${c.x} ${c.y + NODE_HEIGHT / 2}`}
+                d={`
+                  M ${p.x + (nodeSizes[n.parentId]?.width ?? NODE_WIDTH)}
+                    ${p.y + (nodeSizes[n.parentId]?.height ?? NODE_HEIGHT) / 2}
+
+                  C ${p.x + (nodeSizes[n.parentId]?.width ?? NODE_WIDTH) + 40}
+                    ${p.y + (nodeSizes[n.parentId]?.height ?? NODE_HEIGHT) / 2},
+                    ${c.x - 40}
+                    ${c.y + (nodeSizes[n.id]?.height ?? NODE_HEIGHT) / 2},
+                    ${c.x}
+                    ${c.y + (nodeSizes[n.id]?.height ?? NODE_HEIGHT) / 2}
+                `}
                 stroke="#888"
                 fill="none"
                 strokeWidth="2"
@@ -204,36 +241,73 @@ export default function MindMap() {
           const p = positions[n.id];
           if (!p) return null;
 
+          const fontSize = getFontSize(n.text);
+
           return (
             <div
+              ref={(el) => (nodeRefs.current[n.id] = el)}
               key={n.id}
               onPointerDown={(e) => e.stopPropagation()}
-              className="absolute bg-white border rounded-xl shadow
-                         px-3 py-2 text-center select-none"
+              className="group absolute rounded-xl border bg-white shadow
+                 px-3 py-2 select-none"
               style={{
                 left: p.x,
                 top: p.y,
-                width: NODE_WIDTH,
-                height: NODE_HEIGHT,
+                maxWidth: MAX_WIDTH,
+                fontSize,
               }}
             >
-              <div className="font-medium">{n.text}</div>
+              {editingId === n.id ? (
+                <textarea
+                  autoFocus
+                  value={n.text}
+                  onChange={(e) =>
+                    setNodes((prev) =>
+                      prev.map((node) =>
+                        node.id === n.id
+                          ? { ...node, text: e.target.value }
+                          : node,
+                      ),
+                    )
+                  }
+                  onBlur={() => setEditingId(null)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter" && !e.shiftKey) {
+                      e.preventDefault();
+                      setEditingId(null);
+                    }
+                  }}
+                  className="w-full resize-none bg-transparent outline-none
+                     text-center leading-snug"
+                />
+              ) : (
+                <div
+                  className="text-center break-words cursor-text"
+                  onDoubleClick={() => setEditingId(n.id)}
+                >
+                  {n.text}
+                </div>
+              )}
 
+              {/* ADD */}
               <button
-                onMouseDown={(e) => e.stopPropagation()}
+                onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => addNode(n.id)}
                 className="absolute -right-3 top-1/2 -translate-y-1/2
-                           w-6 h-6 rounded-full bg-blue-500 text-white"
+                   w-6 h-6 rounded-full bg-blue-500 text-white text-sm
+                   opacity-0 group-hover:opacity-100 transition"
               >
                 +
               </button>
 
+              {/* DELETE */}
               {n.parentId && (
                 <button
-                  onMouseDown={(e) => e.stopPropagation()}
+                  onPointerDown={(e) => e.stopPropagation()}
                   onClick={() => deleteNode(n.id)}
                   className="absolute -bottom-3 left-1/2 -translate-x-1/2
-                             w-6 h-6 rounded-full bg-red-500 text-white"
+                     w-6 h-6 rounded-full bg-red-500 text-white text-sm
+                     opacity-0 group-hover:opacity-100 transition"
                 >
                   ×
                 </button>

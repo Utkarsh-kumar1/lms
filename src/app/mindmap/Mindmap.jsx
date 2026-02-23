@@ -1,5 +1,6 @@
 "use client";
 
+import api from "@/axios";
 import { useEffect, useRef, useState } from "react";
 
 const MIN_FONT = 12;
@@ -20,8 +21,11 @@ const getFontSize = (text) => {
   return MIN_FONT + ratio * (MAX_FONT - MIN_FONT);
 };
 
-export default function MindMap() {
+export default function MindMap({ mapId, onBack }) {
   const containerRef = useRef(null);
+  const saveTimer = useRef(null);
+  const hasLoaded = useRef(false);
+  const lastSaved = useRef("");
   const [editingId, setEditingId] = useState(null);
 
   const nodeRefs = useRef({});
@@ -37,16 +41,59 @@ export default function MindMap() {
 
   /* ---------- DATA ---------- */
   const [startOffsetX, setStartOffsetX] = useState(300);
-  const [nodes, setNodes] = useState([
-    { id: "1", text: "Start", parentId: null },
-    { id: "2", text: "Child 1", parentId: "1" },
-    { id: "3", text: "Child 2", parentId: "1" },
-  ]);
+  // const [nodes, setNodes] = useState([
+  //   { id: "1", text: "Start", parentId: null },
+  // ]);
+  const [nodes, setNodes] = useState([]);
   const [positions, setPositions] = useState({});
 
   useEffect(() => {
     setStartOffsetX(window.innerWidth / 4);
   }, []);
+
+  // Fetch at start
+  useEffect(() => {
+    if (!mapId) return;
+
+    (async () => {
+      try {
+        const { data } = await api.get(`/mindmaps/${mapId}`);
+        const loadedNodes = data?.nodes?.nodes ?? [];
+        setNodes(loadedNodes);
+
+        // ✅ mark this state as already saved
+        lastSaved.current = JSON.stringify(loadedNodes);
+
+        // ✅ now allow autosave
+        hasLoaded.current = true;
+      } catch (err) {
+        console.error("Failed to load mindmap", err);
+      }
+    })();
+  }, [mapId]);
+
+  // Update with debounce timer
+  useEffect(() => {
+    console.log(nodes);
+    // 🚫 skip autosave until initial load completes
+    if (!hasLoaded.current) return;
+    if (!mapId || nodes?.length === 0) return;
+
+    const current = JSON.stringify(nodes);
+    if (current === lastSaved.current) return;
+
+    lastSaved.current = current;
+
+    clearTimeout(saveTimer.current);
+
+    saveTimer.current = setTimeout(async () => {
+      try {
+        await api.put(`/mindmaps/${mapId}`, { nodes });
+      } catch (err) {
+        console.error("Auto-save failed", err);
+      }
+    }, 600); // debounce
+  }, [nodes, mapId]);
 
   /* ---------- POINTER PAN ---------- */
   const onPointerDown = (e) => {
@@ -102,11 +149,11 @@ export default function MindMap() {
   /* ---------- TREE LAYOUT ---------- */
   const buildTree = (flat) => {
     const map = {};
-    flat.forEach((n) => (map[n.id] = { ...n, children: [] }));
-    flat.forEach((n) => {
+    flat?.forEach((n) => (map[n.id] = { ...n, children: [] }));
+    flat?.forEach((n) => {
       if (n.parentId) map[n.parentId].children.push(map[n.id]);
     });
-    return map[flat.find((n) => n.parentId === null)?.id];
+    return map[flat?.find((n) => n.parentId === null)?.id];
   };
 
   useEffect(() => {
@@ -141,22 +188,22 @@ export default function MindMap() {
     setPositions(pos);
   }, [nodes, startOffsetX]);
 
-useEffect(() => {
-  const sizes = {};
+  useEffect(() => {
+    const sizes = {};
 
-  Object.entries(nodeRefs.current).forEach(([id, el]) => {
-    if (!el) return;
+    Object.entries(nodeRefs.current).forEach(([id, el]) => {
+      if (!el) return;
 
-    const rect = el.getBoundingClientRect();
+      const rect = el.getBoundingClientRect();
 
-    sizes[id] = {
-      width: rect.width / scaleRef.current,
-      height: rect.height / scaleRef.current,
-    };
-  });
+      sizes[id] = {
+        width: rect.width / scaleRef.current,
+        height: rect.height / scaleRef.current,
+      };
+    });
 
-  setNodeSizes(sizes);
-}, [nodes, editingId, scaleRef.current]);
+    setNodeSizes(sizes);
+  }, [nodes, editingId, scaleRef.current]);
 
   /* ---------- ACTIONS ---------- */
   const addNode = (parentId) => {
@@ -170,7 +217,7 @@ useEffect(() => {
     const ids = new Set();
     const collect = (pid) => {
       ids.add(pid);
-      nodes.filter((n) => n.parentId === pid).forEach((c) => collect(c.id));
+      nodes?.filter((n) => n.parentId === pid).forEach((c) => collect(c.id));
     };
     collect(id);
     setNodes((prev) => prev.filter((n) => !ids.has(n.id)));
@@ -190,7 +237,10 @@ useEffect(() => {
   return (
     <div
       ref={containerRef}
-      className="relative w-full h-full overflow-hidden bg-gray-100"
+      className="
+          relative w-full h-full overflow-hidden
+          bg-gray-100 dark:bg-gray-900
+        "
       onPointerDown={onPointerDown}
       onPointerMove={onPointerMove}
       onPointerUp={onPointerUp}
@@ -209,7 +259,7 @@ useEffect(() => {
           height={height}
           className="absolute top-0 left-0 pointer-events-none"
         >
-          {nodes.map((n) => {
+          {nodes?.map((n) => {
             if (!n.parentId) return null;
             const p = positions[n.parentId];
             const c = positions[n.id];
@@ -229,7 +279,8 @@ useEffect(() => {
                     ${c.x}
                     ${c.y + (nodeSizes[n.id]?.height ?? NODE_HEIGHT) / 2}
                 `}
-                stroke="#888"
+                stroke="currentColor"
+                className="text-gray-400 dark:text-gray-500"
                 fill="none"
                 strokeWidth="2"
               />
@@ -237,7 +288,7 @@ useEffect(() => {
           })}
         </svg>
 
-        {nodes.map((n) => {
+        {nodes?.map((n) => {
           const p = positions[n.id];
           if (!p) return null;
 
@@ -248,8 +299,11 @@ useEffect(() => {
               ref={(el) => (nodeRefs.current[n.id] = el)}
               key={n.id}
               onPointerDown={(e) => e.stopPropagation()}
-              className="group absolute rounded-xl border bg-white shadow
-                 px-3 py-2 select-none"
+              className="
+                group absolute rounded-xl border px-3 py-2 select-none
+                bg-white text-gray-900 border-gray-300 shadow
+                dark:bg-gray-800 dark:text-gray-100 dark:border-gray-600 dark:shadow-[0_4px_12px_rgba(0,0,0,0.6)]
+              "
               style={{
                 left: p.x,
                 top: p.y,
@@ -277,8 +331,11 @@ useEffect(() => {
                       setEditingId(null);
                     }
                   }}
-                  className="w-full resize-none bg-transparent outline-none
-                     text-center leading-snug"
+                  className="
+                    w-full resize-none bg-transparent outline-none
+                    text-center leading-snug
+                    text-gray-900 dark:text-gray-100
+                  "
                 />
               ) : (
                 <div
@@ -293,9 +350,12 @@ useEffect(() => {
               <button
                 onPointerDown={(e) => e.stopPropagation()}
                 onClick={() => addNode(n.id)}
-                className="absolute -right-3 top-1/2 -translate-y-1/2
-                   w-6 h-6 rounded-full bg-blue-500 text-white text-sm
-                   opacity-0 group-hover:opacity-100 transition"
+                className="
+                  absolute -right-3 top-1/2 -translate-y-1/2
+                  w-6 h-6 rounded-full text-sm
+                  bg-blue-500 hover:bg-blue-600 text-white
+                  opacity-0 group-hover:opacity-100 transition
+                "
               >
                 +
               </button>
@@ -305,9 +365,12 @@ useEffect(() => {
                 <button
                   onPointerDown={(e) => e.stopPropagation()}
                   onClick={() => deleteNode(n.id)}
-                  className="absolute -bottom-3 left-1/2 -translate-x-1/2
-                     w-6 h-6 rounded-full bg-red-500 text-white text-sm
-                     opacity-0 group-hover:opacity-100 transition"
+                  className="
+                    absolute -bottom-3 left-1/2 -translate-x-1/2
+                    w-6 h-6 rounded-full text-sm
+                    bg-red-500 hover:bg-red-600 text-white
+                    opacity-0 group-hover:opacity-100 transition
+                  "
                 >
                   ×
                 </button>

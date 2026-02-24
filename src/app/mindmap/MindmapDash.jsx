@@ -12,7 +12,7 @@ export default function MindMapDashboard() {
   /* ---------- LOAD ---------- */
   useEffect(() => {
     fetchMaps();
-  }, []);
+  });
 
   const fetchMaps = async () => {
     try {
@@ -47,16 +47,6 @@ export default function MindMapDashboard() {
       if (activeMap?.id === id) setActiveMap(null);
     } catch (err) {
       console.error("Failed to delete mind map", err);
-    }
-  };
-
-  /* ---------- UPDATE ---------- */
-  const updateMap = async (updated) => {
-    try {
-      const res = await api.put(`/mindmaps/${updated.id}`, updated);
-      setMaps((prev) => prev.map((m) => (m.id === updated.id ? res.data : m)));
-    } catch (err) {
-      console.error("Failed to update mind map", err);
     }
   };
 

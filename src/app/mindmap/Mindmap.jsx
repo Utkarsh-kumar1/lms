@@ -2,6 +2,7 @@
 
 import api from "@/axios";
 import { useEffect, useRef, useState } from "react";
+import MindMapTopBar from "./MindMapTopBar";
 
 const MIN_FONT = 12;
 const MAX_FONT = 16;
@@ -41,15 +42,43 @@ export default function MindMap({ mapId, onBack }) {
 
   /* ---------- DATA ---------- */
   const [startOffsetX, setStartOffsetX] = useState(300);
-  // const [nodes, setNodes] = useState([
-  //   { id: "1", text: "Start", parentId: null },
-  // ]);
+  const [title, setTitle] = useState();
   const [nodes, setNodes] = useState([]);
   const [positions, setPositions] = useState({});
-
+  const [versions, setVersions] = useState([]);
+  const [saveStatus, setSaveStatus] = useState("saved");
+  // "saving" | "saved" | "error"
   useEffect(() => {
     setStartOffsetX(window.innerWidth / 4);
   }, []);
+
+  const loadVersions = async () => {
+    const { data } = await api.get(`/mindmaps/${mapId}/versions`);
+    setVersions(data);
+  };
+
+  const restoreVersion = async (version) => {
+    try {
+      const { data } = await api.post(`/mindmaps/${mapId}/restore/${version}`);
+
+      hasLoaded.current = false; // 🚫 avoid autosave loop
+      setNodes(data?.nodes_json?.nodes);
+      hasLoaded.current = true;
+    } catch (e) {
+      console.error(e.toString);
+    }
+  };
+
+  const updateTitle = async (newTitle) => {
+
+    try {
+      await api.put(`/mindmaps/setTitle/${mapId}`, { newTitle });
+      setTitle(newTitle);
+    } catch (e) {
+      setTitle(title);
+      console.error(e.toString);
+    }
+  };
 
   // Fetch at start
   useEffect(() => {
@@ -58,11 +87,12 @@ export default function MindMap({ mapId, onBack }) {
     (async () => {
       try {
         const { data } = await api.get(`/mindmaps/${mapId}`);
-        const loadedNodes = data?.nodes?.nodes ?? [];
-        setNodes(loadedNodes);
+        const fullJsonData = data?.nodes_json ?? [];
+        setTitle(data?.title);
+        setNodes(fullJsonData?.nodes);
 
         // ✅ mark this state as already saved
-        lastSaved.current = JSON.stringify(loadedNodes);
+        lastSaved.current = JSON.stringify(fullJsonData?.nodes);
 
         // ✅ now allow autosave
         hasLoaded.current = true;
@@ -70,12 +100,13 @@ export default function MindMap({ mapId, onBack }) {
         console.error("Failed to load mindmap", err);
       }
     })();
+
+    // Load versions
+    loadVersions();
   }, [mapId]);
 
-  // Update with debounce timer
+  // Update mindmap with debounce timer
   useEffect(() => {
-    console.log(nodes);
-    // 🚫 skip autosave until initial load completes
     if (!hasLoaded.current) return;
     if (!mapId || nodes?.length === 0) return;
 
@@ -83,17 +114,20 @@ export default function MindMap({ mapId, onBack }) {
     if (current === lastSaved.current) return;
 
     lastSaved.current = current;
+    setSaveStatus("saving");
 
     clearTimeout(saveTimer.current);
 
     saveTimer.current = setTimeout(async () => {
       try {
         await api.put(`/mindmaps/${mapId}`, { nodes });
-      } catch (err) {
-        console.error("Auto-save failed", err);
+        setSaveStatus("saved");
+        loadVersions(); // 🔥 refresh history
+      } catch {
+        setSaveStatus("error");
       }
-    }, 600); // debounce
-  }, [nodes, mapId]);
+    }, 700);
+  }, [nodes]);
 
   /* ---------- POINTER PAN ---------- */
   const onPointerDown = (e) => {
@@ -247,6 +281,15 @@ export default function MindMap({ mapId, onBack }) {
       onPointerLeave={onPointerUp}
       onWheel={onWheel}
     >
+      {/* 🔝 FLOATING UI */}
+      <MindMapTopBar
+        title={title}
+        onTitleChange={updateTitle}
+        onBack={onBack}
+        saveStatus={saveStatus}
+        versions={versions}
+        onRestoreVersion={restoreVersion}
+      />
       <div
         style={{
           transform: `translate(${panRef.current.x}px, ${panRef.current.y}px)

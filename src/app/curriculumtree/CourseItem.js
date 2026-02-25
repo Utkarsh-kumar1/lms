@@ -83,6 +83,38 @@ export default function CourseItem({ course }) {
     setIsProcessing(false);
   };
 
+  const handleTopicDelete = async (topicId) => {
+    setIsProcessing(true);
+    setErrors((prev) => ({ ...prev, deletionError: "" }));
+
+    try {
+      const response = await api.delete("/deleteTopic", {
+        data: {
+          topicId: topicId,
+        },
+      });
+
+      if (response.data.success) {
+        // ✅ Remove deleted item from frontend
+        setTopics((prev) => prev.filter((t) => t.id !== topicId));
+        setIsDeleteModalOpen(false);
+      } else {
+        setErrors((prev) => ({
+          ...prev,
+          deletionError: response.data.message || "Could not delete subtopic",
+        }));
+      }
+    } catch (err) {
+      console.error("Error while deleting subtopic:", err);
+      setErrors((prev) => ({
+        ...prev,
+        deletionError: "Error while deleting subtopic. Please try again.",
+      }));
+    } finally {
+      setIsProcessing(false);
+    }
+  };
+
   const handleSaveClick = async () => {
     const reqArray = [];
 

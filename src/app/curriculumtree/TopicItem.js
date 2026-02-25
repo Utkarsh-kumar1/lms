@@ -119,19 +119,6 @@ export default function TopicItem({ topic }) {
     }
   };
 
-  const handleDeleteClick = async (e) => {
-    setIsProcessing(true);
-    const { error, success } = await DeleteTopic(topic.id);
-    if (success) {
-      setIsDeleteModalOpen(false);
-      setIsEditing(false);
-      setIsProcessing(false);
-    } else if (error) {
-      setIsProcessing(false);
-      setErrors((prev) => ({ ...prev, deletionError: error }));
-    }
-  };
-
   const handleSaveClick = async () => {
     // const reqArray = [];
 
@@ -585,7 +572,7 @@ export default function TopicItem({ topic }) {
                     Cancel
                   </button>
                   <button
-                    onClick={handleDeleteClick}
+                    onClick={handleTopicDelete}
                     className="px-4 py-2 bg-green-600 dark:bg-green-500 text-white rounded-lg hover:bg-green-700 dark:hover:bg-green-400 transition duration-200 disabled:cursor-progress"
                     disabled={isProcessing}
                   >

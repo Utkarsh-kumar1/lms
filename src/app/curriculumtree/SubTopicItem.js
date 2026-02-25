@@ -223,11 +223,10 @@ export default function SubTopicItem({ subtopic, handleSubTopicDelete }) {
         <div className="fixed inset-0 flex justify-center items-center bg-gray-700 dark:bg-gray-900 bg-opacity-75 z-50 transition-opacity">
           <div className="bg-white dark:bg-gray-800 p-6 rounded-lg shadow-xl transform transition-all w-full max-w-sm">
             <p className="text-lg font-semibold text-gray-800 dark:text-gray-200 mb-4">
-              Delete Course
+              Delete subtopic
             </p>
             <p className="text-gray-700 dark:text-gray-400">
-              Are you sure you want to delete this Course? You will lose all
-              data related to this Course.
+              Are you sure you want to delete this Subtopic ?
             </p>
 
             {errors.deletionError && (

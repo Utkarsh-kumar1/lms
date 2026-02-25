@@ -125,7 +125,7 @@ export default function MindMap({ mapId, onBack }) {
       } catch {
         setSaveStatus("error");
       }
-    }, 2000);
+    }, 4000);
   }, [nodes]);
 
   /* ---------- POINTER PAN ---------- */

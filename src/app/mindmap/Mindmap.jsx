@@ -70,7 +70,6 @@ export default function MindMap({ mapId, onBack }) {
   };
 
   const updateTitle = async (newTitle) => {
-
     try {
       await api.put(`/mindmaps/setTitle/${mapId}`, { newTitle });
       setTitle(newTitle);
@@ -126,7 +125,7 @@ export default function MindMap({ mapId, onBack }) {
       } catch {
         setSaveStatus("error");
       }
-    }, 700);
+    }, 2000);
   }, [nodes]);
 
   /* ---------- POINTER PAN ---------- */
@@ -204,6 +203,8 @@ export default function MindMap({ mapId, onBack }) {
           y: currentY + START_OFFSET_Y,
         };
         currentY += NODE_HEIGHT + GAP_Y;
+        // const nodeHeight = nodeSizes[node.id]?.height ?? NODE_HEIGHT;
+        // currentY += nodeHeight + GAP_Y;
         return;
       }
 

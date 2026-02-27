@@ -53,6 +53,7 @@ export default function MindMap({ mapId, onBack }) {
   }, []);
 
   const loadVersions = async () => {
+    console.log("versions loaded");
     const { data } = await api.get(`/mindmaps/${mapId}/versions`);
     setVersions(data);
   };
@@ -121,7 +122,6 @@ export default function MindMap({ mapId, onBack }) {
       try {
         await api.put(`/mindmaps/${mapId}`, { nodes });
         setSaveStatus("saved");
-        loadVersions(); // 🔥 refresh history
       } catch {
         setSaveStatus("error");
       }
@@ -289,6 +289,7 @@ export default function MindMap({ mapId, onBack }) {
         onBack={onBack}
         saveStatus={saveStatus}
         versions={versions}
+        loadVersions={loadVersions}
         onRestoreVersion={restoreVersion}
       />
       <div

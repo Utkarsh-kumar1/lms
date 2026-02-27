@@ -8,6 +8,7 @@ export default function MindMapTopBar({
   onBack,
   saveStatus,
   versions = [],
+  loadVersions,
   onRestoreVersion,
 }) {
   const [editing, setEditing] = useState(false);
@@ -28,7 +29,7 @@ export default function MindMapTopBar({
   return (
     <div
       className="
-        absolute top-4 left-1/2 -translate-x-1/2 z-50
+        absolute top-4 left-40 -translate-x-1/2 z-50
         flex items-center gap-4 px-4 py-2 rounded-xl
         bg-white/90 dark:bg-gray-800/90
         backdrop-blur border border-gray-200 dark:border-gray-700
@@ -92,7 +93,10 @@ export default function MindMapTopBar({
       {/* VERSION HISTORY */}
       <div className="relative">
         <button
-          onClick={() => setShowHistory((v) => !v)}
+          onClick={async () => {
+            if (!showHistory) await loadVersions();
+            setShowHistory((v) => !v);
+          }}
           className="px-2 text-gray-600 dark:text-gray-400"
         >
           ⏱

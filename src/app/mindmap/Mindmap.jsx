@@ -1,7 +1,7 @@
 "use client";
 
 import api from "@/axios";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import MindMapTopBar from "./MindMapTopBar";
 
 const MIN_FONT = 12;
@@ -189,6 +189,26 @@ export default function MindMap({ mapId, onBack }) {
     return map[flat?.find((n) => n.parentId === null)?.id];
   };
 
+  useLayoutEffect(() => {
+    const sizes = {};
+
+    Object.entries(nodeRefs.current).forEach(([id, el]) => {
+      if (!el) return;
+
+      const rect = el.getBoundingClientRect();
+      // console.log(rect);
+
+      sizes[id] = {
+        // width: rect.width / scaleRef.current,
+        // height: rect.height / scaleRef.current,
+        width: el.offsetWidth,
+        height: el.offsetHeight,
+      };
+    });
+
+    setNodeSizes(sizes);
+  }, [nodes, editingId]);
+
   useEffect(() => {
     const tree = buildTree(nodes);
     if (!tree) return;
@@ -196,49 +216,41 @@ export default function MindMap({ mapId, onBack }) {
     const pos = {};
     let currentY = 0;
 
-    const dfs = (node, depth) => {
-      if (node.children.length === 0) {
+    const dfs = (node, depth, parentX = null) => {
+      const nodeWidth = nodeSizes[node.id]?.width ?? NODE_WIDTH;
+      const nodeHeight = nodeSizes[node.id]?.height ?? NODE_HEIGHT;
+
+      // ✅ ROOT
+      if (parentX === null) {
         pos[node.id] = {
-          x: depth * GAP_X + startOffsetX,
+          x: startOffsetX,
           y: currentY + START_OFFSET_Y,
         };
-        currentY += NODE_HEIGHT + GAP_Y;
-        // const nodeHeight = nodeSizes[node.id]?.height ?? NODE_HEIGHT;
-        // currentY += nodeHeight + GAP_Y;
+      } else {
+        pos[node.id] = {
+          x: parentX + GAP_X,
+          y: currentY + START_OFFSET_Y,
+        };
+      }
+
+      if (node.children.length === 0) {
+        currentY += nodeHeight + GAP_Y;
         return;
       }
 
-      node.children.forEach((c) => dfs(c, depth + 1));
+      const parentRight = pos[node.id].x + nodeWidth;
+
+      node.children.forEach((child) => dfs(child, depth + 1, parentRight));
 
       const first = pos[node.children[0].id];
       const last = pos[node.children[node.children.length - 1].id];
 
-      pos[node.id] = {
-        x: depth * GAP_X + startOffsetX,
-        y: (first.y + last.y) / 2,
-      };
+      pos[node.id].y = (first.y + last.y) / 2;
     };
 
     dfs(tree, 0);
     setPositions(pos);
-  }, [nodes, startOffsetX]);
-
-  useEffect(() => {
-    const sizes = {};
-
-    Object.entries(nodeRefs.current).forEach(([id, el]) => {
-      if (!el) return;
-
-      const rect = el.getBoundingClientRect();
-
-      sizes[id] = {
-        width: rect.width / scaleRef.current,
-        height: rect.height / scaleRef.current,
-      };
-    });
-
-    setNodeSizes(sizes);
-  }, [nodes, editingId, scaleRef.current]);
+  }, [nodes, startOffsetX, nodeSizes]);
 
   /* ---------- ACTIONS ---------- */
   const addNode = (parentId) => {
@@ -259,14 +271,28 @@ export default function MindMap({ mapId, onBack }) {
   };
 
   /* ---------- CONTENT SIZE ---------- */
-  const width =
-    Math.max(...Object.values(positions).map((p) => p.x || 0), 0) +
-    NODE_WIDTH +
-    300;
-  const height =
-    Math.max(...Object.values(positions).map((p) => p.y || 0), 0) +
-    NODE_HEIGHT +
-    300;
+  const maxX = Math.max(
+    ...nodes.map((n) => {
+      const p = positions[n.id];
+      if (!p) return 0;
+      const w = nodeSizes[n.id]?.width ?? NODE_WIDTH;
+      return p.x + w;
+    }),
+    0,
+  );
+
+  const maxY = Math.max(
+    ...nodes.map((n) => {
+      const p = positions[n.id];
+      if (!p) return 0;
+      const h = nodeSizes[n.id]?.height ?? NODE_HEIGHT;
+      return p.y + h;
+    }),
+    0,
+  );
+
+  const width = maxX + 400; // extra breathing space
+  const height = maxY + 400;
 
   /* ---------- RENDER ---------- */
   return (
@@ -360,15 +386,18 @@ export default function MindMap({ mapId, onBack }) {
                 <textarea
                   autoFocus
                   value={n.text}
-                  onChange={(e) =>
+                  onChange={(e) => {
+                    e.target.style.height = "auto";
+                    e.target.style.height = e.target.scrollHeight + "px";
+
                     setNodes((prev) =>
                       prev.map((node) =>
                         node.id === n.id
                           ? { ...node, text: e.target.value }
                           : node,
                       ),
-                    )
-                  }
+                    );
+                  }}
                   onBlur={() => setEditingId(null)}
                   onKeyDown={(e) => {
                     if (e.key === "Enter" && !e.shiftKey) {

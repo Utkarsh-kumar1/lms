@@ -11,7 +11,7 @@ const MAX_WIDTH = 220;
 const START_OFFSET_Y = 120;
 const NODE_WIDTH = 60;
 const NODE_HEIGHT = 40;
-const GAP_X = 180;
+const GAP_X = 80;
 const GAP_Y = 80;
 
 const getFontSize = (text) => {
@@ -275,7 +275,9 @@ export default function MindMap({ mapId, onBack }) {
     ...nodes.map((n) => {
       const p = positions[n.id];
       if (!p) return 0;
+
       const w = nodeSizes[n.id]?.width ?? NODE_WIDTH;
+
       return p.x + w;
     }),
     0,
@@ -379,6 +381,7 @@ export default function MindMap({ mapId, onBack }) {
                 left: p.x,
                 top: p.y,
                 maxWidth: MAX_WIDTH,
+                width: "max-content",
                 fontSize,
               }}
             >

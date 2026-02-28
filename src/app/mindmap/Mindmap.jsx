@@ -189,7 +189,7 @@ export default function MindMap({ mapId, onBack }) {
     return map[flat?.find((n) => n.parentId === null)?.id];
   };
 
-  useLayoutEffect(() => {
+  useEffect(() => {
     const sizes = {};
 
     Object.entries(nodeRefs.current).forEach(([id, el]) => {

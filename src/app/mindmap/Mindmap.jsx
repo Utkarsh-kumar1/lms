@@ -1,7 +1,7 @@
 "use client";
 
 import api from "@/axios";
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import MindMapTopBar from "./MindMapTopBar";
 
 const MIN_FONT = 12;
